@@ -170,7 +170,9 @@
   
   .main-content {
     margin-top: 50px;
+    margin-left: 0;
     min-height: calc(100vh - 50px);
+    padding-left: var(--space-4);
   }
 }
 
@@ -221,9 +223,10 @@
   
   .main-content {
     margin-left: 0;
+    padding-left: var(--space-4);
   }
   
-  .sidebar-toggle {
+  .top-nav .sidebar-toggle {
     display: flex;
   }
 }
