@@ -134,29 +134,29 @@
 }
 
 .notification-item.info {
-    border-left-color: var(--blue-500);
-    background-color: var(--blue-50);
+    border-left-color: #3b82f6;
+    background-color: #eff6ff;
 }
 
 .notification-item.success {
-    border-left-color: var(--green-500);
-    background-color: var(--green-50);
+    border-left-color: #10b981;
+    background-color: #ecfdf5;
 }
 
 .notification-item.warning {
-    border-left-color: var(--yellow-500);
-    background-color: var(--yellow-50);
+    border-left-color: #f59e0b;
+    background-color: #fffbeb;
 }
 
 .notification-item.error {
-    border-left-color: var(--red-500);
-    background-color: var(--red-50);
+    border-left-color: #dc2626;
+    background-color: #fef2f2;
 }
 
 .notification-item.critical {
-    border-left-color: var(--red-600);
-    background-color: var(--red-100);
-    border: 1px solid var(--red-200);
+    border-left-color: #b91c1c;
+    background-color: #fee2e2;
+    border: 1px solid #fecaca;
 }
 
 .notification-icon {
@@ -236,120 +236,126 @@
 }
 
 .notification-action.primary {
-    background: linear-gradient(135deg, var(--blue-500), var(--blue-600));
-    border-color: var(--blue-500);
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    border-color: #3b82f6;
     color: white;
-    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.25);
 }
 
 .notification-action.primary:hover {
-    background: linear-gradient(135deg, var(--blue-600), var(--blue-700));
-    border-color: var(--blue-600);
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    border-color: #2563eb;
     transform: translateY(-1px);
-    box-shadow: 0 4px 6px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 4px 8px rgba(59, 130, 246, 0.35);
 }
 
 .notification-action.primary:active {
     transform: translateY(0);
-    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+    box-shadow: 0 2px 6px rgba(59, 130, 246, 0.3);
 }
 
 .notification-action.danger {
-    background: linear-gradient(135deg, var(--red-500), var(--red-600));
-    border-color: var(--red-500);
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+    border-color: #dc2626;
     color: white;
-    box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
+    box-shadow: 0 2px 4px rgba(220, 38, 38, 0.25);
 }
 
 .notification-action.danger:hover {
-    background: linear-gradient(135deg, var(--red-600), var(--red-700));
-    border-color: var(--red-600);
+    background: linear-gradient(135deg, #b91c1c, #991b1b);
+    border-color: #b91c1c;
     transform: translateY(-1px);
-    box-shadow: 0 4px 6px rgba(239, 68, 68, 0.3);
+    box-shadow: 0 4px 8px rgba(220, 38, 38, 0.35);
 }
 
 .notification-action.danger:active {
     transform: translateY(0);
-    box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
+    box-shadow: 0 2px 6px rgba(220, 38, 38, 0.3);
 }
 
 .notification-footer {
     display: flex;
     justify-content: space-between;
-    padding: var(--space-3);
+    align-items: center;
+    padding: var(--space-4);
     border-top: 1px solid var(--gray-200);
-    background-color: var(--gray-50);
+    background: linear-gradient(to bottom, var(--gray-50), var(--gray-100));
     border-radius: 0 0 var(--border-radius-lg) var(--border-radius-lg);
+    gap: var(--space-3);
 }
 
 .notification-clear {
-    background: linear-gradient(135deg, var(--red-500), var(--red-600));
-    border: 1px solid var(--red-500);
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+    border: 1px solid #dc2626;
     color: white;
     padding: var(--space-2) var(--space-4);
     border-radius: var(--border-radius-md);
     font-size: var(--text-sm);
-    font-weight: var(--font-medium);
+    font-weight: var(--font-semibold);
     cursor: pointer;
     transition: all var(--transition-fast);
-    box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
+    box-shadow: 0 2px 8px rgba(220, 38, 38, 0.25);
     display: inline-flex;
     align-items: center;
-    gap: var(--space-1);
+    gap: var(--space-2);
     text-transform: none;
     letter-spacing: 0.025em;
+    min-height: 36px;
+    justify-content: center;
 }
 
 .notification-clear:hover {
-    background: linear-gradient(135deg, var(--red-600), var(--red-700));
-    border-color: var(--red-600);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);
+    background: linear-gradient(135deg, #b91c1c, #991b1b);
+    border-color: #b91c1c;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(220, 38, 38, 0.4);
 }
 
 .notification-clear:active {
-    transform: translateY(0);
-    box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
 }
 
 .notification-clear:focus {
     outline: none;
-    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.3);
 }
 
 .notification-refresh {
-    background: linear-gradient(135deg, var(--blue-500), var(--blue-600));
-    border: 1px solid var(--blue-500);
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    border: 1px solid #3b82f6;
     color: white;
     padding: var(--space-2) var(--space-4);
     border-radius: var(--border-radius-md);
     font-size: var(--text-sm);
-    font-weight: var(--font-medium);
+    font-weight: var(--font-semibold);
     cursor: pointer;
     transition: all var(--transition-fast);
-    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.25);
     display: inline-flex;
     align-items: center;
-    gap: var(--space-1);
+    gap: var(--space-2);
     text-transform: none;
     letter-spacing: 0.025em;
+    min-height: 36px;
+    justify-content: center;
 }
 
 .notification-refresh:hover {
-    background: linear-gradient(135deg, var(--blue-600), var(--blue-700));
-    border-color: var(--blue-600);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    border-color: #2563eb;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
 }
 
 .notification-refresh:active {
-    transform: translateY(0);
-    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
 .notification-refresh:focus {
     outline: none;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
 }
 
 /* Empty state */
