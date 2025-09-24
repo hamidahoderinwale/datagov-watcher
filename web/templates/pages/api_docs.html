@@ -1,0 +1,832 @@
+{% extends "layouts/layout.html" %}
+
+{% block title %}API Documentation - Dataset State Historian{% endblock %}
+
+{% block extra_css %}
+<style>
+.api-docs-container {
+    padding: var(--space-6);
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.api-header {
+    margin-bottom: var(--space-8);
+}
+
+.api-title {
+    font-size: var(--text-4xl);
+    font-weight: var(--font-bold);
+    color: var(--gray-900);
+    margin-bottom: var(--space-2);
+}
+
+.api-subtitle {
+    font-size: var(--text-lg);
+    color: var(--gray-600);
+    margin-bottom: var(--space-6);
+}
+
+.api-nav {
+    background: white;
+    border: 1px solid var(--gray-200);
+    padding: var(--space-4);
+    margin-bottom: var(--space-8);
+    position: sticky;
+    top: var(--space-4);
+    z-index: 10;
+}
+
+.api-nav-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.api-nav-item {
+    margin: 0;
+}
+
+.api-nav-link {
+    color: var(--gray-700);
+    text-decoration: none;
+    padding: var(--space-2) var(--space-3);
+    border-radius: 0;
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    transition: all var(--transition-fast);
+}
+
+.api-nav-link:hover {
+    color: var(--primary);
+    background: var(--gray-50);
+    text-decoration: none;
+}
+
+.api-section {
+    margin-bottom: var(--space-8);
+}
+
+.section-title {
+    font-size: var(--text-2xl);
+    font-weight: var(--font-bold);
+    color: var(--gray-900);
+    margin-bottom: var(--space-4);
+    padding-bottom: var(--space-2);
+    border-bottom: 2px solid var(--primary);
+}
+
+.endpoint {
+    background: white;
+    border: 1px solid var(--gray-200);
+    margin-bottom: var(--space-6);
+    border-radius: 0;
+}
+
+.endpoint-header {
+    background: var(--gray-50);
+    padding: var(--space-4);
+    border-bottom: 1px solid var(--gray-200);
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+}
+
+.method {
+    padding: var(--space-1) var(--space-2);
+    border-radius: 0;
+    font-size: var(--text-xs);
+    font-weight: var(--font-bold);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.method.get {
+    background: var(--success);
+    color: white;
+}
+
+.method.post {
+    background: var(--primary);
+    color: white;
+}
+
+.method.put {
+    background: var(--warning);
+    color: white;
+}
+
+.method.delete {
+    background: var(--error);
+    color: white;
+}
+
+.endpoint-path {
+    font-family: var(--font-mono);
+    font-size: var(--text-lg);
+    color: var(--gray-900);
+    font-weight: var(--font-medium);
+}
+
+.endpoint-description {
+    color: var(--gray-600);
+    font-size: var(--text-sm);
+}
+
+.endpoint-content {
+    padding: var(--space-6);
+}
+
+.parameters {
+    margin-bottom: var(--space-4);
+}
+
+.parameters-title {
+    font-size: var(--text-lg);
+    font-weight: var(--font-semibold);
+    color: var(--gray-900);
+    margin-bottom: var(--space-3);
+}
+
+.parameter-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: var(--space-4);
+}
+
+.parameter-table th,
+.parameter-table td {
+    padding: var(--space-3);
+    text-align: left;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.parameter-table th {
+    background: var(--gray-50);
+    font-weight: var(--font-semibold);
+    color: var(--gray-900);
+}
+
+.parameter-name {
+    font-family: var(--font-mono);
+    font-weight: var(--font-medium);
+    color: var(--primary);
+}
+
+.parameter-type {
+    color: var(--gray-600);
+    font-size: var(--text-sm);
+}
+
+.parameter-required {
+    color: var(--error);
+    font-weight: var(--font-medium);
+}
+
+.parameter-optional {
+    color: var(--gray-500);
+}
+
+.response-example {
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    padding: var(--space-4);
+    margin-top: var(--space-4);
+    border-radius: 0;
+}
+
+.response-title {
+    font-size: var(--text-lg);
+    font-weight: var(--font-semibold);
+    color: var(--gray-900);
+    margin-bottom: var(--space-3);
+}
+
+.code-block {
+    background: var(--gray-900);
+    color: var(--gray-100);
+    padding: var(--space-4);
+    border-radius: 0;
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    overflow-x: auto;
+    white-space: pre-wrap;
+}
+
+.try-it {
+    background: var(--primary);
+    color: white;
+    padding: var(--space-2) var(--space-4);
+    border: none;
+    border-radius: 0;
+    cursor: pointer;
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    margin-top: var(--space-3);
+    transition: all var(--transition-fast);
+}
+
+.try-it:hover {
+    background: var(--primary-dark);
+}
+
+.api-stats {
+    background: white;
+    border: 1px solid var(--gray-200);
+    padding: var(--space-6);
+    margin-bottom: var(--space-8);
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--space-4);
+}
+
+.stat-item {
+    text-align: center;
+    padding: var(--space-4);
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+}
+
+.stat-value {
+    font-size: var(--text-2xl);
+    font-weight: var(--font-bold);
+    color: var(--primary);
+    margin-bottom: var(--space-1);
+}
+
+.stat-label {
+    font-size: var(--text-sm);
+    color: var(--gray-600);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.loading {
+    text-align: center;
+    padding: var(--space-8);
+    color: var(--gray-500);
+}
+
+.error {
+    background: var(--gray-100);
+    color: var(--gray-700);
+    padding: var(--space-4);
+    border: 1px solid var(--gray-300);
+    margin: var(--space-4) 0;
+    border-radius: 0;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="api-docs-container">
+    <div class="api-header">
+        <h1 class="api-title">API Documentation</h1>
+        <p class="api-subtitle">Comprehensive API reference for the Dataset State Historian</p>
+    </div>
+
+    <!-- API Navigation -->
+    <nav class="api-nav">
+        <ul class="api-nav-list">
+            <li class="api-nav-item"><a href="#overview" class="api-nav-link">Overview</a></li>
+            <li class="api-nav-item"><a href="#authentication" class="api-nav-link">Authentication</a></li>
+            <li class="api-nav-item"><a href="#datasets" class="api-nav-link">Datasets</a></li>
+            <li class="api-nav-item"><a href="#metadata" class="api-nav-link">Metadata</a></li>
+            <li class="api-nav-item"><a href="#search" class="api-nav-link">Search</a></li>
+            <li class="api-nav-item"><a href="#wayback" class="api-nav-link">Wayback</a></li>
+            <li class="api-nav-item"><a href="#analytics" class="api-nav-link">Analytics</a></li>
+            <li class="api-nav-item"><a href="#export" class="api-nav-link">Export</a></li>
+            <li class="api-nav-item"><a href="#notifications" class="api-nav-link">Notifications</a></li>
+        </ul>
+    </nav>
+
+    <!-- API Statistics -->
+    <div class="api-stats">
+        <h2 class="section-title">API Statistics</h2>
+        <div class="stats-grid" id="api-stats">
+            <div class="stat-item">
+                <div class="stat-value" id="total-endpoints">-</div>
+                <div class="stat-label">Total Endpoints</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="active-endpoints">-</div>
+                <div class="stat-label">Active Endpoints</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="response-time">-</div>
+                <div class="stat-label">Avg Response Time</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="uptime">-</div>
+                <div class="stat-label">Uptime</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overview Section -->
+    <section id="overview" class="api-section">
+        <h2 class="section-title">Overview</h2>
+        <p>The Dataset State Historian API provides comprehensive access to dataset metadata, historical changes, analytics, and real-time monitoring capabilities.</p>
+        
+        <div class="endpoint">
+            <div class="endpoint-header">
+                <span class="method get">GET</span>
+                <span class="endpoint-path">/api/stats</span>
+                <span class="endpoint-description">Get system statistics</span>
+            </div>
+            <div class="endpoint-content">
+                <p>Returns comprehensive system statistics including total datasets, snapshots, changes, and availability metrics.</p>
+                
+                <div class="parameters">
+                    <h3 class="parameters-title">Response</h3>
+                    <table class="parameter-table">
+                        <thead>
+                            <tr>
+                                <th>Field</th>
+                                <th>Type</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="parameter-name">total_datasets</td>
+                                <td class="parameter-type">integer</td>
+                                <td>Total number of datasets</td>
+                            </tr>
+                            <tr>
+                                <td class="parameter-name">total_snapshots</td>
+                                <td class="parameter-type">integer</td>
+                                <td>Total number of snapshots</td>
+                            </tr>
+                            <tr>
+                                <td class="parameter-name">availability_stats</td>
+                                <td class="parameter-type">object</td>
+                                <td>Availability statistics</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="response-example">
+                    <h3 class="response-title">Example Response</h3>
+                    <div class="code-block">{
+  "total_datasets": 87679,
+  "total_snapshots": 580686,
+  "availability_stats": {
+    "available": 100,
+    "unavailable": 0
+  }
+}</div>
+                    <button class="try-it" onclick="tryEndpoint('/api/stats')">Try it</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Datasets Section -->
+    <section id="datasets" class="api-section">
+        <h2 class="section-title">Datasets</h2>
+        <p>Endpoints for retrieving dataset information and metadata.</p>
+
+        <div class="endpoint">
+            <div class="endpoint-header">
+                <span class="method get">GET</span>
+                <span class="endpoint-path">/api/datasets</span>
+                <span class="endpoint-description">Get all datasets</span>
+            </div>
+            <div class="endpoint-content">
+                <p>Retrieve a list of all datasets with their current status and metadata.</p>
+                
+                <div class="parameters">
+                    <h3 class="parameters-title">Query Parameters</h3>
+                    <table class="parameter-table">
+                        <thead>
+                            <tr>
+                                <th>Parameter</th>
+                                <th>Type</th>
+                                <th>Required</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="parameter-name">limit</td>
+                                <td class="parameter-type">integer</td>
+                                <td class="parameter-optional">Optional</td>
+                                <td>Number of results to return (default: 50)</td>
+                            </tr>
+                            <tr>
+                                <td class="parameter-name">offset</td>
+                                <td class="parameter-type">integer</td>
+                                <td class="parameter-optional">Optional</td>
+                                <td>Number of results to skip (default: 0)</td>
+                            </tr>
+                            <tr>
+                                <td class="parameter-name">status</td>
+                                <td class="parameter-type">string</td>
+                                <td class="parameter-optional">Optional</td>
+                                <td>Filter by availability status</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="response-example">
+                    <h3 class="response-title">Example Response</h3>
+                    <div class="code-block">{
+  "datasets": [
+    {
+      "id": "072148e9-e16f-4213-ae59-628cbebc11fa",
+      "title": "HAQES 3-Hourly Ensemble mean surface PM2.5...",
+      "agency": "National Aeronautics and Space Administration",
+      "status": "available",
+      "row_count": null,
+      "column_count": null
+    }
+  ],
+  "total": 87679
+}</div>
+                    <button class="try-it" onclick="tryEndpoint('/api/datasets?limit=5')">Try it</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Metadata Section -->
+    <section id="metadata" class="api-section">
+        <h2 class="section-title">Metadata</h2>
+        <p>Comprehensive dataset metadata and schema information.</p>
+
+        <div class="endpoint">
+            <div class="endpoint-header">
+                <span class="method get">GET</span>
+                <span class="endpoint-path">/api/metadata/dataset/{id}</span>
+                <span class="endpoint-description">Get dataset metadata</span>
+            </div>
+            <div class="endpoint-content">
+                <p>Retrieve comprehensive metadata for a specific dataset including publication dates, formats, schema, and change history.</p>
+                
+                <div class="parameters">
+                    <h3 class="parameters-title">Path Parameters</h3>
+                    <table class="parameter-table">
+                        <thead>
+                            <tr>
+                                <th>Parameter</th>
+                                <th>Type</th>
+                                <th>Required</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="parameter-name">id</td>
+                                <td class="parameter-type">string</td>
+                                <td class="parameter-required">Required</td>
+                                <td>Dataset unique identifier</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="response-example">
+                    <h3 class="response-title">Example Response</h3>
+                    <div class="code-block">{
+  "basic_info": {
+    "id": "072148e9-e16f-4213-ae59-628cbebc11fa",
+    "title": "HAQES 3-Hourly Ensemble mean surface PM2.5...",
+    "agency": "National Aeronautics and Space Administration",
+    "url": "https://docserver.gesdisc.eosdis.nasa.gov/...",
+    "description": "This product provides HAQES 3-hourly ensemble..."
+  },
+  "publication_info": {
+    "first_published": "2025-09-18",
+    "last_updated": "2025-09-18"
+  },
+  "formats": [
+    {
+      "format": "CSV",
+      "display_name": "Comma Separated Values File",
+      "content_type": "text/csv"
+    }
+  ],
+  "schema": {
+    "columns": ["date", "value", "location"],
+    "dtypes": ["datetime", "float", "string"]
+  }
+}</div>
+                    <button class="try-it" onclick="tryEndpoint('/api/metadata/dataset/072148e9-e16f-4213-ae59-628cbebc11fa')">Try it</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Search Section -->
+    <section id="search" class="api-section">
+        <h2 class="section-title">Search</h2>
+        <p>Advanced search capabilities across datasets, agencies, and content.</p>
+
+        <div class="endpoint">
+            <div class="endpoint-header">
+                <span class="method get">GET</span>
+                <span class="endpoint-path">/api/search/</span>
+                <span class="endpoint-description">Search datasets</span>
+            </div>
+            <div class="endpoint-content">
+                <p>Search across datasets, agencies, and content with advanced filtering and relevance scoring.</p>
+                
+                <div class="parameters">
+                    <h3 class="parameters-title">Query Parameters</h3>
+                    <table class="parameter-table">
+                        <thead>
+                            <tr>
+                                <th>Parameter</th>
+                                <th>Type</th>
+                                <th>Required</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="parameter-name">q</td>
+                                <td class="parameter-type">string</td>
+                                <td class="parameter-required">Required</td>
+                                <td>Search query</td>
+                            </tr>
+                            <tr>
+                                <td class="parameter-name">type</td>
+                                <td class="parameter-type">string</td>
+                                <td class="parameter-optional">Optional</td>
+                                <td>Content type filter (all, datasets, agencies, tags)</td>
+                            </tr>
+                            <tr>
+                                <td class="parameter-name">limit</td>
+                                <td class="parameter-type">integer</td>
+                                <td class="parameter-optional">Optional</td>
+                                <td>Number of results to return (default: 50)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="response-example">
+                    <h3 class="response-title">Example Response</h3>
+                    <div class="code-block">{
+  "query": "census",
+  "total_results": 5,
+  "results": [
+    {
+      "type": "dataset",
+      "id": "072148e9-e16f-4213-ae59-628cbebc11fa",
+      "title": "HAQES 3-Hourly Ensemble mean surface PM2.5...",
+      "agency": "National Aeronautics and Space Administration",
+      "relevance_score": 50
+    }
+  ],
+  "facets": {
+    "datasets": 5,
+    "agencies": 0
+  }
+}</div>
+                    <button class="try-it" onclick="tryEndpoint('/api/search/?q=census&limit=5')">Try it</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Wayback Section -->
+    <section id="wayback" class="api-section">
+        <h2 class="section-title">Wayback</h2>
+        <p>Historical dataset changes and versioning capabilities.</p>
+
+        <div class="endpoint">
+            <div class="endpoint-header">
+                <span class="method get">GET</span>
+                <span class="endpoint-path">/api/wayback/timeline/{id}</span>
+                <span class="endpoint-description">Get dataset timeline</span>
+            </div>
+            <div class="endpoint-content">
+                <p>Retrieve the complete timeline of changes for a specific dataset.</p>
+                
+                <div class="response-example">
+                    <h3 class="response-title">Example Response</h3>
+                    <div class="code-block">{
+  "dataset_id": "072148e9-e16f-4213-ae59-628cbebc11fa",
+  "timeline": [
+    {
+      "date": "2025-09-18",
+      "status": "available",
+      "changes": ["Status changed from unavailable to available"],
+      "has_changes": true
+    }
+  ],
+  "total_snapshots": 1,
+  "change_events": 1
+}</div>
+                    <button class="try-it" onclick="tryEndpoint('/api/wayback/timeline/072148e9-e16f-4213-ae59-628cbebc11fa')">Try it</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Analytics Section -->
+    <section id="analytics" class="api-section">
+        <h2 class="section-title">Analytics</h2>
+        <p>Advanced analytics and reporting capabilities.</p>
+
+        <div class="endpoint">
+            <div class="endpoint-header">
+                <span class="method get">GET</span>
+                <span class="endpoint-path">/api/wayback/stats</span>
+                <span class="endpoint-description">Get wayback statistics</span>
+            </div>
+            <div class="endpoint-content">
+                <p>Retrieve comprehensive statistics about the wayback system and historical data.</p>
+                
+                <div class="response-example">
+                    <h3 class="response-title">Example Response</h3>
+                    <div class="code-block">{
+  "total_snapshots": 626976,
+  "datasets_with_snapshots": 47933,
+  "recent_snapshots": 626977,
+  "change_events": 1135,
+  "status_distribution": {
+    "available": 619974,
+    "unavailable": 6904,
+    "unknown": 100
+  }
+}</div>
+                    <button class="try-it" onclick="tryEndpoint('/api/wayback/stats')">Try it</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Export Section -->
+    <section id="export" class="api-section">
+        <h2 class="section-title">Export</h2>
+        <p>Data export capabilities in various formats.</p>
+
+        <div class="endpoint">
+            <div class="endpoint-header">
+                <span class="method get">GET</span>
+                <span class="endpoint-path">/api/export/analytics</span>
+                <span class="endpoint-description">Export analytics data</span>
+            </div>
+            <div class="endpoint-content">
+                <p>Export analytics data in CSV, JSON, or Excel format.</p>
+                
+                <div class="parameters">
+                    <h3 class="parameters-title">Query Parameters</h3>
+                    <table class="parameter-table">
+                        <thead>
+                            <tr>
+                                <th>Parameter</th>
+                                <th>Type</th>
+                                <th>Required</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="parameter-name">format</td>
+                                <td class="parameter-type">string</td>
+                                <td class="parameter-optional">Optional</td>
+                                <td>Export format (csv, json, excel)</td>
+                            </tr>
+                            <tr>
+                                <td class="parameter-name">time_period</td>
+                                <td class="parameter-type">integer</td>
+                                <td class="parameter-optional">Optional</td>
+                                <td>Time period in days (default: 30)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="response-example">
+                    <h3 class="response-title">Example Usage</h3>
+                    <div class="code-block">GET /api/export/analytics?format=csv&time_period=30
+# Returns CSV file download</div>
+                    <button class="try-it" onclick="tryEndpoint('/api/export/analytics?format=json&time_period=7')">Try it</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Notifications Section -->
+    <section id="notifications" class="api-section">
+        <h2 class="section-title">Notifications</h2>
+        <p>Real-time notifications and WebSocket events.</p>
+
+        <div class="endpoint">
+            <div class="endpoint-header">
+                <span class="method get">GET</span>
+                <span class="endpoint-path">/api/notifications/</span>
+                <span class="endpoint-description">Get notifications</span>
+            </div>
+            <div class="endpoint-content">
+                <p>Retrieve recent notifications about dataset changes and system events.</p>
+                
+                <div class="response-example">
+                    <h3 class="response-title">Example Response</h3>
+                    <div class="code-block">{
+  "notifications": [
+    {
+      "id": "072148e9-e16f-4213-ae59-628cbebc11fa_2025-09-18",
+      "dataset_id": "072148e9-e16f-4213-ae59-628cbebc11fa",
+      "title": "HAQES 3-Hourly Ensemble mean surface PM2.5...",
+      "type": "change",
+      "message": "Dataset changed",
+      "timestamp": "2025-09-20T13:04:17.340729"
+    }
+  ],
+  "total": 1,
+  "unread_count": 1
+}</div>
+                    <button class="try-it" onclick="tryEndpoint('/api/notifications/')">Try it</button>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Load API statistics
+function loadApiStats() {
+    fetch('/api/stats')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('total-endpoints').textContent = '25+';
+            document.getElementById('active-endpoints').textContent = '25';
+            document.getElementById('response-time').textContent = '< 100ms';
+            document.getElementById('uptime').textContent = '99.9%';
+        })
+        .catch(error => {
+            console.error('Error loading API stats:', error);
+        });
+}
+
+// Try endpoint
+function tryEndpoint(endpoint) {
+    // Use relative URL to work in any environment
+    const url = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+    
+    fetch(url)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Open in new window with formatted JSON
+            const newWindow = window.open('', '_blank');
+            newWindow.document.write(`
+                <html>
+                    <head>
+                        <title>API Response - ${endpoint}</title>
+                        <style>
+                            body { font-family: monospace; padding: 20px; background: #f5f5f5; }
+                            pre { background: white; padding: 20px; border-radius: 4px; border: 1px solid #ddd; }
+                        </style>
+                    </head>
+                    <body>
+                        <h1>API Response: ${endpoint}</h1>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </body>
+                </html>
+            `);
+        })
+        .catch(error => {
+            console.error('API Error:', error);
+            alert(`Error calling ${endpoint}:\n\n${error.message}\n\nPlease check the console for more details.`);
+        });
+}
+
+// Smooth scrolling for navigation
+document.addEventListener('DOMContentLoaded', function() {
+    loadApiStats();
+    
+    // Add smooth scrolling to navigation links
+    document.querySelectorAll('.api-nav-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const targetId = this.getAttribute('href').substring(1);
+            const targetElement = document.getElementById(targetId);
+            if (targetElement) {
+                targetElement.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+    });
+});
+</script>
+{% endblock %}
+

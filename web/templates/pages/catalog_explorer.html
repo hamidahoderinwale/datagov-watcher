@@ -1,0 +1,118 @@
+{% extends "layouts/layout.html" %}
+
+{% block title %}Catalog Explorer - Dataset State Historian{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/catalog-explorer.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="catalog-container">
+        <!-- Page Header -->
+        <header class="page-header">
+            <h1>Catalog Explorer</h1>
+            <p>Browse and search all datasets in the system</p>
+        </header>
+
+        <!-- Search and Filters -->
+        <section class="search-section">
+            <div class="search-container">
+                <input type="text" id="searchInput" placeholder="Search datasets..." class="search-input">
+                <select id="agencyFilter" class="filter-select">
+                    <option value="">All Agencies</option>
+                </select>
+                <select id="statusFilter" class="filter-select">
+                    <option value="">All Status</option>
+                    <option value="active">Active</option>
+                    <option value="vanished">Vanished</option>
+                </select>
+                <select id="sortFilter" class="filter-select">
+                    <option value="title">Sort by Title</option>
+                    <option value="agency">Sort by Agency</option>
+                    <option value="last_seen">Sort by Last Seen</option>
+                    <option value="volatility">Sort by Volatility</option>
+                </select>
+                <button class="search-btn" onclick="performSearch()">Search</button>
+            </div>
+        </section>
+
+        <!-- Results Summary -->
+        <section class="results-summary">
+            <div class="summary-stats">
+                <span id="results-count">Loading...</span>
+                <span id="results-info">datasets found</span>
+            </div>
+            <div class="view-controls">
+                <button class="view-btn active" onclick="setView('grid')" id="grid-view">Grid</button>
+                <button class="view-btn" onclick="setView('table')" id="table-view">Table</button>
+            </div>
+        </section>
+
+        <!-- Dataset Grid View -->
+        <section class="dataset-grid-section" id="grid-view-section">
+            <div class="dataset-grid" id="dataset-grid">
+                <!-- Populated by JavaScript -->
+            </div>
+        </section>
+
+        <!-- Dataset Table View -->
+        <section class="dataset-table-section" id="table-view-section" style="display: none;">
+            <div class="table-container">
+                <table class="dataset-table" id="dataset-table">
+                    <thead>
+                        <tr>
+                            <th>Dataset</th>
+                            <th>Agency</th>
+                            <th>Status</th>
+                            <th>Last Seen</th>
+                            <th>Volatility</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="datasetsTableBody">
+                        <!-- Populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Pagination -->
+        <section class="pagination-section">
+            <div class="pagination" id="pagination">
+                <!-- Populated by JavaScript -->
+            </div>
+        </section>
+    </div>
+
+    <!-- Dataset Modal -->
+    <div id="datasetModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Dataset Details</h3>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="modalContent">Loading...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Indicator -->
+    <div id="loadingIndicator" class="loading-indicator">
+        <div class="loading-spinner"></div>
+        <span>Loading datasets...</span>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/catalog-explorer.js') }}"></script>
+<script>
+    // Load catalog data when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        if (window.catalogExplorer) {
+            window.catalogExplorer.loadDatasets();
+        }
+    });
+</script>
+{% endblock %}

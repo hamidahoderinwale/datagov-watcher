@@ -1,0 +1,10 @@
+{
+  "lil_enabled": true,
+  "wayback_enabled": true,
+  "monitoring_interval_hours": 24,
+  "max_datasets_per_run": 1000,
+  "volatility_threshold": 0.5,
+  "change_detection_enabled": true,
+  "postmortem_auto_generate": true,
+  "api_key": null
+}

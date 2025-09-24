@@ -1,0 +1,131 @@
+/* Chromogram Timeline Component Styles */
+
+.chromogram-timeline {
+    background: white;
+    border: 1px solid var(--gray-200);
+    border-radius: 0;
+    padding: var(--space-6);
+    margin-bottom: var(--space-6);
+}
+
+.chromogram-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-6);
+}
+
+.chromogram-title {
+    font-size: var(--text-xl);
+    font-weight: var(--font-semibold);
+    color: var(--gray-900);
+    margin: 0;
+}
+
+.chromogram-controls {
+    display: flex;
+    gap: var(--space-4);
+    align-items: center;
+}
+
+.timeline-container {
+    position: relative;
+    overflow-x: auto;
+    padding: var(--space-4);
+    background: var(--gray-50);
+    border-radius: 0;
+}
+
+.timeline-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(20px, 1fr));
+    gap: 2px;
+    min-width: 800px;
+}
+
+.timeline-cell {
+    width: 20px;
+    height: 20px;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    position: relative;
+}
+
+.timeline-cell:hover {
+    transform: scale(1.2);
+    z-index: 10;
+}
+
+.timeline-cell.available {
+    background: var(--success);
+}
+
+.timeline-cell.unavailable {
+    background: var(--error);
+}
+
+.timeline-cell.unknown {
+    background: var(--gray-400);
+}
+
+.timeline-cell.no-data {
+    background: var(--gray-200);
+}
+
+.timeline-legend {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-6);
+    margin-top: var(--space-4);
+    padding: var(--space-3);
+    background: white;
+    border-radius: 0;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--text-sm);
+    color: var(--gray-700);
+}
+
+.legend-color {
+    width: 16px;
+    height: 16px;
+    border-radius: 2px;
+}
+
+.timeline-tooltip {
+    position: absolute;
+    background: var(--gray-900);
+    color: white;
+    padding: var(--space-2) var(--space-3);
+    border-radius: 0;
+    font-size: var(--text-xs);
+    pointer-events: none;
+    z-index: 1000;
+    white-space: nowrap;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .chromogram-header {
+        flex-direction: column;
+        gap: var(--space-4);
+        align-items: stretch;
+    }
+    
+    .chromogram-controls {
+        flex-direction: column;
+        gap: var(--space-2);
+    }
+    
+    .timeline-legend {
+        flex-wrap: wrap;
+        gap: var(--space-3);
+    }
+}
+
+

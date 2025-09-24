@@ -1,0 +1,109 @@
+{% extends "layouts/layout.html" %}
+
+{% block title %}Vanished Datasets - Dataset State Historian{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/vanished-datasets.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="vanished-container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1 class="page-title">Vanished Datasets</h1>
+        <p class="page-subtitle">Datasets that have been removed or are no longer available</p>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-section">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="total-vanished">-</div>
+                <div class="stat-label">Total Vanished</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="recent-vanished">-</div>
+                <div class="stat-label">Last 7 Days</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="agencies-affected">-</div>
+                <div class="stat-label">Agencies Affected</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="last-updated">-</div>
+                <div class="stat-label">Last Updated</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters and Search -->
+    <div class="filters-section">
+        <div class="filters-container">
+            <div class="search-container">
+                <input type="text" class="search-input" id="search-input" placeholder="Search vanished datasets...">
+                <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.35-4.35"></path>
+                </svg>
+            </div>
+            <div class="filter-controls">
+                <select class="filter-select" id="agency-filter">
+                    <option value="">All Agencies</option>
+                </select>
+                <select class="filter-select" id="status-filter">
+                    <option value="">All Status</option>
+                    <option value="REMOVED">Removed</option>
+                    <option value="UNAVAILABLE">Unavailable</option>
+                    <option value="ERROR">Error</option>
+                </select>
+                <select class="filter-select" id="time-filter">
+                    <option value="">All Time</option>
+                    <option value="7">Last 7 Days</option>
+                    <option value="30">Last 30 Days</option>
+                    <option value="90">Last 90 Days</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vanished Datasets Table -->
+    <div class="table-section">
+        <div class="table-container">
+            <table class="vanished-table" id="vanished-table">
+                <thead>
+                    <tr>
+                        <th class="col-id">Dataset ID</th>
+                        <th class="col-title">Title</th>
+                        <th class="col-agency">Agency</th>
+                        <th class="col-last-seen">Last Seen</th>
+                        <th class="col-status">Status</th>
+                        <th class="col-actions">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="vanished-table-body">
+                    <tr>
+                        <td colspan="6" class="loading">Loading vanished datasets...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination-section">
+        <div class="pagination" id="pagination">
+            <!-- Pagination will be populated by JavaScript -->
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/vanished-datasets.js') }}"></script>
+<script>
+    // Load vanished datasets data
+    loadVanishedDatasets();
+</script>
+{% endblock %}
+
+

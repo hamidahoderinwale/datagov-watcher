@@ -1,0 +1,313 @@
+/* Historian Dashboard Styles */
+.historian-dashboard {
+    min-height: 100vh;
+    background: var(--background);
+    padding: var(--spacing-lg) 0;
+}
+
+.historian-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 var(--spacing-md);
+}
+
+.historian-header {
+    text-align: center;
+    margin-bottom: var(--spacing-xl);
+}
+
+.historian-header h1 {
+    font-family: var(--font-heading);
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 var(--spacing-md) 0;
+}
+
+.historian-subtitle {
+    font-family: var(--font-body);
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    margin: 0;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* Stats Section */
+.historian-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-xl);
+}
+
+.stat-card {
+    background: white;
+    border: var(--card-border);
+    border-radius: var(--card-border-radius);
+    padding: var(--spacing-lg);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.stat-icon {
+    font-size: 2rem;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--background);
+    border-radius: 50%;
+}
+
+.stat-content h3 {
+    font-family: var(--font-heading);
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 var(--spacing-xs) 0;
+}
+
+.stat-content p {
+    font-family: var(--font-body);
+    color: var(--text-secondary);
+    margin: 0;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+/* Actions Section */
+.historian-actions {
+    margin-bottom: var(--spacing-xl);
+}
+
+.historian-actions h2 {
+    font-family: var(--font-heading);
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 var(--spacing-lg) 0;
+}
+
+.action-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--spacing-lg);
+}
+
+.action-card {
+    background: white;
+    border: var(--card-border);
+    border-radius: var(--card-border-radius);
+    padding: var(--spacing-lg);
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.action-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    text-decoration: none;
+    color: inherit;
+}
+
+.action-card:hover .action-arrow {
+    transform: translateX(4px);
+}
+
+.action-icon {
+    font-size: 2.5rem;
+    margin-bottom: var(--spacing-md);
+}
+
+.action-card h3 {
+    font-family: var(--font-heading);
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 var(--spacing-sm) 0;
+}
+
+.action-card p {
+    font-family: var(--font-body);
+    color: var(--text-secondary);
+    margin: 0 0 var(--spacing-md) 0;
+    line-height: 1.5;
+}
+
+.action-arrow {
+    position: absolute;
+    top: var(--spacing-lg);
+    right: var(--spacing-lg);
+    font-size: 1.2rem;
+    color: var(--accent);
+    transition: transform 0.2s ease;
+}
+
+/* Recent Activity */
+.historian-recent {
+    margin-bottom: var(--spacing-xl);
+}
+
+.historian-recent h2 {
+    font-family: var(--font-heading);
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 var(--spacing-lg) 0;
+}
+
+.recent-activity {
+    background: white;
+    border: var(--card-border);
+    border-radius: var(--card-border-radius);
+    padding: var(--spacing-lg);
+    min-height: 200px;
+}
+
+.loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 200px;
+    color: var(--text-secondary);
+    font-family: var(--font-body);
+}
+
+.activity-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md) 0;
+    border-bottom: 1px solid var(--border-neutral);
+}
+
+.activity-item:last-child {
+    border-bottom: none;
+}
+
+.activity-icon {
+    font-size: 1.2rem;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--background);
+    border-radius: 50%;
+}
+
+.activity-content {
+    flex: 1;
+}
+
+.activity-title {
+    font-family: var(--font-body);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 var(--spacing-xs) 0;
+}
+
+.activity-description {
+    font-family: var(--font-body);
+    color: var(--text-secondary);
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.activity-time {
+    font-family: var(--font-mono);
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+}
+
+/* System Status */
+.historian-status h2 {
+    font-family: var(--font-heading);
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 var(--spacing-lg) 0;
+}
+
+.status-grid {
+    background: white;
+    border: var(--card-border);
+    border-radius: var(--card-border-radius);
+    padding: var(--spacing-lg);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-lg);
+}
+
+.status-item {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.status-label {
+    font-family: var(--font-body);
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.status-value {
+    font-family: var(--font-heading);
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.status-value.running {
+    color: var(--event-low);
+}
+
+.status-value.stopped {
+    color: var(--event-high);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .historian-header h1 {
+        font-size: 2rem;
+    }
+    
+    .historian-subtitle {
+        font-size: 1rem;
+    }
+    
+    .stat-card {
+        padding: var(--spacing-md);
+    }
+    
+    .stat-icon {
+        font-size: 1.5rem;
+        width: 50px;
+        height: 50px;
+    }
+    
+    .stat-content h3 {
+        font-size: 1.5rem;
+    }
+    
+    .action-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .status-grid {
+        grid-template-columns: 1fr;
+    }
+}

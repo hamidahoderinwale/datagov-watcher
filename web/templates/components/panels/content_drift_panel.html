@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Content Drift Panel - Dataset State Historian</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/historian-design-system.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/content-drift-panel.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <h1>Dataset State Historian</h1>
+            <p>Comprehensive monitoring and analysis of government datasets</p>
+        </div>
+    </header>
+    
+    <nav class="nav">
+        <div class="container">
+            <ul class="nav-list">
+                <li class="nav-item">
+                    <a href="/" class="nav-link">ANALYTICS Overview</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/catalog" class="nav-link">FOLDER Catalog</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/timeline" class="nav-link">GROWTH Timeline</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/vanished" class="nav-link">GHOST Vanished</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/agencies" class="nav-link">BUILDING Agencies</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    
+    <main class="container">
+        <!-- Dataset Selection -->
+        <div class="card mb-6">
+            <div class="card-body">
+                <div class="drift-controls">
+                    <div class="control-group">
+                        <label for="datasetSelect">Dataset:</label>
+                        <select id="datasetSelect" onchange="loadDatasetDrift()">
+                            <option value="">Select a dataset...</option>
+                        </select>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label for="timeRange">Time Range:</label>
+                        <select id="timeRange" onchange="updateDriftAnalysis()">
+                            <option value="30">Last 30 days</option>
+                            <option value="90">Last 90 days</option>
+                            <option value="365">Last year</option>
+                            <option value="all">All time</option>
+                        </select>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label for="driftType">Analysis Type:</label>
+                        <select id="driftType" onchange="updateDriftAnalysis()">
+                            <option value="all">All Metrics</option>
+                            <option value="row_count">Row Count Only</option>
+                            <option value="similarity">Similarity Only</option>
+                            <option value="schema">Schema Only</option>
+                        </select>
+                    </div>
+                    
+                    <div class="control-group">
+                        <button class="btn btn-primary" onclick="updateDriftAnalysis()">Refresh Analysis</button>
+                        <button class="btn btn-secondary" onclick="exportDriftReport()">Export Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Drift Summary -->
+        <div class="card mb-6">
+            <div class="card-header">
+                <h3>Drift Summary</h3>
+                <div class="drift-info">
+                    <span id="driftInfo">Select a dataset to view drift analysis</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="drift-summary-grid">
+                    <div class="drift-stat">
+                        <div class="drift-stat-value" id="totalSnapshots">-</div>
+                        <div class="drift-stat-label">Total Snapshots</div>
+                    </div>
+                    <div class="drift-stat">
+                        <div class="drift-stat-value" id="avgSimilarity">-</div>
+                        <div class="drift-stat-label">Avg Similarity</div>
+                    </div>
+                    <div class="drift-stat">
+                        <div class="drift-stat-value" id="maxDrift">-</div>
+                        <div class="drift-stat-label">Max Drift</div>
+                    </div>
+                    <div class="drift-stat">
+                        <div class="drift-stat-value" id="driftEvents">-</div>
+                        <div class="drift-stat-label">Drift Events</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Row Count Trend Chart -->
+        <div class="card mb-6">
+            <div class="card-header">
+                <h3>Row Count Trend</h3>
+                <div class="chart-controls">
+                    <button class="btn btn-sm btn-secondary" onclick="toggleChartType('rowCount')">Toggle View</button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="rowCountChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Similarity Score Chart -->
+        <div class="card mb-6">
+            <div class="card-header">
+                <h3>Content Similarity Over Time</h3>
+                <div class="chart-controls">
+                    <button class="btn btn-sm btn-secondary" onclick="toggleChartType('similarity')">Toggle View</button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="similarityChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Schema Evolution -->
+        <div class="card mb-6">
+            <div class="card-header">
+                <h3>Schema Evolution</h3>
+            </div>
+            <div class="card-body">
+                <div id="schemaEvolution" class="schema-evolution">
+                    <div class="loading">Select a dataset to view schema evolution</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Drift Events Timeline -->
+        <div class="card">
+            <div class="card-header">
+                <h3>Drift Events Timeline</h3>
+                <div class="event-controls">
+                    <div class="control-group">
+                        <label for="severityFilter">Severity:</label>
+                        <select id="severityFilter" onchange="filterDriftEvents()">
+                            <option value="">All Severities</option>
+                            <option value="high">High</option>
+                            <option value="medium">Medium</option>
+                            <option value="low">Low</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div id="driftEventsTimeline" class="drift-events-timeline">
+                    <div class="loading">Select a dataset to view drift events</div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Event Detail Modal -->
+    <div id="eventDetailModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="eventDetailTitle">Event Details</h3>
+                <button class="modal-close" onclick="closeEventDetailModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="eventDetailContent">Loading...</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Loading Indicator -->
+    <div id="loadingIndicator" class="loading-indicator">
+        <div class="loading-spinner"></div>
+        <span>Loading...</span>
+    </div>
+    
+    <script src="{{ url_for('static', filename='js/content-drift-panel.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,159 @@
+{% extends "layouts/layout.html" %}
+
+{% block title %}Live Monitor - Dataset State Historian{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/live-monitor.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="live-monitor-container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1 class="page-title">Live Monitor</h1>
+        <p class="page-subtitle">Real-time monitoring of dataset availability and changes</p>
+    </div>
+
+    <!-- System Status -->
+    <div class="status-section">
+        <h2>System Status</h2>
+        <div class="status-grid">
+            <div class="status-card">
+                <div class="status-icon">REFRESH</div>
+                <div class="status-content">
+                    <h3>Monitoring Status</h3>
+                    <div class="status-indicator" id="monitoring-status">Loading...</div>
+                    <div class="status-details" id="monitoring-details">-</div>
+                </div>
+            </div>
+            <div class="status-card">
+                <div class="status-icon">STATS</div>
+                <div class="status-content">
+                    <h3>Total Checks</h3>
+                    <div class="status-value" id="total-checks">-</div>
+                    <div class="status-details">Last 24 hours</div>
+                </div>
+            </div>
+            <div class="status-card">
+                <div class="status-icon">✅</div>
+                <div class="status-content">
+                    <h3>Success Rate</h3>
+                    <div class="status-value" id="success-rate">-</div>
+                    <div class="status-details">Available datasets</div>
+                </div>
+            </div>
+            <div class="status-card">
+                <div class="status-icon">⏱️</div>
+                <div class="status-content">
+                    <h3>Last Update</h3>
+                    <div class="status-value" id="last-update">-</div>
+                    <div class="status-details">System refresh</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Monitoring Controls -->
+    <div class="controls-section">
+        <h2>Monitoring Controls</h2>
+        <div class="controls-grid">
+            <div class="control-card">
+                <h3>Start Monitoring</h3>
+                <p>Begin comprehensive dataset monitoring</p>
+                <button class="btn btn-primary" id="start-monitoring">Start</button>
+            </div>
+            <div class="control-card">
+                <h3>Stop Monitoring</h3>
+                <p>Stop all monitoring activities</p>
+                <button class="btn btn-secondary" id="stop-monitoring">Stop</button>
+            </div>
+            <div class="control-card">
+                <h3>Initialize System</h3>
+                <p>Set up monitoring infrastructure</p>
+                <button class="btn btn-outline" id="init-monitoring">Initialize</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Live Activity Feed -->
+    <div class="activity-section">
+        <h2>Live Activity Feed</h2>
+        <div class="activity-container">
+            <div class="activity-feed" id="activity-feed">
+                <div class="loading">Loading activity feed...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Monitoring Statistics -->
+    <div class="stats-section">
+        <h2>Monitoring Statistics</h2>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-header">
+                    <h3>Status Breakdown</h3>
+                </div>
+                <div class="stat-content" id="status-breakdown">
+                    <div class="loading">Loading status breakdown...</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <h3>Response Times</h3>
+                </div>
+                <div class="stat-content" id="response-times">
+                    <div class="loading">Loading response times...</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <h3>Error Codes</h3>
+                </div>
+                <div class="stat-content" id="error-codes">
+                    <div class="loading">Loading error codes...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Monitoring Data -->
+    <div class="data-section">
+        <h2>Recent Monitoring Data</h2>
+        <div class="data-table-container">
+            <table class="data-table" id="monitoring-table">
+                <thead>
+                    <tr>
+                        <th>Dataset ID</th>
+                        <th>Title</th>
+                        <th>Agency</th>
+                        <th>Status</th>
+                        <th>Response Time</th>
+                        <th>Last Checked</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td colspan="6" class="loading">Loading monitoring data...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/live-monitor.js') }}"></script>
+<script>
+    // Initialize live monitor when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        loadLiveMonitorData();
+        startAutoRefresh();
+        
+        // Set up control buttons
+        document.getElementById('start-monitoring').addEventListener('click', startMonitoring);
+        document.getElementById('stop-monitoring').addEventListener('click', stopMonitoring);
+        document.getElementById('init-monitoring').addEventListener('click', initMonitoring);
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,341 @@
+{% extends "layouts/layout.html" %}
+
+{% block title %}Dashboard - Dataset State Historian{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/monitoring-status.css') }}">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
+{% endblock %}
+
+{% block content %}
+    <!-- Update Indicator -->
+    <div id="updateIndicator" class="update-indicator">Data Updated</div>
+    
+    <div class="container">
+        <!-- Dashboard Page -->
+        <div id="dashboard" class="page active">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalDatasets">-</div>
+                    <div class="stat-label">Total Datasets</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="totalSnapshots">-</div>
+                    <div class="stat-label">Total Snapshots</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="unavailableDatasets">-</div>
+                    <div class="stat-label">Unavailable</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="availableDatasets">-</div>
+                    <div class="stat-label">Available</div>
+                </div>
+            </div>
+            
+            <div class="text-center mb-20">
+                <span class="last-updated">Last updated: Loading...</span>
+                <span id="connectionStatus" class="connection-status connecting">Connecting...</span>
+            </div>
+            
+            <!-- Monitoring Status Section -->
+            <div class="monitoring-status-section">
+                <h3>Monitoring System Status</h3>
+                <div class="monitoring-grid">
+                    <div class="monitoring-card">
+                        <div class="monitoring-header">
+                            <span class="monitoring-icon">MONITOR</span>
+                            <span class="monitoring-title">Live Monitoring</span>
+                        </div>
+                        <div class="monitoring-stats">
+                            <div class="monitoring-stat">
+                                <span class="stat-value" id="monitoringTotal">-</span>
+                                <span class="stat-label">Total Checks</span>
+                            </div>
+                            <div class="monitoring-stat">
+                                <span class="stat-value" id="monitoringAvailable">-</span>
+                                <span class="stat-label">Available</span>
+                            </div>
+                            <div class="monitoring-stat">
+                                <span class="stat-value" id="monitoringErrors">-</span>
+                                <span class="stat-label">Errors</span>
+                            </div>
+                            <div class="monitoring-stat">
+                                <span class="stat-value" id="monitoringTimeouts">-</span>
+                                <span class="stat-label">Timeouts</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="monitoring-card">
+                        <div class="monitoring-header">
+                            <span class="monitoring-icon">SEARCH</span>
+                            <span class="monitoring-title">Status Breakdown</span>
+                        </div>
+                        <div class="monitoring-stats">
+                            <div class="monitoring-stat">
+                                <span class="stat-value" id="status403">-</span>
+                                <span class="stat-label">403 Forbidden</span>
+                            </div>
+                            <div class="monitoring-stat">
+                                <span class="stat-value" id="status404">-</span>
+                                <span class="stat-label">404 Not Found</span>
+                            </div>
+                            <div class="monitoring-stat">
+                                <span class="stat-value" id="status500">-</span>
+                                <span class="stat-label">500 Server Error</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="monitoring-card">
+                        <div class="monitoring-header">
+                            <span class="monitoring-icon">TIME</span>
+                            <span class="monitoring-title">Rate Limiting</span>
+                        </div>
+                        <div class="monitoring-stats">
+                            <div class="monitoring-stat">
+                                <span class="stat-value" id="rateLimitDomains">-</span>
+                                <span class="stat-label">Domains Tracked</span>
+                            </div>
+                            <div class="monitoring-stat">
+                                <span class="stat-value" id="rateLimitActive">-</span>
+                                <span class="stat-label">Active</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- License Distribution Section -->
+            <div class="license-distribution-section">
+                <h3>License Distribution</h3>
+                <div class="license-stats">
+                    <div class="license-stat-card">
+                        <div class="license-stat-value" id="totalWithLicenses">-</div>
+                        <div class="license-stat-label">Datasets with Known Licenses</div>
+                    </div>
+                    <div class="license-stat-card">
+                        <div class="license-stat-value" id="totalUnknownLicenses">-</div>
+                        <div class="license-stat-label">Unknown License</div>
+                    </div>
+                    <div class="license-stat-card">
+                        <div class="license-stat-value" id="licenseCoverage">-</div>
+                        <div class="license-stat-label">License Coverage</div>
+                    </div>
+                </div>
+                <div class="license-breakdown" id="licenseBreakdown">
+                    <!-- Populated by JavaScript -->
+                </div>
+            </div>
+            
+            <div class="controls">
+                <div class="search-section">
+                    <input type="text" id="searchInput" placeholder="Search datasets..." class="search-input">
+                    <button class="search-btn" onclick="applyFilters()">Search</button>
+                </div>
+                
+                <div class="filters-section">
+                    <div class="filter-row">
+                        <div class="filter-group">
+                            <label for="agencyFilter">Agency</label>
+                            <select id="agencyFilter" class="filter-select">
+                                <option value="">All</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="statusFilter">Status</label>
+                            <select id="statusFilter" class="filter-select">
+                                <option value="">All</option>
+                                <option value="available">Available</option>
+                                <option value="unavailable">Unavailable</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="dataTypeFilter">Data Type</label>
+                            <select id="dataTypeFilter" class="filter-select">
+                                <option value="">All</option>
+                                <option value="CSV">CSV</option>
+                                <option value="JSON">JSON</option>
+                                <option value="XML">XML</option>
+                                <option value="PDF">PDF</option>
+                                <option value="HTML">HTML</option>
+                                <option value="ZIP">ZIP</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="dateAddedFilter">Data Added</label>
+                            <select id="dateAddedFilter" class="filter-select">
+                                <option value="">All Time</option>
+                                <option value="today">Today</option>
+                                <option value="week">This Week</option>
+                                <option value="month">This Month</option>
+                                <option value="quarter">This Quarter</option>
+                                <option value="year">This Year</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="fileSizeFilter">File Size</label>
+                            <select id="fileSizeFilter" class="filter-select">
+                                <option value="">Any Size</option>
+                                <option value="small">< 1 MB</option>
+                                <option value="medium">1-10 MB</option>
+                                <option value="large">10-100 MB</option>
+                                <option value="xlarge">> 100 MB</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="licenseFilter">License</label>
+                            <select id="licenseFilter" class="filter-select">
+                                <option value="">All Licenses</option>
+                                <option value="Unknown">Unknown License</option>
+                                <option value="Public Domain">Public Domain</option>
+                                <option value="CC0">CC0</option>
+                                <option value="CC BY">CC BY</option>
+                                <option value="CC BY-SA">CC BY-SA</option>
+                                <option value="CC BY-NC">CC BY-NC</option>
+                                <option value="MIT">MIT</option>
+                                <option value="Apache">Apache</option>
+                                <option value="GPL">GPL</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        
+                <div class="filter-group">
+                    <label for="sortByFilter">Sort By</label>
+                    <select id="sortByFilter" class="filter-select">
+                        <option value="last_checked">Last Checked</option>
+                        <option value="title">Title</option>
+                        <option value="agency">Agency</option>
+                        <option value="created_at">Date Added</option>
+                        <option value="file_size">File Size</option>
+                        <option value="response_time">Response Time</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="licenseFilter">License</label>
+                    <select id="licenseFilter" class="filter-select">
+                        <option value="">All Licenses</option>
+                        <option value="Unknown">Unknown License</option>
+                        <option value="Public Domain">Public Domain</option>
+                        <option value="CC0">CC0</option>
+                        <option value="CC BY">CC BY</option>
+                        <option value="CC BY-SA">CC BY-SA</option>
+                        <option value="CC BY-NC">CC BY-NC</option>
+                        <option value="MIT">MIT</option>
+                        <option value="Apache">Apache</option>
+                        <option value="GPL">GPL</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+            </div>
+                    
+                    <div class="filter-actions">
+                        <button class="btn btn-primary btn-sm" onclick="applyFilters()">Apply</button>
+                        <button class="btn btn-secondary btn-sm" onclick="clearFilters()">Clear</button>
+                        <button id="toggleRefresh" class="btn btn-secondary btn-sm" onclick="toggleAutoRefresh()">Stop Auto-refresh</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="table-container">
+                <div class="table-header">
+                    <h3>Dataset Overview</h3>
+                    <div class="table-info">
+                        <span id="tableCount">Loading...</span>
+                        <span class="data-quality-note">* Some data may be incomplete</span>
+                    </div>
+                </div>
+                <div class="table-wrapper">
+                    <table class="table dataset-table">
+                        <thead>
+                            <tr>
+                                <th class="col-id">Dataset ID</th>
+                                <th class="col-title">Title</th>
+                                <th class="col-agency">Agency</th>
+                                <th class="col-status">Status</th>
+                                <th class="col-last-checked">Last Checked</th>
+                                <th class="col-response">Response Time</th>
+                            </tr>
+                        </thead>
+                        <tbody id="datasetsTableBody">
+                            <tr>
+                                <td colspan="6" class="loading">Loading datasets...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div id="pagination" class="pagination"></div>
+        </div>
+        
+        <!-- Dataset Detail Modal -->
+        <div id="datasetModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="modalTitle">Dataset Details</h3>
+                    <button class="modal-close" onclick="closeModal()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div id="modalContent">Loading...</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Timeline Page -->
+        <div id="timeline" class="page">
+            <div class="timeline-container">
+                <div class="timeline-header">
+                    <h3 class="timeline-title">Dataset Evolution Timeline</h3>
+                    <div class="timeline-controls">
+                        <button class="btn btn-primary btn-small" onclick="loadTimelineData()">Refresh</button>
+                    </div>
+                </div>
+                <div id="timelineChart" class="timeline-chart">
+                    <div class="loading">Loading timeline data...</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Data Viewer Page -->
+        <div id="data-viewer" class="page">
+            <div class="data-viewer">
+                <div class="data-viewer-header">
+                    <h3 class="data-viewer-title">Dataset Data Viewer</h3>
+                    <span class="last-updated">Last updated: Loading...</span>
+                </div>
+                <div id="dataViewer" class="data-content">
+                    <div class="loading">Loading data...</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Vanished Datasets Page -->
+        <div id="vanished" class="page">
+            <div class="data-viewer">
+                <div class="data-viewer-header">
+                    <h3 class="data-viewer-title">Vanished Datasets</h3>
+                    <span class="last-updated">Last updated: Loading...</span>
+                </div>
+                <div id="vanishedContainer" class="data-content">
+                    <div class="loading">Loading vanished datasets...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Real-time Indicator -->
+    <div class="text-center mb-20">
+        <span id="realTimeIndicator" class="real-time-indicator offline">Offline</span>
+    </div>
+    
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/main.js') }}?v={{ range(1000, 9999) | random }}"></script>
+{% endblock %}

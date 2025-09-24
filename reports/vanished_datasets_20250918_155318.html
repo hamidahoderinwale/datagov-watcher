@@ -1,0 +1,157 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data.gov Vanished Datasets Report</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            margin: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border: 1px solid #ddd;
+        }
+        h1 {
+            color: #d32f2f;
+            border-bottom: 2px solid #d32f2f;
+            padding-bottom: 10px;
+        }
+        .stats {
+            background-color: #f0f0f0;
+            padding: 15px;
+            margin: 20px 0;
+            border: 1px solid #ccc;
+        }
+        .stats h2 {
+            margin-top: 0;
+            color: #1976d2;
+        }
+        .stat-item {
+            margin: 5px 0;
+            font-weight: bold;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+            font-family: 'Courier New', monospace;
+        }
+        th {
+            background-color: #f0f0f0;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .status-removed {
+            color: #d32f2f;
+            font-weight: bold;
+        }
+        .status-moved {
+            color: #f57c00;
+            font-weight: bold;
+        }
+        .status-draft {
+            color: #1976d2;
+            font-weight: bold;
+        }
+        .archive-link {
+            color: #1976d2;
+            text-decoration: none;
+        }
+        .archive-link:hover {
+            text-decoration: underline;
+        }
+        .no-data {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+            padding: 40px;
+        }
+        .timestamp {
+            color: #666;
+            font-size: 0.9em;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Data.gov Vanished Datasets Report</h1>
+        
+        <div class="stats">
+            <h2>Summary Statistics</h2>
+            <div class="stat-item">LIL Archive Datasets: 3</div>
+            <div class="stat-item">Live Datasets: 1000</div>
+            <div class="stat-item">Vanished Datasets: 3</div>
+            <div class="stat-item">Last Check: 2025-09-18T15:53:18.782944</div>
+        </div>
+        
+        <h2>Vanished Datasets</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Agency</th>
+                    <th>Original URL</th>
+                    <th>Last Seen</th>
+                    <th>Suspected Cause</th>
+                    <th>Status</th>
+                    <th>Archive Link</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                <tr>
+                    <td>Climate Change Indicators</td>
+                    <td>EPA</td>
+                    <td><a href="https://data.epa.gov/dataset/climate-change-indicators" target="_blank">https://data.epa.gov/dataset/climate-change-indicators</a></td>
+                    <td>2024-01-15</td>
+                    <td>Potential policy takedown</td>
+                    <td class="status-removed">Removed</td>
+                    <td><a href="https://web.archive.org/web/*/https://data.epa.gov/dataset/climate-change-indicators" target="_blank" class="archive-link">View Archive</a></td>
+                </tr>
+
+                <tr>
+                    <td>COVID-19 Case Data</td>
+                    <td>CDC</td>
+                    <td><a href="https://data.cdc.gov/dataset/covid-19-cases" target="_blank">https://data.cdc.gov/dataset/covid-19-cases</a></td>
+                    <td>2024-01-20</td>
+                    <td>Policy change - COVID data sunset</td>
+                    <td class="status-removed">Removed</td>
+                    <td><a href="https://web.archive.org/web/*/https://data.cdc.gov/dataset/covid-19-cases" target="_blank" class="archive-link">View Archive</a></td>
+                </tr>
+
+                <tr>
+                    <td>Economic Indicators</td>
+                    <td>BLS</td>
+                    <td><a href="https://data.bls.gov/dataset/economic-indicators" target="_blank">https://data.bls.gov/dataset/economic-indicators</a></td>
+                    <td>2024-01-10</td>
+                    <td>Unknown - requires investigation</td>
+                    <td class="status-removed">Removed</td>
+                    <td><a href="https://web.archive.org/web/*/https://data.bls.gov/dataset/economic-indicators" target="_blank" class="archive-link">View Archive</a></td>
+                </tr>
+
+            </tbody>
+        </table>
+
+        <div class="timestamp">
+            Report generated: 2025-09-18 15:53:18
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Post-mortem Report - Dataset State Historian</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/historian-design-system.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/postmortem-report.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <h1>Dataset State Historian</h1>
+            <p>Comprehensive monitoring and analysis of government datasets</p>
+        </div>
+    </header>
+    
+    <nav class="nav">
+        <div class="container">
+            <ul class="nav-list">
+                <li class="nav-item">
+                    <a href="/" class="nav-link">ANALYTICS Overview</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/catalog" class="nav-link">FOLDER Catalog</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/timeline" class="nav-link">GROWTH Timeline</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/vanished" class="nav-link">GHOST Vanished</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/agencies" class="nav-link">BUILDING Agencies</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    
+    <main class="container">
+        <!-- Dataset Selection -->
+        <div class="card mb-6">
+            <div class="card-body">
+                <div class="postmortem-controls">
+                    <div class="control-group">
+                        <label for="datasetSelect">Dataset:</label>
+                        <select id="datasetSelect" onchange="loadPostmortem()">
+                            <option value="">Select a vanished dataset...</option>
+                        </select>
+                    </div>
+                    
+                    <div class="control-group">
+                        <button class="btn btn-primary" onclick="generatePostmortem()">Generate Report</button>
+                        <button class="btn btn-secondary" onclick="exportPostmortem()">Export PDF</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Post-mortem Report -->
+        <div id="postmortemReport" class="postmortem-report">
+            <div class="loading">Select a dataset to generate post-mortem report</div>
+        </div>
+    </main>
+    
+    <!-- Loading Indicator -->
+    <div id="loadingIndicator" class="loading-indicator">
+        <div class="loading-spinner"></div>
+        <span>Generating report...</span>
+    </div>
+    
+    <script src="{{ url_for('static', filename='js/postmortem-report.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+{% extends "layouts/layout.html" %}
+
+{% block title %}Agencies - Dataset State Historian{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/agencies-list.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="agencies-container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1 class="page-title">Agencies</h1>
+        <p class="page-subtitle">Explore datasets by government agency</p>
+    </div>
+
+    <!-- Search and Filters -->
+    <div class="search-section">
+        <div class="search-container">
+            <input type="text" id="agency-search" placeholder="Search agencies..." class="search-input">
+            <select id="sort-filter" class="filter-select">
+                <option value="datasets">Sort by Dataset Count</option>
+                <option value="volatility">Sort by Volatility</option>
+                <option value="vanished">Sort by Vanished Rate</option>
+            </select>
+            <button class="search-btn" onclick="searchAgencies()">Search</button>
+        </div>
+    </div>
+
+    <!-- Agency Grid -->
+    <div class="agency-grid-section">
+        <div class="agency-grid" id="agency-grid">
+            <!-- Populated by JavaScript -->
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/agencies-list.js') }}"></script>
+{% endblock %}

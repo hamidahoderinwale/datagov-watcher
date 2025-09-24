@@ -1,0 +1,178 @@
+{% extends "layouts/layout.html" %}
+
+{% block title %}Management Dashboard - Dataset State Historian{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/management-dashboard.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="management-container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1 class="page-title">Management Dashboard</h1>
+        <p class="page-subtitle">Comprehensive dataset discovery and monitoring management</p>
+    </div>
+
+    <!-- System Status Overview -->
+    <div class="status-section">
+        <h2>System Status</h2>
+        <div class="status-grid">
+            <div class="status-card" id="discovery-status">
+                <div class="status-icon">SEARCH</div>
+                <div class="status-content">
+                    <h3>Discovery System</h3>
+                    <div class="status-indicator" id="discovery-indicator">Loading...</div>
+                    <div class="status-details" id="discovery-details">-</div>
+                </div>
+            </div>
+            <div class="status-card" id="monitoring-status">
+                <div class="status-icon">STATS</div>
+                <div class="status-content">
+                    <h3>Monitoring System</h3>
+                    <div class="status-indicator" id="monitoring-indicator">Loading...</div>
+                    <div class="status-details" id="monitoring-details">-</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Discovery Management -->
+    <div class="management-section">
+        <h2>Dataset Discovery</h2>
+        <div class="management-card">
+            <div class="card-header">
+                <h3>Comprehensive Discovery</h3>
+                <p>Discover datasets from multiple sources including Data.gov, agency data.json files, and LIL archive</p>
+            </div>
+            <div class="card-content">
+                <div class="stats-row">
+                    <div class="stat-item">
+                        <span class="stat-label">Total Datasets:</span>
+                        <span class="stat-value" id="total-datasets">-</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Recent Discoveries:</span>
+                        <span class="stat-value" id="recent-discoveries">-</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Sources Active:</span>
+                        <span class="stat-value" id="active-sources">-</span>
+                    </div>
+                </div>
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="startDiscovery()">Start Discovery</button>
+                    <button class="btn btn-secondary" onclick="refreshDiscoveryStatus()">Refresh Status</button>
+                </div>
+                <div class="source-breakdown" id="source-breakdown">
+                    <!-- Populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Monitoring Management -->
+    <div class="management-section">
+        <h2>Dataset Monitoring</h2>
+        <div class="management-card">
+            <div class="card-header">
+                <h3>Priority-Based Monitoring</h3>
+                <p>Monitor datasets with different frequencies based on importance and volatility</p>
+            </div>
+            <div class="card-content">
+                <div class="monitoring-priorities" id="monitoring-priorities">
+                    <!-- Populated by JavaScript -->
+                </div>
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="initMonitoring()">Initialize Schedule</button>
+                    <button class="btn btn-success" onclick="startMonitoring()">Start Monitoring</button>
+                    <button class="btn btn-secondary" onclick="refreshMonitoringStatus()">Refresh Status</button>
+                </div>
+                <div class="monitoring-stats" id="monitoring-stats">
+                    <!-- Populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Configuration -->
+    <div class="management-section">
+        <h2>System Configuration</h2>
+        <div class="management-card">
+            <div class="card-header">
+                <h3>Monitoring Configuration</h3>
+                <p>Configure monitoring frequencies and priorities</p>
+            </div>
+            <div class="card-content">
+                <div class="config-grid">
+                    <div class="config-item">
+                        <label>Discovery Interval (hours):</label>
+                        <input type="number" id="discovery-interval" value="24" min="1" max="168">
+                    </div>
+                    <div class="config-item">
+                        <label>Critical Priority Frequency (hours):</label>
+                        <input type="number" id="critical-frequency" value="1" min="1" max="24">
+                    </div>
+                    <div class="config-item">
+                        <label>High Priority Frequency (hours):</label>
+                        <input type="number" id="high-frequency" value="6" min="1" max="48">
+                    </div>
+                    <div class="config-item">
+                        <label>Medium Priority Frequency (hours):</label>
+                        <input type="number" id="medium-frequency" value="24" min="1" max="168">
+                    </div>
+                    <div class="config-item">
+                        <label>Low Priority Frequency (hours):</label>
+                        <input type="number" id="low-frequency" value="168" min="24" max="720">
+                    </div>
+                </div>
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="saveConfiguration()">Save Configuration</button>
+                    <button class="btn btn-secondary" onclick="resetConfiguration()">Reset to Defaults</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="management-section">
+        <h2>Recent Activity</h2>
+        <div class="management-card">
+            <div class="card-header">
+                <h3>System Activity Log</h3>
+                <p>Recent discovery and monitoring activities</p>
+            </div>
+            <div class="card-content">
+                <div class="activity-log" id="activity-log">
+                    <!-- Populated by JavaScript -->
+                </div>
+                <div class="action-buttons">
+                    <button class="btn btn-secondary" onclick="refreshActivityLog()">Refresh Log</button>
+                    <button class="btn btn-secondary" onclick="clearActivityLog()">Clear Log</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/management-dashboard.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        loadSystemStatus();
+        loadDiscoveryStatus();
+        loadMonitoringStatus();
+        loadActivityLog();
+        
+        // Auto-refresh every 30 seconds
+        setInterval(function() {
+            loadSystemStatus();
+            loadDiscoveryStatus();
+            loadMonitoringStatus();
+        }, 30000);
+    });
+</script>
+{% endblock %}
+
+

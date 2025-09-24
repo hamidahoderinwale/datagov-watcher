@@ -1,0 +1,894 @@
+{% extends "layouts/layout.html" %}
+
+{% block title %}Search - Dataset State Historian{% endblock %}
+
+{% block extra_css %}
+<style>
+.search-container {
+    padding: var(--space-6);
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.search-header {
+    margin-bottom: var(--space-8);
+}
+
+.search-header-content {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-4);
+}
+
+.search-header-text {
+    flex: 1;
+}
+
+/* Info Icon */
+.info-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: var(--gray-100);
+    border: 1px solid var(--gray-300);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    color: var(--gray-600);
+    flex-shrink: 0;
+}
+
+.info-icon:hover {
+    background: var(--primary-100);
+    border-color: var(--primary-300);
+    color: var(--primary-600);
+    transform: scale(1.05);
+}
+
+.info-icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+.search-title {
+    font-size: var(--text-4xl);
+    font-weight: var(--font-bold);
+    color: var(--gray-900);
+    margin-bottom: var(--space-2);
+}
+
+.search-subtitle {
+    font-size: var(--text-lg);
+    color: var(--gray-600);
+    margin-bottom: var(--space-6);
+}
+
+.search-box {
+    background: white;
+    padding: var(--space-6);
+    border: 1px solid var(--gray-200);
+    margin-bottom: var(--space-6);
+}
+
+.search-input-container {
+    position: relative;
+    margin-bottom: var(--space-4);
+}
+
+.search-input {
+    width: 100%;
+    padding: var(--space-4);
+    padding-right: 50px;
+    border: 2px solid var(--gray-300);
+    border-radius: 0;
+    font-size: var(--text-lg);
+    background: white;
+    transition: border-color var(--transition-fast);
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(74, 74, 74, 0.1);
+}
+
+.search-button {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: var(--space-2) var(--space-4);
+    border-radius: 0;
+    cursor: pointer;
+    font-weight: var(--font-medium);
+}
+
+.search-button:hover {
+    background: var(--primary-dark);
+}
+
+.search-suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid var(--gray-200);
+    border-top: none;
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 1000;
+    display: none;
+}
+
+.suggestion-item {
+    padding: var(--space-3) var(--space-4);
+    cursor: pointer;
+    border-bottom: 1px solid var(--gray-100);
+    transition: background-color var(--transition-fast);
+}
+
+.suggestion-item:hover {
+    background: var(--gray-50);
+}
+
+.suggestion-item:last-child {
+    border-bottom: none;
+}
+
+.suggestion-text {
+    font-size: var(--text-sm);
+    color: var(--gray-700);
+}
+
+.suggestion-category {
+    font-size: var(--text-xs);
+    color: var(--gray-500);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.search-filters {
+    display: flex;
+    gap: var(--space-4);
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.filter-label {
+    font-size: var(--text-xs);
+    font-weight: var(--font-semibold);
+    color: var(--gray-600);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.filter-select {
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid var(--gray-300);
+    border-radius: 0;
+    font-size: var(--text-sm);
+    background: white;
+}
+
+.search-results {
+    margin-top: var(--space-6);
+}
+
+.results-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-4);
+    padding-bottom: var(--space-2);
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.results-count {
+    font-size: var(--text-sm);
+    color: var(--gray-600);
+}
+
+.results-sort {
+    display: flex;
+    gap: var(--space-2);
+    align-items: center;
+}
+
+.results-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+.result-item {
+    background: white;
+    border: 1px solid var(--gray-200);
+    padding: var(--space-6);
+    transition: all var(--transition-fast);
+}
+
+.result-item:hover {
+    border-color: var(--primary);
+    box-shadow: var(--shadow-md);
+}
+
+.result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: var(--space-3);
+}
+
+.result-title {
+    font-size: var(--text-lg);
+    font-weight: var(--font-semibold);
+    color: var(--gray-900);
+    margin: 0;
+    flex: 1;
+}
+
+.result-type {
+    padding: var(--space-1) var(--space-2);
+    background: var(--gray-100);
+    color: var(--gray-700);
+    font-size: var(--text-xs);
+    font-weight: var(--font-medium);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-radius: 0;
+}
+
+.result-meta {
+    display: flex;
+    gap: var(--space-4);
+    margin-bottom: var(--space-3);
+    font-size: var(--text-sm);
+    color: var(--gray-600);
+}
+
+.result-description {
+    font-size: var(--text-sm);
+    color: var(--gray-700);
+    line-height: var(--leading-relaxed);
+    margin-bottom: var(--space-3);
+}
+
+.result-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+}
+
+.result-tag {
+    padding: var(--space-1) var(--space-2);
+    background: var(--gray-100);
+    color: var(--gray-700);
+    font-size: var(--text-xs);
+    border-radius: 0;
+}
+
+.result-stats {
+    display: flex;
+    gap: var(--space-4);
+    font-size: var(--text-sm);
+    color: var(--gray-600);
+}
+
+.loading {
+    text-align: center;
+    padding: var(--space-8);
+    color: var(--gray-500);
+}
+
+.no-results {
+    text-align: center;
+    padding: var(--space-8);
+    color: var(--gray-500);
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-2);
+    margin-top: var(--space-8);
+}
+
+.pagination-button {
+    padding: var(--space-2) var(--space-4);
+    border: 1px solid var(--gray-300);
+    background: white;
+    color: var(--gray-700);
+    text-decoration: none;
+    border-radius: 0;
+    transition: all var(--transition-fast);
+}
+
+.pagination-button:hover {
+    background: var(--gray-50);
+    border-color: var(--primary);
+    color: var(--primary);
+    text-decoration: none;
+}
+
+.pagination-button.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+.pagination-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    animation: fadeIn 0.3s ease;
+}
+
+.modal-content {
+    background-color: white;
+    margin: 5% auto;
+    padding: 0;
+    border: none;
+    width: 90%;
+    max-width: 600px;
+    max-height: 80vh;
+    overflow-y: auto;
+    animation: slideIn 0.3s ease;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-6);
+    border-bottom: 1px solid var(--gray-200);
+    background: var(--gray-50);
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: var(--text-xl);
+    font-weight: var(--font-semibold);
+    color: var(--gray-900);
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: var(--text-2xl);
+    cursor: pointer;
+    color: var(--gray-500);
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all var(--transition-fast);
+}
+
+.close-btn:hover {
+    background: var(--gray-200);
+    color: var(--gray-700);
+}
+
+.modal-body {
+    padding: var(--space-6);
+}
+
+/* Info Modal Content */
+.info-content h3 {
+    font-size: var(--text-xl);
+    font-weight: var(--font-semibold);
+    color: var(--gray-900);
+    margin: 0 0 var(--space-6) 0;
+    padding-bottom: var(--space-2);
+    border-bottom: 2px solid var(--primary-200);
+}
+
+.info-section {
+    margin-bottom: var(--space-6);
+}
+
+.info-section h4 {
+    font-size: var(--text-lg);
+    font-weight: var(--font-semibold);
+    color: var(--primary-600);
+    margin: 0 0 var(--space-3) 0;
+}
+
+.info-section p {
+    font-size: var(--text-sm);
+    color: var(--gray-700);
+    margin: 0 0 var(--space-3) 0;
+    line-height: 1.6;
+}
+
+.info-section ul {
+    margin: 0;
+    padding-left: var(--space-4);
+}
+
+.info-section li {
+    font-size: var(--text-sm);
+    color: var(--gray-700);
+    margin-bottom: var(--space-2);
+    line-height: 1.5;
+}
+
+.info-section li strong {
+    color: var(--gray-900);
+    font-weight: var(--font-semibold);
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideIn {
+    from { transform: translateY(-50px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="search-container">
+    <div class="search-header">
+        <div class="search-header-content">
+            <div class="search-header-text">
+                <h1 class="search-title">Search Datasets</h1>
+                <p class="search-subtitle">Find datasets, agencies, and tags across the entire system</p>
+            </div>
+            <button class="info-icon" onclick="openInfoModal()" title="Learn about search features">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M12 16v-4"></path>
+                    <path d="M12 8h.01"></path>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <div class="search-box">
+        <div class="search-input-container">
+            <input type="text" class="search-input" id="search-input" placeholder="Search for datasets, agencies, tags..." autocomplete="off">
+            <button class="search-button" onclick="performSearch()">Search</button>
+            <div class="search-suggestions" id="search-suggestions"></div>
+        </div>
+        
+        <div class="search-filters">
+            <div class="filter-group">
+                <label class="filter-label">Content Type</label>
+                <select class="filter-select" id="content-type">
+                    <option value="all">All</option>
+                    <option value="datasets">Datasets</option>
+                    <option value="agencies">Agencies</option>
+                    <option value="tags">Tags</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label class="filter-label">Status</label>
+                <select class="filter-select" id="status-filter">
+                    <option value="">All Status</option>
+                    <option value="available">Available</option>
+                    <option value="unavailable">Unavailable</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label class="filter-label">Sort By</label>
+                <select class="filter-select" id="sort-by">
+                    <option value="relevance">Relevance</option>
+                    <option value="title">Title</option>
+                    <option value="date">Date</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="search-results" id="search-results" style="display: none;">
+        <div class="results-header">
+            <div class="results-count" id="results-count">0 results</div>
+            <div class="results-sort">
+                <label for="results-per-page">Per page:</label>
+                <select id="results-per-page" class="filter-select">
+                    <option value="25">25</option>
+                    <option value="50" selected>50</option>
+                    <option value="100">100</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="results-list" id="results-list">
+            <!-- Results will be populated here -->
+        </div>
+        
+        <div class="pagination" id="pagination">
+            <!-- Pagination will be populated here -->
+        </div>
+    </div>
+    
+    <!-- Info Modal -->
+    <div id="info-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Search Features & Relevance Scoring</h2>
+                <button class="close-btn" onclick="closeInfoModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="info-content">
+                    <h3>Relevance Score</h3>
+                    
+                    <div class="info-section">
+                        <h4>How Relevance Score is Calculated</h4>
+                        <p>The relevance score determines how well search results match your query. It's calculated based on the following criteria:</p>
+                        <ul>
+                            <li><strong>Exact Match (100 points):</strong> When your query exactly matches a field (title, agency, description)</li>
+                            <li><strong>Starts With (50 points):</strong> When a field begins with your query</li>
+                            <li><strong>Contains (25 points):</strong> When a field contains your query anywhere</li>
+                            <li><strong>Word Boundary (10 points):</strong> When your query appears as a complete word within a field</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="info-section">
+                        <h4>Search Fields</h4>
+                        <p>The search algorithm examines multiple fields for each dataset:</p>
+                        <ul>
+                            <li><strong>Title:</strong> Dataset name and title</li>
+                            <li><strong>Agency:</strong> Government department or organization</li>
+                            <li><strong>Description:</strong> Dataset description and metadata</li>
+                            <li><strong>Tags:</strong> Associated keywords and categories</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="info-section">
+                        <h4>Sorting Options</h4>
+                        <ul>
+                            <li><strong>Relevance:</strong> Results sorted by relevance score (highest first)</li>
+                            <li><strong>Title:</strong> Alphabetical sorting by dataset title</li>
+                            <li><strong>Date:</strong> Chronological sorting by creation date</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="info-section">
+                        <h4>Search Tips</h4>
+                        <ul>
+                            <li>Use specific terms for better matches</li>
+                            <li>Try partial words to find related datasets</li>
+                            <li>Search by agency name to find all datasets from that organization</li>
+                            <li>Use keywords from dataset descriptions for broader results</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let currentQuery = '';
+let currentPage = 1;
+let currentFilters = {
+    type: 'all',
+    status: '',
+    sort: 'relevance',
+    perPage: 50
+};
+
+// Perform search
+function performSearch() {
+    const query = document.getElementById('search-input').value.trim();
+    if (!query) return;
+    
+    currentQuery = query;
+    currentPage = 1;
+    updateFilters();
+    
+    fetchSearchResults();
+}
+
+// Update filters from form
+function updateFilters() {
+    currentFilters.type = document.getElementById('content-type').value;
+    currentFilters.status = document.getElementById('status-filter').value;
+    currentFilters.sort = document.getElementById('sort-by').value;
+    currentFilters.perPage = parseInt(document.getElementById('results-per-page').value);
+}
+
+// Fetch search results
+function fetchSearchResults() {
+    const params = new URLSearchParams({
+        q: currentQuery,
+        type: currentFilters.type,
+        limit: currentFilters.perPage,
+        offset: (currentPage - 1) * currentFilters.perPage
+    });
+    
+    if (currentFilters.status) {
+        params.append('status', currentFilters.status);
+    }
+    
+    showLoading();
+    
+    fetch(`/api/search/?${params}`)
+        .then(response => response.json())
+        .then(data => {
+            displaySearchResults(data);
+        })
+        .catch(error => {
+            console.error('Search error:', error);
+            showError('Error performing search');
+        });
+}
+
+// Display search results
+function displaySearchResults(data) {
+    const resultsContainer = document.getElementById('search-results');
+    const resultsList = document.getElementById('results-list');
+    const resultsCount = document.getElementById('results-count');
+    
+    resultsContainer.style.display = 'block';
+    resultsCount.textContent = `${data.total_results} results`;
+    
+    if (data.results && data.results.length > 0) {
+        resultsList.innerHTML = data.results.map(result => createResultItem(result)).join('');
+    } else {
+        resultsList.innerHTML = '<div class="no-results">No results found</div>';
+    }
+    
+    updatePagination(data.total_results);
+}
+
+// Create result item HTML
+function createResultItem(result) {
+    let html = `
+        <div class="result-item">
+            <div class="result-header">
+                <h3 class="result-title">
+                    ${result.type === 'dataset' ? 
+                        `<a href="/dataset/${result.id}" style="color: inherit; text-decoration: none;">${escapeHtml(result.title || result.name)}</a>` :
+                        escapeHtml(result.title || result.name)
+                    }
+                </h3>
+                <span class="result-type">${result.type}</span>
+            </div>
+    `;
+    
+    if (result.type === 'dataset') {
+        html += `
+            <div class="result-meta">
+                <span><strong>Agency:</strong> ${escapeHtml(result.agency || 'Unknown')}</span>
+                <span><strong>Status:</strong> ${result.status || 'Unknown'}</span>
+                <span><strong>Last Updated:</strong> ${result.last_updated ? new Date(result.last_updated).toLocaleDateString() : 'Unknown'}</span>
+            </div>
+            <div class="result-description">${escapeHtml(result.description || 'No description available')}</div>
+        `;
+        
+        if (result.tags && result.tags.length > 0) {
+            html += `
+                <div class="result-tags">
+                    ${result.tags.map(tag => `<span class="result-tag">${escapeHtml(tag)}</span>`).join('')}
+                </div>
+            `;
+        }
+        
+        if (result.row_count || result.column_count) {
+            html += `
+                <div class="result-stats">
+                    <span>Rows: ${result.row_count || 'Unknown'}</span>
+                    <span>Columns: ${result.column_count || 'Unknown'}</span>
+                </div>
+            `;
+        }
+    } else if (result.type === 'agency') {
+        html += `
+            <div class="result-meta">
+                <span><strong>Datasets:</strong> ${result.dataset_count || 0}</span>
+                <span><strong>Available:</strong> ${result.available_count || 0}</span>
+                <span><strong>Unavailable:</strong> ${result.unavailable_count || 0}</span>
+            </div>
+        `;
+    } else if (result.type === 'tag') {
+        html += `
+            <div class="result-meta">
+                <span><strong>Usage:</strong> ${result.usage_count || 0} datasets</span>
+            </div>
+        `;
+    }
+    
+    html += '</div>';
+    return html;
+}
+
+// Update pagination
+function updatePagination(totalResults) {
+    const pagination = document.getElementById('pagination');
+    const totalPages = Math.ceil(totalResults / currentFilters.perPage);
+    
+    if (totalPages <= 1) {
+        pagination.innerHTML = '';
+        return;
+    }
+    
+    let html = '';
+    
+    // Previous button
+    html += `<a href="#" class="pagination-button ${currentPage === 1 ? 'disabled' : ''}" onclick="changePage(${currentPage - 1})">Previous</a>`;
+    
+    // Page numbers
+    const startPage = Math.max(1, currentPage - 2);
+    const endPage = Math.min(totalPages, currentPage + 2);
+    
+    for (let i = startPage; i <= endPage; i++) {
+        html += `<a href="#" class="pagination-button ${i === currentPage ? 'active' : ''}" onclick="changePage(${i})">${i}</a>`;
+    }
+    
+    // Next button
+    html += `<a href="#" class="pagination-button ${currentPage === totalPages ? 'disabled' : ''}" onclick="changePage(${currentPage + 1})">Next</a>`;
+    
+    pagination.innerHTML = html;
+}
+
+// Change page
+function changePage(page) {
+    if (page < 1) return;
+    currentPage = page;
+    fetchSearchResults();
+}
+
+// Show loading state
+function showLoading() {
+    const resultsList = document.getElementById('results-list');
+    resultsList.innerHTML = '<div class="loading">Searching...</div>';
+}
+
+// Show error state
+function showError(message) {
+    const resultsList = document.getElementById('results-list');
+    resultsList.innerHTML = `<div class="no-results">${message}</div>`;
+}
+
+// Escape HTML
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Handle search suggestions
+function handleSearchInput() {
+    const input = document.getElementById('search-input');
+    const suggestions = document.getElementById('search-suggestions');
+    const query = input.value.trim();
+    
+    if (query.length < 2) {
+        suggestions.style.display = 'none';
+        return;
+    }
+    
+    fetch(`/api/search/suggestions?q=${encodeURIComponent(query)}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.suggestions && data.suggestions.length > 0) {
+                suggestions.innerHTML = data.suggestions.map(suggestion => `
+                    <div class="suggestion-item" onclick="selectSuggestion('${escapeHtml(suggestion.text)}')">
+                        <div class="suggestion-text">${escapeHtml(suggestion.text)}</div>
+                        <div class="suggestion-category">${suggestion.category}</div>
+                    </div>
+                `).join('');
+                suggestions.style.display = 'block';
+            } else {
+                suggestions.style.display = 'none';
+            }
+        })
+        .catch(error => {
+            console.error('Suggestions error:', error);
+            suggestions.style.display = 'none';
+        });
+}
+
+// Select suggestion
+function selectSuggestion(text) {
+    document.getElementById('search-input').value = text;
+    document.getElementById('search-suggestions').style.display = 'none';
+    performSearch();
+}
+
+// Modal functions
+function openInfoModal() {
+    const modal = document.getElementById('info-modal');
+    if (modal) {
+        modal.style.display = 'block';
+    }
+}
+
+function closeInfoModal() {
+    const modal = document.getElementById('info-modal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+// Close modal when clicking outside
+window.addEventListener('click', function(event) {
+    const modal = document.getElementById('info-modal');
+    if (event.target === modal) {
+        closeInfoModal();
+    }
+});
+
+// Close modal on escape key
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        closeInfoModal();
+    }
+});
+
+// Hide suggestions when clicking outside
+document.addEventListener('click', function(event) {
+    const suggestions = document.getElementById('search-suggestions');
+    const input = document.getElementById('search-input');
+    
+    if (!suggestions.contains(event.target) && !input.contains(event.target)) {
+        suggestions.style.display = 'none';
+    }
+});
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('search-input');
+    
+    // Handle input events
+    searchInput.addEventListener('input', handleSearchInput);
+    searchInput.addEventListener('keypress', function(event) {
+        if (event.key === 'Enter') {
+            performSearch();
+        }
+    });
+    
+    // Handle filter changes
+    document.getElementById('content-type').addEventListener('change', updateFilters);
+    document.getElementById('status-filter').addEventListener('change', updateFilters);
+    document.getElementById('sort-by').addEventListener('change', updateFilters);
+    document.getElementById('results-per-page').addEventListener('change', updateFilters);
+    
+    // Check for URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const query = urlParams.get('q');
+    if (query) {
+        searchInput.value = query;
+        performSearch();
+    }
+});
+</script>
+{% endblock %}

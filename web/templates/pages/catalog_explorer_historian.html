@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dataset State Historian - Catalog Explorer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/historian-design-system.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <h1>Dataset State Historian</h1>
+            <p>Comprehensive monitoring and analysis of government datasets</p>
+        </div>
+    </header>
+    
+    <nav class="nav">
+        <div class="container">
+            <ul class="nav-list">
+                <li class="nav-item">
+                    <a href="/" class="nav-link">ANALYTICS Overview</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link active">FOLDER Catalog</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/timeline" class="nav-link">GROWTH Timeline</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/vanished" class="nav-link">GHOST Vanished</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/agencies" class="nav-link">BUILDING Agencies</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    
+    <main class="container">
+        <!-- Search and Filters Section -->
+        <div class="card mb-6">
+            <div class="card-body">
+                <div class="search-filters">
+                    <div class="search-group">
+                        <input type="text" id="searchInput" placeholder="Search datasets by title, agency, or ID..." class="search-input">
+                        <button class="btn btn-primary" onclick="performSearch()">Search</button>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <div class="filter-item">
+                            <label for="agencyFilter" class="filter-label">Agency:</label>
+                            <select id="agencyFilter" class="filter-select">
+                                <option value="">All Agencies</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-item">
+                            <label for="statusFilter" class="filter-label">Status:</label>
+                            <select id="statusFilter" class="filter-select">
+                                <option value="">All Status</option>
+                                <option value="active">Active</option>
+                                <option value="vanished">Vanished</option>
+                                <option value="stable">Stable</option>
+                                <option value="degraded">Degraded</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-item">
+                            <label for="eventFilter" class="filter-label">Event:</label>
+                            <select id="eventFilter" class="filter-select">
+                                <option value="">All Events</option>
+                                <option value="high">High Severity</option>
+                                <option value="medium">Medium Severity</option>
+                                <option value="low">Low Severity</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-actions">
+                            <button class="btn btn-primary" onclick="applyFilters()">Apply Filters</button>
+                            <button class="btn btn-secondary" onclick="clearFilters()">Clear</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Dataset Table -->
+        <div class="card">
+            <div class="card-header">
+                <h3>Dataset Catalog</h3>
+                <div class="table-info">
+                    <span id="tableCount">Loading...</span>
+                    <span class="data-quality-note">* Some data may be incomplete</span>
+                </div>
+            </div>
+            <div class="table-wrapper">
+                <table class="table dataset-table">
+                    <thead>
+                        <tr>
+                            <th class="col-title">Dataset Title</th>
+                            <th class="col-agency">Agency</th>
+                            <th class="col-status">Status</th>
+                            <th class="col-volatility">Volatility</th>
+                            <th class="col-last-seen">Last Seen</th>
+                            <th class="col-actions">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="datasetsTableBody">
+                        <tr>
+                            <td colspan="6" class="loading">Loading datasets...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Pagination -->
+        <div id="pagination" class="pagination"></div>
+    </main>
+    
+    <!-- Dataset Detail Modal -->
+    <div id="datasetModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Dataset Details</h3>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="modalContent">Loading...</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Loading Indicator -->
+    <div id="loadingIndicator" class="loading-indicator">
+        <div class="loading-spinner"></div>
+        <span>Loading...</span>
+    </div>
+    
+    <script src="{{ url_for('static', filename='js/catalog-explorer.js') }}"></script>
+</body>
+</html>

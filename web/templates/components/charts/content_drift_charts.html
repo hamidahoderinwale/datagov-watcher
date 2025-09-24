@@ -1,0 +1,690 @@
+{% extends "layouts/layout.html" %}
+
+{% block title %}Content Drift Charts - Dataset State Historian{% endblock %}
+
+{% block extra_css %}
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+.content-drift-container {
+    padding: var(--space-6);
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.content-drift-header {
+    margin-bottom: var(--space-6);
+}
+
+.content-drift-title {
+    font-size: var(--text-3xl);
+    font-weight: var(--font-bold);
+    color: var(--gray-900);
+    margin-bottom: var(--space-2);
+}
+
+.content-drift-subtitle {
+    font-size: var(--text-lg);
+    color: var(--gray-600);
+    margin-bottom: var(--space-4);
+}
+
+.dataset-selector {
+    display: flex;
+    gap: var(--space-4);
+    align-items: center;
+    margin-bottom: var(--space-6);
+    padding: var(--space-4);
+    background: white;
+    border: 1px solid var(--gray-200);
+}
+
+.dataset-dropdown {
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid var(--gray-300);
+    border-radius: 0;
+    font-size: var(--text-sm);
+    font-family: var(--font-family);
+    background-color: white;
+    min-width: 300px;
+}
+
+.charts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-6);
+    margin-bottom: var(--space-6);
+}
+
+.chart-card {
+    background: white;
+    border: 1px solid var(--gray-200);
+    padding: var(--space-6);
+}
+
+.chart-title {
+    font-size: var(--text-xl);
+    font-weight: var(--font-semibold);
+    color: var(--gray-900);
+    margin-bottom: var(--space-4);
+    text-align: center;
+}
+
+.chart-container {
+    position: relative;
+    height: 300px;
+    margin: var(--space-4) 0;
+}
+
+.chart-container canvas {
+    max-height: 300px;
+}
+
+.similarity-heatmap {
+    background: white;
+    border: 1px solid var(--gray-200);
+    padding: var(--space-6);
+    margin-bottom: var(--space-6);
+}
+
+.heatmap-title {
+    font-size: var(--text-xl);
+    font-weight: var(--font-semibold);
+    color: var(--gray-900);
+    margin-bottom: var(--space-4);
+    text-align: center;
+}
+
+.heatmap-grid {
+    display: grid;
+    gap: 2px;
+    margin: var(--space-4) 0;
+}
+
+.heatmap-cell {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--text-xs);
+    color: white;
+    font-weight: var(--font-medium);
+    cursor: pointer;
+    transition: opacity var(--transition-fast);
+}
+
+.heatmap-cell:hover {
+    opacity: 0.8;
+}
+
+.heatmap-legend {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--space-4);
+    margin-top: var(--space-4);
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.legend-color {
+    width: 20px;
+    height: 20px;
+    border-radius: 0;
+}
+
+.event-markers {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 20px;
+    pointer-events: none;
+}
+
+.event-marker {
+    position: absolute;
+    top: 0;
+    width: 2px;
+    height: 100%;
+    background-color: var(--error);
+    opacity: 0.7;
+}
+
+.event-marker.medium {
+    background-color: var(--warning);
+}
+
+.event-marker.low {
+    background-color: var(--success);
+}
+
+.loading {
+    text-align: center;
+    padding: var(--space-8);
+    color: var(--gray-500);
+}
+
+.error {
+    background: var(--gray-100);
+    color: var(--error);
+    padding: var(--space-4);
+    border: 1px solid var(--gray-200);
+    border-radius: 0;
+    margin: var(--space-4) 0;
+}
+
+@media (max-width: 768px) {
+    .charts-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .dataset-selector {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .dataset-dropdown {
+        min-width: auto;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="content-drift-container">
+    <div class="content-drift-header">
+        <h1 class="content-drift-title">Content Drift Charts</h1>
+        <p class="content-drift-subtitle">Analysis of content changes, similarity scores, and schema evolution over time</p>
+    </div>
+
+    <div class="dataset-selector">
+        <label for="dataset-select">Dataset:</label>
+        <select id="dataset-select" class="dataset-dropdown">
+            <option value="">Select a dataset...</option>
+        </select>
+        
+        <button id="load-charts" class="export-button" disabled>Load Charts</button>
+    </div>
+
+    <div id="charts-container" style="display: none;">
+        <div class="charts-grid">
+            <div class="chart-card">
+                <h3 class="chart-title">Row Count Trend</h3>
+                <div class="chart-container">
+                    <canvas id="row-count-chart"></canvas>
+                </div>
+            </div>
+            
+            <div class="chart-card">
+                <h3 class="chart-title">Schema Size Evolution</h3>
+                <div class="chart-container">
+                    <canvas id="schema-size-chart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <div class="charts-grid">
+            <div class="chart-card">
+                <h3 class="chart-title">Content Similarity Scores</h3>
+                <div class="chart-container">
+                    <canvas id="similarity-chart"></canvas>
+                </div>
+            </div>
+            
+            <div class="chart-card">
+                <h3 class="chart-title">File Size Changes</h3>
+                <div class="chart-container">
+                    <canvas id="file-size-chart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <div class="similarity-heatmap">
+            <h3 class="heatmap-title">Content Similarity Heatmap</h3>
+            <div class="heatmap-grid" id="heatmap-grid">
+                <!-- Heatmap will be generated here -->
+            </div>
+            <div class="heatmap-legend">
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #d73027;"></div>
+                    <span>Low Similarity (0-0.3)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #fee08b;"></div>
+                    <span>Medium Similarity (0.3-0.7)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #1a9850;"></div>
+                    <span>High Similarity (0.7-1.0)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+class ContentDriftCharts {
+    constructor() {
+        this.currentDataset = null;
+        this.chartData = null;
+        this.charts = {};
+        this.init();
+    }
+
+    init() {
+        this.loadDatasets();
+        this.bindEvents();
+    }
+
+    async loadDatasets() {
+        try {
+            const response = await fetch('/api/datasets?limit=100');
+            const data = await response.json();
+            
+            const select = document.getElementById('dataset-select');
+            select.innerHTML = '<option value="">Select a dataset...</option>';
+            
+            data.datasets.forEach(dataset => {
+                const option = document.createElement('option');
+                option.value = dataset.dataset_id;
+                option.textContent = `${dataset.title || 'Unknown'} (${dataset.agency || 'Unknown Agency'})`;
+                select.appendChild(option);
+            });
+        } catch (error) {
+            console.error('Error loading datasets:', error);
+        }
+    }
+
+    bindEvents() {
+        document.getElementById('dataset-select').addEventListener('change', (e) => {
+            this.currentDataset = e.target.value;
+            document.getElementById('load-charts').disabled = !this.currentDataset;
+        });
+
+        document.getElementById('load-charts').addEventListener('click', () => {
+            if (this.currentDataset) {
+                this.loadChartData();
+            }
+        });
+    }
+
+    async loadChartData() {
+        try {
+            const response = await fetch(`/api/dataset/${this.currentDataset}/content-drift`);
+            const data = await response.json();
+            
+            this.chartData = data;
+            this.renderCharts();
+            document.getElementById('charts-container').style.display = 'block';
+        } catch (error) {
+            console.error('Error loading chart data:', error);
+            this.showError('Error loading chart data');
+        }
+    }
+
+    renderCharts() {
+        this.renderRowCountChart();
+        this.renderSchemaSizeChart();
+        this.renderSimilarityChart();
+        this.renderFileSizeChart();
+        this.renderSimilarityHeatmap();
+    }
+
+    renderRowCountChart() {
+        const ctx = document.getElementById('row-count-chart').getContext('2d');
+        
+        if (this.charts.rowCount) {
+            this.charts.rowCount.destroy();
+        }
+        
+        this.charts.rowCount = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: this.chartData.timeline || [],
+                datasets: [{
+                    label: 'Row Count',
+                    data: this.chartData.row_counts || [],
+                    borderColor: '#4CAF50',
+                    backgroundColor: 'rgba(76, 175, 80, 0.2)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Row Count Over Time',
+                        font: {
+                            family: 'Funnel Sans',
+                            size: 14,
+                            weight: 'bold'
+                        }
+                    },
+                    legend: {
+                        labels: {
+                            font: {
+                                family: 'Funnel Sans'
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Date',
+                            font: {
+                                family: 'Funnel Sans'
+                            }
+                        },
+                        ticks: {
+                            font: {
+                                family: 'Funnel Sans'
+                            }
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Row Count',
+                            font: {
+                                family: 'Funnel Sans'
+                            }
+                        },
+                        ticks: {
+                            font: {
+                                family: 'Funnel Sans'
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    renderSchemaSizeChart() {
+        const ctx = document.getElementById('schema-size-chart').getContext('2d');
+        
+        if (this.charts.schemaSize) {
+            this.charts.schemaSize.destroy();
+        }
+        
+        this.charts.schemaSize = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: this.chartData.timeline || [],
+                datasets: [{
+                    label: 'Column Count',
+                    data: this.chartData.column_counts || [],
+                    backgroundColor: '#2196F3',
+                    borderColor: '#1976D2',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Schema Size Evolution',
+                        font: {
+                            family: 'Funnel Sans',
+                            size: 14,
+                            weight: 'bold'
+                        }
+                    },
+                    legend: {
+                        labels: {
+                            font: {
+                                family: 'Funnel Sans'
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Date',
+                            font: {
+                                family: 'Funnel Sans'
+                            }
+                        },
+                        ticks: {
+                            font: {
+                                family: 'Funnel Sans'
+                            }
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Column Count',
+                            font: {
+                                family: 'Funnel Sans'
+                            }
+                        },
+                        ticks: {
+                            font: {
+                                family: 'Funnel Sans'
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    renderSimilarityChart() {
+        const ctx = document.getElementById('similarity-chart').getContext('2d');
+        
+        if (this.charts.similarity) {
+            this.charts.similarity.destroy();
+        }
+        
+        this.charts.similarity = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: this.chartData.timeline || [],
+                datasets: [{
+                    label: 'Similarity Score',
+                    data: this.chartData.similarity_scores || [],
+                    borderColor: '#FF9800',
+                    backgroundColor: 'rgba(255, 152, 0, 0.2)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Content Similarity Over Time',
+                        font: {
+                            family: 'Funnel Sans',
+                            size: 14,
+                            weight: 'bold'
+                        }
+                    },
+                    legend: {
+                        labels: {
+                            font: {
+                                family: 'Funnel Sans'
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Date',
+                            font: {
+                                family: 'Funnel Sans'
+                            }
+                        },
+                        ticks: {
+                            font: {
+                                family: 'Funnel Sans'
+                            }
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Similarity Score',
+                            font: {
+                                family: 'Funnel Sans'
+                            }
+                        },
+                        min: 0,
+                        max: 1,
+                        ticks: {
+                            font: {
+                                family: 'Funnel Sans'
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    renderFileSizeChart() {
+        const ctx = document.getElementById('file-size-chart').getContext('2d');
+        
+        if (this.charts.fileSize) {
+            this.charts.fileSize.destroy();
+        }
+        
+        this.charts.fileSize = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: this.chartData.timeline || [],
+                datasets: [{
+                    label: 'File Size (MB)',
+                    data: (this.chartData.file_sizes || []).map(size => size / (1024 * 1024)),
+                    borderColor: '#9C27B0',
+                    backgroundColor: 'rgba(156, 39, 176, 0.2)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'File Size Changes Over Time',
+                        font: {
+                            family: 'Funnel Sans',
+                            size: 14,
+                            weight: 'bold'
+                        }
+                    },
+                    legend: {
+                        labels: {
+                            font: {
+                                family: 'Funnel Sans'
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Date',
+                            font: {
+                                family: 'Funnel Sans'
+                            }
+                        },
+                        ticks: {
+                            font: {
+                                family: 'Funnel Sans'
+                            }
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'File Size (MB)',
+                            font: {
+                                family: 'Funnel Sans'
+                            }
+                        },
+                        ticks: {
+                            font: {
+                                family: 'Funnel Sans'
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    renderSimilarityHeatmap() {
+        const heatmapGrid = document.getElementById('heatmap-grid');
+        const similarityMatrix = this.chartData.similarity_matrix || [];
+        
+        if (similarityMatrix.length === 0) {
+            heatmapGrid.innerHTML = '<div class="loading">No similarity data available</div>';
+            return;
+        }
+        
+        // Create heatmap grid
+        const gridSize = similarityMatrix.length;
+        heatmapGrid.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
+        
+        heatmapGrid.innerHTML = '';
+        
+        for (let i = 0; i < gridSize; i++) {
+            for (let j = 0; j < gridSize; j++) {
+                const cell = document.createElement('div');
+                cell.className = 'heatmap-cell';
+                
+                const similarity = similarityMatrix[i][j] || 0;
+                const color = this.getSimilarityColor(similarity);
+                
+                cell.style.backgroundColor = color;
+                cell.textContent = similarity.toFixed(2);
+                cell.title = `Similarity: ${similarity.toFixed(3)}`;
+                
+                heatmapGrid.appendChild(cell);
+            }
+        }
+    }
+
+    getSimilarityColor(similarity) {
+        if (similarity >= 0.7) return '#1a9850'; // Green
+        if (similarity >= 0.3) return '#fee08b'; // Yellow
+        return '#d73027'; // Red
+    }
+
+    showError(message) {
+        const container = document.getElementById('charts-container');
+        container.innerHTML = `<div class="error">${message}</div>`;
+    }
+}
+
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', () => {
+    new ContentDriftCharts();
+});
+</script>
+{% endblock %}

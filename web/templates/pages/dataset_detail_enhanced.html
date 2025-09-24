@@ -1,0 +1,1005 @@
+{% extends "layouts/layout.html" %}
+
+{% block title %}{{ dataset.title or 'Dataset Details' }} - Dataset State Historian{% endblock %}
+
+{% block extra_css %}
+<style>
+.dataset-detail-container {
+    padding: var(--space-6);
+    max-width: 1600px;
+    margin: 0 auto;
+}
+
+.dataset-header {
+    margin-bottom: var(--space-8);
+    padding-bottom: var(--space-6);
+    border-bottom: 2px solid var(--gray-200);
+}
+
+.dataset-title {
+    font-size: var(--text-3xl);
+    font-weight: var(--font-bold);
+    color: var(--gray-900);
+    margin-bottom: var(--space-3);
+    line-height: 1.2;
+}
+
+.dataset-agency {
+    font-size: var(--text-lg);
+    color: var(--primary);
+    margin-bottom: var(--space-2);
+    font-weight: var(--font-semibold);
+}
+
+.dataset-description {
+    font-size: var(--text-base);
+    color: var(--gray-700);
+    line-height: 1.6;
+    margin-bottom: var(--space-4);
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--space-6);
+    margin-bottom: var(--space-8);
+}
+
+.info-section {
+    background: white;
+    border: 1px solid var(--gray-200);
+    padding: var(--space-6);
+}
+
+.section-title {
+    font-size: var(--text-xl);
+    font-weight: var(--font-semibold);
+    color: var(--gray-900);
+    margin-bottom: var(--space-4);
+    padding-bottom: var(--space-2);
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.metric-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: var(--space-4);
+    margin-bottom: var(--space-4);
+}
+
+.metric-card {
+    text-align: center;
+    padding: var(--space-4);
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    transition: all var(--transition-fast);
+}
+
+.metric-card:hover {
+    background: var(--gray-100);
+    border-color: var(--primary);
+}
+
+.metric-value {
+    font-size: var(--text-2xl);
+    font-weight: var(--font-bold);
+    color: var(--primary);
+    margin-bottom: var(--space-1);
+}
+
+.metric-label {
+    font-size: var(--text-xs);
+    color: var(--gray-600);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.metric-description {
+    font-size: var(--text-xs);
+    color: var(--gray-500);
+    margin-top: var(--space-1);
+}
+
+.status-badge {
+    display: inline-block;
+    padding: var(--space-1) var(--space-2);
+    border-radius: 0;
+    font-size: var(--text-xs);
+    font-weight: var(--font-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.status-badge.available {
+    background: var(--success-light);
+    color: var(--success-dark);
+}
+
+.status-badge.unavailable {
+    background: var(--error-light);
+    color: var(--error-dark);
+}
+
+.status-badge.unknown {
+    background: var(--gray-200);
+    color: var(--gray-700);
+}
+
+.status-badge.high {
+    background: var(--success-light);
+    color: var(--success-dark);
+}
+
+.status-badge.medium {
+    background: var(--warning-light);
+    color: var(--warning-dark);
+}
+
+.status-badge.low {
+    background: var(--error-light);
+    color: var(--error-dark);
+}
+
+.analytics-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: var(--space-6);
+    margin-bottom: var(--space-8);
+}
+
+.chart-container {
+    background: white;
+    border: 1px solid var(--gray-200);
+    padding: var(--space-6);
+    margin-bottom: var(--space-6);
+}
+
+.chart-title {
+    font-size: var(--text-lg);
+    font-weight: var(--font-semibold);
+    color: var(--gray-900);
+    margin-bottom: var(--space-4);
+}
+
+.chart-content {
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+}
+
+.trend-indicator {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-bottom: var(--space-2);
+}
+
+.trend-arrow {
+    font-size: var(--text-lg);
+    font-weight: var(--font-bold);
+}
+
+.trend-arrow.up {
+    color: var(--success);
+}
+
+.trend-arrow.down {
+    color: var(--error);
+}
+
+.trend-arrow.stable {
+    color: var(--gray-500);
+}
+
+.comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: var(--space-4);
+}
+
+.comparison-table th,
+.comparison-table td {
+    padding: var(--space-3);
+    text-align: left;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.comparison-table th {
+    background: var(--gray-50);
+    font-weight: var(--font-semibold);
+    color: var(--gray-700);
+    font-size: var(--text-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.comparison-table td {
+    font-size: var(--text-sm);
+    color: var(--gray-900);
+}
+
+.similarity-score {
+    font-weight: var(--font-semibold);
+    color: var(--primary);
+}
+
+.enhanced-metadata {
+    background: var(--gray-50);
+    padding: var(--space-4);
+    border: 1px solid var(--gray-200);
+    margin-top: var(--space-4);
+}
+
+.metadata-item {
+    display: flex;
+    justify-content: space-between;
+    padding: var(--space-2) 0;
+    border-bottom: 1px solid var(--gray-100);
+}
+
+.metadata-item:last-child {
+    border-bottom: none;
+}
+
+.metadata-label {
+    font-weight: var(--font-medium);
+    color: var(--gray-700);
+}
+
+.metadata-value {
+    color: var(--gray-900);
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+}
+
+.loading {
+    text-align: center;
+    padding: var(--space-8);
+    color: var(--gray-500);
+}
+
+.error {
+    background: var(--gray-100);
+    color: var(--gray-700);
+    padding: var(--space-4);
+    border: 1px solid var(--gray-300);
+    margin: var(--space-4) 0;
+    border-radius: 0;
+}
+
+.back-button {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-4);
+    background: var(--gray-100);
+    color: var(--gray-700);
+    text-decoration: none;
+    border: 1px solid var(--gray-300);
+    border-radius: 0;
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    transition: all var(--transition-fast);
+    margin-bottom: var(--space-6);
+}
+
+.back-button:hover {
+    background: var(--gray-200);
+    color: var(--gray-900);
+    text-decoration: none;
+}
+
+.tab-container {
+    margin-bottom: var(--space-6);
+}
+
+.tab-buttons {
+    display: flex;
+    border-bottom: 1px solid var(--gray-200);
+    margin-bottom: var(--space-4);
+}
+
+.tab-button {
+    padding: var(--space-3) var(--space-6);
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    color: var(--gray-600);
+    transition: all var(--transition-fast);
+}
+
+.tab-button:hover {
+    color: var(--gray-900);
+    background: var(--gray-50);
+}
+
+.tab-button.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.quality-indicator {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
+}
+
+.quality-circle {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: var(--font-bold);
+    font-size: var(--text-lg);
+}
+
+.quality-circle.high {
+    background: var(--success-light);
+    color: var(--success-dark);
+}
+
+.quality-circle.medium {
+    background: var(--warning-light);
+    color: var(--warning-dark);
+}
+
+.quality-circle.low {
+    background: var(--error-light);
+    color: var(--error-dark);
+}
+
+.export-buttons {
+    display: flex;
+    gap: var(--space-3);
+    margin-top: var(--space-4);
+}
+
+.export-button {
+    padding: var(--space-2) var(--space-4);
+    background: var(--gray-100);
+    color: var(--gray-700);
+    border: 1px solid var(--gray-300);
+    border-radius: 0;
+    cursor: pointer;
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    text-decoration: none;
+    transition: all var(--transition-fast);
+}
+
+.export-button:hover {
+    background: var(--gray-200);
+    color: var(--gray-900);
+    text-decoration: none;
+}
+
+.export-button.primary {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+.export-button.primary:hover {
+    background: var(--primary-dark);
+    color: white;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dataset-detail-container">
+    <a href="javascript:history.back()" class="back-button">
+        ← BACK
+    </a>
+    
+    <div class="dataset-header">
+        <h1 class="dataset-title" id="dataset-title">Loading...</h1>
+        <div class="dataset-agency" id="dataset-agency">Loading...</div>
+        <div class="dataset-description" id="dataset-description">Loading...</div>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="tab-container">
+        <div class="tab-buttons">
+            <button class="tab-button active" onclick="showTab('overview')">OVERVIEW</button>
+            <button class="tab-button" onclick="showTab('analytics')">ANALYTICS</button>
+            <button class="tab-button" onclick="showTab('comparison')">COMPARISON</button>
+            <button class="tab-button" onclick="showTab('technical')">TECHNICAL</button>
+        </div>
+
+        <!-- Overview Tab -->
+        <div id="overview-tab" class="tab-content active">
+            <div class="info-grid">
+                <!-- Current State -->
+                <div class="info-section">
+                    <h3 class="section-title">Current State</h3>
+                    <div class="metric-grid" id="current-metrics">
+                        <div class="metric-card">
+                            <div class="metric-value" id="current-rows">-</div>
+                            <div class="metric-label">Rows</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-value" id="current-columns">-</div>
+                            <div class="metric-label">Columns</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-value" id="quality-score">-</div>
+                            <div class="metric-label">Quality</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-value" id="file-size">-</div>
+                            <div class="metric-label">Size</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Data Patterns -->
+                <div class="info-section">
+                    <h3 class="section-title">Data Patterns</h3>
+                    <div id="data-patterns">
+                        <div class="loading">Loading patterns...</div>
+                    </div>
+                </div>
+
+                <!-- Quality Assessment -->
+                <div class="info-section">
+                    <h3 class="section-title">Quality Assessment</h3>
+                    <div id="quality-assessment">
+                        <div class="loading">Loading quality data...</div>
+                    </div>
+                </div>
+
+                <!-- Reliability Indicators -->
+                <div class="info-section">
+                    <h3 class="section-title">Reliability</h3>
+                    <div id="reliability-indicators">
+                        <div class="loading">Loading reliability data...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analytics Tab -->
+        <div id="analytics-tab" class="tab-content">
+            <div class="analytics-grid">
+                <div class="chart-container">
+                    <h3 class="chart-title">Trend Analysis</h3>
+                    <div class="chart-content" id="trend-chart">
+                        <div class="loading">Loading trend analysis...</div>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <h3 class="chart-title">Performance Metrics</h3>
+                    <div class="chart-content" id="performance-chart">
+                        <div class="loading">Loading performance data...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Comparison Tab -->
+        <div id="comparison-tab" class="tab-content">
+            <div class="info-section">
+                <h3 class="section-title">Similar Datasets</h3>
+                <div id="similar-datasets">
+                    <div class="loading">Loading similar datasets...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Technical Tab -->
+        <div id="technical-tab" class="tab-content">
+            <div class="info-grid">
+                <div class="info-section">
+                    <h3 class="section-title">Technical Details</h3>
+                    <div id="technical-details">
+                        <div class="loading">Loading technical details...</div>
+                    </div>
+                </div>
+                <div class="info-section">
+                    <h3 class="section-title">Enhanced Metadata</h3>
+                    <div id="enhanced-metadata">
+                        <div class="loading">Loading enhanced metadata...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Options -->
+    <div class="info-section">
+        <h3 class="section-title">Export Data</h3>
+        <div class="export-buttons">
+            <button class="export-button primary" onclick="exportDataset('csv')">
+                EXPORT CSV
+            </button>
+            <button class="export-button" onclick="exportDataset('json')">
+                EXPORT JSON
+            </button>
+            <button class="export-button" onclick="exportDataset('pdf')">
+                EXPORT PDF
+            </button>
+            <button class="export-button" onclick="exportDataset('enhanced')">
+                EXPORT ENHANCED
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Get dataset ID from URL
+const datasetId = window.location.pathname.split('/').pop();
+
+// Tab management
+function showTab(tabName) {
+    // Hide all tabs
+    document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    document.querySelectorAll('.tab-button').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // Show selected tab
+    document.getElementById(tabName + '-tab').classList.add('active');
+    event.target.classList.add('active');
+    
+    // Load tab data if needed
+    if (tabName === 'analytics' && !window.analyticsLoaded) {
+        loadAnalytics();
+    } else if (tabName === 'comparison' && !window.comparisonLoaded) {
+        loadComparison();
+    } else if (tabName === 'technical' && !window.technicalLoaded) {
+        loadTechnical();
+    }
+}
+
+// Load enhanced dataset information
+function loadEnhancedDatasetInfo() {
+    fetch(`/api/dataset/${datasetId}/enhanced`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                showError(data.error);
+                return;
+            }
+            
+            updateBasicInfo(data);
+            updateDataPatterns(data.data_patterns);
+            updateQualityAssessment(data.data_quality);
+            updateReliabilityIndicators(data);
+        })
+        .catch(error => {
+            console.error('Error loading enhanced dataset info:', error);
+            showError('Error loading enhanced dataset information');
+        });
+}
+
+// Update basic information
+function updateBasicInfo(data) {
+    const basic = data.basic_info;
+    const technical = data.technical_info;
+    const quality = data.data_quality;
+    
+    document.getElementById('dataset-title').textContent = basic.title || 'Unknown Title';
+    document.getElementById('dataset-agency').textContent = basic.agency || 'Unknown Agency';
+    document.getElementById('dataset-description').textContent = basic.description || 'No description available';
+    
+    // Update metrics
+    document.getElementById('current-rows').textContent = 
+        technical.row_count !== null && technical.row_count > 0 ? technical.row_count.toLocaleString() : 'Computing...';
+    document.getElementById('current-columns').textContent = 
+        technical.column_count !== null && technical.column_count > 0 ? technical.column_count.toLocaleString() : 'Computing...';
+    document.getElementById('quality-score').textContent = 
+        quality.quality_score || 'N/A';
+    document.getElementById('file-size').textContent = 
+        formatBytes(technical.file_size || 0);
+}
+
+// Update data patterns
+function updateDataPatterns(patterns) {
+    const container = document.getElementById('data-patterns');
+    
+    if (!patterns) {
+        container.innerHTML = '<div class="loading">No pattern data available</div>';
+        return;
+    }
+    
+    container.innerHTML = `
+        <div class="metric-grid">
+            <div class="metric-card">
+                <div class="metric-value">${patterns.data_volume || 'Unknown'}</div>
+                <div class="metric-label">Data Volume</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value">${patterns.format_category || 'Unknown'}</div>
+                <div class="metric-label">Format Type</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value">${patterns.update_frequency || 'Unknown'}</div>
+                <div class="metric-label">Update Frequency</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value">${Math.round(patterns.stability_score || 0)}%</div>
+                <div class="metric-label">Stability</div>
+            </div>
+        </div>
+    `;
+}
+
+// Update quality assessment
+function updateQualityAssessment(quality) {
+    const container = document.getElementById('quality-assessment');
+    
+    if (!quality) {
+        container.innerHTML = '<div class="loading">No quality data available</div>';
+        return;
+    }
+    
+    const score = quality.quality_score || 0;
+    const qualityClass = score >= 80 ? 'high' : score >= 60 ? 'medium' : 'low';
+    
+    container.innerHTML = `
+        <div class="quality-indicator">
+            <div class="quality-circle ${qualityClass}">${Math.round(score)}</div>
+            <div>
+                <div class="metric-label">Overall Quality Score</div>
+                <div class="metric-value">${score}/100</div>
+                <div class="metric-description">
+                    ${quality.content_analyzed ? 'Content analyzed' : 'Not analyzed'} • 
+                    ${quality.dimensions_computed ? 'Dimensions computed' : 'Computing...'}
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// Update reliability indicators
+function updateReliabilityIndicators(data) {
+    const container = document.getElementById('reliability-indicators');
+    
+    if (!data.metrics) {
+        container.innerHTML = '<div class="loading">No reliability data available</div>';
+        return;
+    }
+    
+    const metrics = data.metrics;
+    
+    container.innerHTML = `
+        <div class="metric-grid">
+            <div class="metric-card">
+                <div class="metric-value">${Math.round(metrics.accessibility_score || 0)}%</div>
+                <div class="metric-label">Accessibility</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value">${Math.round(metrics.reliability_score || 0)}%</div>
+                <div class="metric-label">Reliability</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value">${Math.round(metrics.efficiency_score || 0)}%</div>
+                <div class="metric-label">Efficiency</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value">${Math.round(metrics.data_density || 0)}</div>
+                <div class="metric-label">Data Density</div>
+            </div>
+        </div>
+    `;
+}
+
+// Load analytics
+function loadAnalytics() {
+    fetch(`/api/dataset/${datasetId}/analytics`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                console.error('Error loading analytics:', data.error);
+                return;
+            }
+            
+            updateTrendAnalysis(data.trends);
+            updatePerformanceMetrics(data.performance_metrics);
+            window.analyticsLoaded = true;
+        })
+        .catch(error => {
+            console.error('Error loading analytics:', error);
+        });
+}
+
+// Update trend analysis
+function updateTrendAnalysis(trends) {
+    const container = document.getElementById('trend-chart');
+    
+    if (!trends) {
+        container.innerHTML = '<div class="loading">No trend data available</div>';
+        return;
+    }
+    
+    container.innerHTML = `
+        <div style="padding: var(--space-4);">
+            <div class="trend-indicator">
+                <span class="trend-arrow ${trends.row_count_trend === 'increasing' ? 'up' : trends.row_count_trend === 'decreasing' ? 'down' : 'stable'}">
+                    ${trends.row_count_trend === 'increasing' ? '↗' : trends.row_count_trend === 'decreasing' ? '↘' : '→'}
+                </span>
+                <span>Row Count: ${trends.row_count_trend}</span>
+            </div>
+            <div class="trend-indicator">
+                <span class="trend-arrow ${trends.file_size_trend === 'increasing' ? 'up' : trends.file_size_trend === 'decreasing' ? 'down' : 'stable'}">
+                    ${trends.file_size_trend === 'increasing' ? '↗' : trends.file_size_trend === 'decreasing' ? '↘' : '→'}
+                </span>
+                <span>File Size: ${trends.file_size_trend}</span>
+            </div>
+            <div class="trend-indicator">
+                <span class="trend-arrow ${trends.quality_trend === 'improving' ? 'up' : trends.quality_trend === 'declining' ? 'down' : 'stable'}">
+                    ${trends.quality_trend === 'improving' ? '↗' : trends.quality_trend === 'declining' ? '↘' : '→'}
+                </span>
+                <span>Quality: ${trends.quality_trend}</span>
+            </div>
+            <div style="margin-top: var(--space-4); font-size: var(--text-sm); color: var(--gray-600);">
+                Data points: ${trends.data_points} • Time span: ${trends.time_span_days} days
+            </div>
+        </div>
+    `;
+}
+
+// Update performance metrics
+function updatePerformanceMetrics(metrics) {
+    const container = document.getElementById('performance-chart');
+    
+    if (!metrics) {
+        container.innerHTML = '<div class="loading">No performance data available</div>';
+        return;
+    }
+    
+    container.innerHTML = `
+        <div style="padding: var(--space-4);">
+            <div class="metric-card" style="margin-bottom: var(--space-3);">
+                <div class="metric-value">${metrics.availability_percentage}%</div>
+                <div class="metric-label">Availability</div>
+            </div>
+            <div class="metric-card" style="margin-bottom: var(--space-3);">
+                <div class="metric-value">${metrics.data_consistency_score}%</div>
+                <div class="metric-label">Consistency</div>
+            </div>
+            <div class="metric-card" style="margin-bottom: var(--space-3);">
+                <div class="metric-value">${metrics.average_response_time_ms || 'N/A'}ms</div>
+                <div class="metric-label">Response Time</div>
+            </div>
+            <div style="margin-top: var(--space-4); font-size: var(--text-sm); color: var(--gray-600);">
+                Total snapshots: ${metrics.total_snapshots} • Status: ${metrics.current_status}
+            </div>
+        </div>
+    `;
+}
+
+// Load comparison
+function loadComparison() {
+    fetch(`/api/dataset/${datasetId}/comparison`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                console.error('Error loading comparison:', data.error);
+                return;
+            }
+            
+            updateSimilarDatasets(data.similar_datasets);
+            window.comparisonLoaded = true;
+        })
+        .catch(error => {
+            console.error('Error loading comparison:', error);
+        });
+}
+
+// Update similar datasets
+function updateSimilarDatasets(similar) {
+    const container = document.getElementById('similar-datasets');
+    
+    if (!similar || similar.length === 0) {
+        container.innerHTML = '<div class="loading">No similar datasets found</div>';
+        return;
+    }
+    
+    container.innerHTML = `
+        <table class="comparison-table">
+            <thead>
+                <tr>
+                    <th>Dataset</th>
+                    <th>Agency</th>
+                    <th>Format</th>
+                    <th>Size</th>
+                    <th>Rows</th>
+                    <th>Quality</th>
+                    <th>Similarity</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${similar.map(dataset => `
+                    <tr onclick="window.location.href='/dataset/${dataset.dataset_id}'">
+                        <td>
+                            <div style="font-weight: var(--font-medium); max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeHtml(dataset.title || 'Unknown')}">
+                                ${escapeHtml(dataset.title || 'Unknown')}
+                            </div>
+                        </td>
+                        <td>${escapeHtml(dataset.agency || 'Unknown')}</td>
+                        <td>${dataset.format || 'Unknown'}</td>
+                        <td>${formatBytes(dataset.file_size || 0)}</td>
+                        <td>${dataset.rows ? dataset.rows.toLocaleString() : 'N/A'}</td>
+                        <td>${dataset.quality_score || 'N/A'}</td>
+                        <td>
+                            <span class="similarity-score">${Math.round(dataset.similarity_score)}%</span>
+                        </td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>
+    `;
+}
+
+// Load technical details
+function loadTechnical() {
+    fetch(`/api/dataset/${datasetId}/enhanced`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                console.error('Error loading technical details:', data.error);
+                return;
+            }
+            
+            updateTechnicalDetails(data.technical_info, data.schema_info);
+            updateEnhancedMetadata(data.enhanced_metadata);
+            window.technicalLoaded = true;
+        })
+        .catch(error => {
+            console.error('Error loading technical details:', error);
+        });
+}
+
+// Update technical details
+function updateTechnicalDetails(technical, schema) {
+    const container = document.getElementById('technical-details');
+    
+    container.innerHTML = `
+        <div class="enhanced-metadata">
+            <div class="metadata-item">
+                <span class="metadata-label">Content Type</span>
+                <span class="metadata-value">${technical.content_type || 'Unknown'}</span>
+            </div>
+            <div class="metadata-item">
+                <span class="metadata-label">Resource Format</span>
+                <span class="metadata-value">${technical.resource_format || 'Unknown'}</span>
+            </div>
+            <div class="metadata-item">
+                <span class="metadata-label">Status Code</span>
+                <span class="metadata-value">${technical.status_code || 'Unknown'}</span>
+            </div>
+            <div class="metadata-item">
+                <span class="metadata-label">Availability</span>
+                <span class="metadata-value">
+                    <span class="status-badge ${technical.availability || 'unknown'}">
+                        ${(technical.availability || 'unknown').toUpperCase()}
+                    </span>
+                </span>
+            </div>
+            <div class="metadata-item">
+                <span class="metadata-label">Schema Hash</span>
+                <span class="metadata-value">${schema.schema_hash || 'Unknown'}</span>
+            </div>
+            <div class="metadata-item">
+                <span class="metadata-label">Content Hash</span>
+                <span class="metadata-value">${schema.content_hash || 'Unknown'}</span>
+            </div>
+            <div class="metadata-item">
+                <span class="metadata-label">Schema Columns</span>
+                <span class="metadata-value">${schema.schema_columns.length}</span>
+            </div>
+        </div>
+    `;
+}
+
+// Update enhanced metadata
+function updateEnhancedMetadata(metadata) {
+    const container = document.getElementById('enhanced-metadata');
+    
+    if (!metadata || Object.keys(metadata).length === 0) {
+        container.innerHTML = '<div class="loading">No enhanced metadata available</div>';
+        return;
+    }
+    
+    let html = '<div class="enhanced-metadata">';
+    
+    if (metadata.url_analysis) {
+        html += `
+            <div class="metadata-item">
+                <span class="metadata-label">Domain</span>
+                <span class="metadata-value">${metadata.url_analysis.domain || 'Unknown'}</span>
+            </div>
+            <div class="metadata-item">
+                <span class="metadata-label">HTTPS</span>
+                <span class="metadata-value">${metadata.url_analysis.is_https ? 'Yes' : 'No'}</span>
+            </div>
+            <div class="metadata-item">
+                <span class="metadata-label">File Extension</span>
+                <span class="metadata-value">${metadata.url_analysis.file_extension || 'None'}</span>
+            </div>
+        `;
+    }
+    
+    if (metadata.response_time_ms) {
+        html += `
+            <div class="metadata-item">
+                <span class="metadata-label">Response Time</span>
+                <span class="metadata-value">${Math.round(metadata.response_time_ms)}ms</span>
+            </div>
+        `;
+    }
+    
+    if (metadata.server) {
+        html += `
+            <div class="metadata-item">
+                <span class="metadata-label">Server</span>
+                <span class="metadata-value">${metadata.server}</span>
+            </div>
+        `;
+    }
+    
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+// Export dataset
+function exportDataset(format) {
+    const url = `/api/export/dataset/${datasetId}?format=${format}`;
+    window.open(url, '_blank');
+}
+
+// Utility functions
+function formatBytes(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function showError(message) {
+    const container = document.querySelector('.dataset-detail-container');
+    container.innerHTML = `
+        <div class="error">
+            <h3>Error</h3>
+            <p>${message}</p>
+            <a href="/" class="back-button">← BACK TO DASHBOARD</a>
+        </div>
+    `;
+}
+
+// Initialize page
+document.addEventListener('DOMContentLoaded', function() {
+    loadEnhancedDatasetInfo();
+});
+</script>
+{% endblock %}

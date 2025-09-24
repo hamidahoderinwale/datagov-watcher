@@ -1,0 +1,156 @@
+{% extends "layouts/layout.html" %}
+
+{% block title %}Tag Gallery - Dataset State Historian{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/tag-gallery.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="tag-gallery-container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="page-header-content">
+            <div class="page-header-text">
+                <h1 class="page-title">Tag Gallery</h1>
+                <p class="page-subtitle">Explore datasets by topic and category</p>
+            </div>
+            <button class="info-icon" onclick="openInfoModal()" title="Learn about calculated properties">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M12 16v-4"></path>
+                    <path d="M12 8h.01"></path>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Search and Filters -->
+    <div class="controls">
+        <div class="search-section">
+            <input type="text" id="tag-search" placeholder="Search tags..." class="search-input">
+            <button class="search-btn" onclick="searchTags()">Search</button>
+        </div>
+        
+        <div class="filters-section">
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label for="category-filter">Category</label>
+                    <select id="category-filter" class="filter-select">
+                        <option value="">All Categories</option>
+                        <option value="agency">Agency</option>
+                        <option value="topic">Topic</option>
+                        <option value="format">Format</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="sort-filter">Sort By</label>
+                    <select id="sort-filter" class="filter-select">
+                        <option value="count">Dataset Count</option>
+                        <option value="name">Name</option>
+                        <option value="volatility">Volatility</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="filter-actions">
+                <button class="btn btn-primary btn-sm" onclick="searchTags()">Apply</button>
+                <button class="btn btn-secondary btn-sm" onclick="clearTagFilters()">Clear</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tag Grid -->
+    <div class="tag-grid-section">
+        <div class="tag-grid" id="tag-grid">
+            <!-- Populated by JavaScript -->
+        </div>
+    </div>
+
+        <!-- Info Modal -->
+        <div id="info-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Tag Gallery Properties</h2>
+                    <button class="close-btn" onclick="closeInfoModal()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="info-content">
+                        <h3>Calculated Properties</h3>
+                        
+                        <div class="info-section">
+                            <h4>Volatility</h4>
+                            <p>Measures how frequently datasets change over time. Calculated as:</p>
+                            <ul>
+                                <li><strong>Formula:</strong> Average of (row_count × column_count) ÷ 1,000,000</li>
+                                <li><strong>Range:</strong> 0.0 to 1.0+ (higher = more volatile)</li>
+                                <li><strong>Purpose:</strong> Indicates data stability and update frequency</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="info-section">
+                            <h4>Dataset Count</h4>
+                            <p>Total number of unique datasets associated with this tag.</p>
+                        </div>
+                        
+                        <div class="info-section">
+                            <h4>Availability Metrics</h4>
+                            <ul>
+                                <li><strong>Available:</strong> Datasets currently accessible (HTTP 200)</li>
+                                <li><strong>Unavailable:</strong> Datasets with errors (4xx/5xx status codes)</li>
+                                <li><strong>Success Rate:</strong> Available ÷ Total × 100%</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="info-section">
+                            <h4>Tag Categories</h4>
+                            <ul>
+                                <li><strong>Agency:</strong> Government departments and organizations</li>
+                                <li><strong>Format:</strong> File types (CSV, JSON, XML, PDF, etc.)</li>
+                                <li><strong>Topic:</strong> Subject matter extracted from dataset titles</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="info-section">
+                            <h4>Data Sources</h4>
+                            <p>Tags are automatically generated from:</p>
+                            <ul>
+                                <li>Dataset metadata (agency, format)</li>
+                                <li>Title analysis for topic classification</li>
+                                <li>Historical monitoring data for volatility</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tag Detail Modal -->
+        <div id="tag-detail-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="tag-detail-title">Tag Details</h2>
+                    <button class="close-btn" onclick="closeTagDetail()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="tag-metrics" id="tag-metrics">
+                        <!-- Populated by JavaScript -->
+                    </div>
+                    <div class="tag-datasets" id="tag-datasets">
+                        <!-- Populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/tag-gallery.js') }}"></script>
+<script>
+    // Load tag gallery
+    document.addEventListener('DOMContentLoaded', function() {
+        loadTagGallery();
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,115 @@
+{% extends "layouts/layout.html" %}
+
+{% block title %}Archive Error - Dataset State Historian{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/archive-detail.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="archive-container">
+    <div class="page-header">
+        <h1 class="page-title">Archive Error</h1>
+        <p class="page-subtitle">An error occurred while loading the archive</p>
+    </div>
+
+    <div class="error-content">
+        <div class="error-card">
+            <div class="error-icon">⚠️</div>
+            <h2>Archive Loading Error</h2>
+            <p>We encountered an error while trying to load the dataset archive.</p>
+            
+            <div class="error-details">
+                <h3>Error Details:</h3>
+                <div class="error-message">
+                    <code>{{ error }}</code>
+                </div>
+            </div>
+
+            <div class="error-actions">
+                <a href="/vanished" class="btn btn-primary">View Vanished Datasets</a>
+                <a href="/" class="btn btn-secondary">Return to Dashboard</a>
+                <button onclick="window.location.reload()" class="btn btn-outline">Try Again</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.error-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 400px;
+}
+
+.error-card {
+    background: white;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    padding: var(--space-8);
+    text-align: center;
+    max-width: 600px;
+    box-shadow: var(--shadow-sm);
+}
+
+.error-icon {
+    font-size: 4rem;
+    margin-bottom: var(--space-4);
+}
+
+.error-card h2 {
+    font-size: var(--text-2xl);
+    font-weight: var(--font-semibold);
+    color: var(--gray-900);
+    margin: 0 0 var(--space-4) 0;
+}
+
+.error-card p {
+    color: var(--gray-600);
+    margin: 0 0 var(--space-6) 0;
+    line-height: 1.6;
+}
+
+.error-details {
+    text-align: left;
+    margin: var(--space-6) 0;
+    padding: var(--space-4);
+    background: var(--gray-50);
+    border-radius: var(--radius-md);
+}
+
+.error-details h3 {
+    font-size: var(--text-lg);
+    font-weight: var(--font-semibold);
+    color: var(--gray-900);
+    margin: 0 0 var(--space-3) 0;
+}
+
+.error-message {
+    background: var(--red-50);
+    border: 1px solid var(--red-200);
+    border-radius: var(--radius-sm);
+    padding: var(--space-3);
+    margin-top: var(--space-2);
+}
+
+.error-message code {
+    background: none;
+    color: var(--red-800);
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    word-break: break-all;
+}
+
+.error-actions {
+    display: flex;
+    gap: var(--space-3);
+    justify-content: center;
+    margin-top: var(--space-6);
+    flex-wrap: wrap;
+}
+</style>
+{% endblock %}
+
+

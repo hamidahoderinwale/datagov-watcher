@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dataset Overview - Dataset State Historian</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/historian-design-system.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dataset-overview.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <h1>Dataset State Historian</h1>
+            <p>Comprehensive monitoring and analysis of government datasets</p>
+        </div>
+    </header>
+    
+    <nav class="nav">
+        <div class="container">
+            <ul class="nav-list">
+                <li class="nav-item">
+                    <a href="/" class="nav-link">ANALYTICS Overview</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/catalog" class="nav-link">FOLDER Catalog</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/timeline" class="nav-link">GROWTH Timeline</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/vanished" class="nav-link">GHOST Vanished</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/agencies" class="nav-link">BUILDING Agencies</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    
+    <main class="container">
+        <!-- Dataset Header -->
+        <div class="card mb-6">
+            <div class="card-body">
+                <div class="dataset-header">
+                    <div class="dataset-info">
+                        <h2 id="datasetTitle">Loading...</h2>
+                        <div class="dataset-meta">
+                            <span id="datasetAgency" class="dataset-agency">Loading...</span>
+                            <span id="datasetStatus" class="status-pill">Loading...</span>
+                        </div>
+                        <div class="dataset-details">
+                            <span class="detail-item">
+                                <span class="detail-label">License:</span>
+                                <span id="datasetLicense">Loading...</span>
+                            </span>
+                            <span class="detail-item">
+                                <span class="detail-label">First seen:</span>
+                                <span id="datasetFirstSeen">Loading...</span>
+                            </span>
+                            <span class="detail-item">
+                                <span class="detail-label">Last seen:</span>
+                                <span id="datasetLastSeen">Loading...</span>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="dataset-actions">
+                        <button class="btn btn-primary" onclick="refreshDataset()">Refresh</button>
+                        <button class="btn btn-secondary" onclick="exportDataset()">Export</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Quick Stats -->
+        <div class="card mb-6">
+            <div class="card-body">
+                <h3>Quick Stats</h3>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span class="stat-value" id="snapshotsCount">-</span>
+                        <span class="stat-label">Snapshots</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value" id="licenseFlips">-</span>
+                        <span class="stat-label">License Flips</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value" id="eventsCount">-</span>
+                        <span class="stat-label">Events</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value" id="volatilityScore">-</span>
+                        <span class="stat-label">Volatility</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tab Navigation -->
+        <div class="card">
+            <div class="card-header">
+                <div class="tab-navigation">
+                    <button class="tab-btn active" onclick="showTab('timeline')">Timeline View</button>
+                    <button class="tab-btn" onclick="showTab('changes')">Change Log</button>
+                    <button class="tab-btn" onclick="showTab('postmortem')">Post-mortem</button>
+                </div>
+            </div>
+            
+            <!-- Timeline Tab -->
+            <div id="timeline-tab" class="tab-content active">
+                <div class="card-body">
+                    <div class="timeline-controls">
+                        <div class="control-group">
+                            <label for="timelineDays">Time Range:</label>
+                            <select id="timelineDays" onchange="updateTimeline()">
+                                <option value="30">Last 30 days</option>
+                                <option value="90">Last 90 days</option>
+                                <option value="365">Last year</option>
+                                <option value="all">All time</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <button class="btn btn-primary" onclick="updateTimeline()">Refresh Timeline</button>
+                        </div>
+                    </div>
+                    
+                    <div class="chromogram-container">
+                        <div id="chromogramTimeline" class="chromogram-timeline">
+                            <div class="loading">Loading timeline data...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Changes Tab -->
+            <div id="changes-tab" class="tab-content">
+                <div class="card-body">
+                    <div class="changes-controls">
+                        <div class="control-group">
+                            <label for="severityFilter">Severity:</label>
+                            <select id="severityFilter" onchange="filterChanges()">
+                                <option value="">All Severities</option>
+                                <option value="high">High</option>
+                                <option value="medium">Medium</option>
+                                <option value="low">Low</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label for="eventTypeFilter">Event Type:</label>
+                            <select id="eventTypeFilter" onchange="filterChanges()">
+                                <option value="">All Types</option>
+                                <option value="VANISHED">Vanished</option>
+                                <option value="LICENSE_CHANGED">License Changed</option>
+                                <option value="SCHEMA_SHRINK">Schema Shrink</option>
+                                <option value="CONTENT_DRIFT">Content Drift</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <button class="btn btn-primary" onclick="loadChanges()">Refresh Changes</button>
+                        </div>
+                    </div>
+                    
+                    <div class="changes-list" id="changesList">
+                        <div class="loading">Loading changes...</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Post-mortem Tab -->
+            <div id="postmortem-tab" class="tab-content">
+                <div class="card-body">
+                    <div class="postmortem-controls">
+                        <button class="btn btn-primary" onclick="generatePostmortem()">Generate Post-mortem</button>
+                        <button class="btn btn-secondary" onclick="exportPostmortem()">Export PDF</button>
+                    </div>
+                    
+                    <div class="postmortem-content" id="postmortemContent">
+                        <div class="loading">Loading post-mortem analysis...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Field Diff Modal -->
+    <div id="fieldDiffModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="fieldDiffTitle">Field Changes</h3>
+                <button class="modal-close" onclick="closeFieldDiffModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="fieldDiffContent">Loading...</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Loading Indicator -->
+    <div id="loadingIndicator" class="loading-indicator">
+        <div class="loading-spinner"></div>
+        <span>Loading...</span>
+    </div>
+    
+    <script src="{{ url_for('static', filename='js/dataset-overview.js') }}"></script>
+</body>
+</html>

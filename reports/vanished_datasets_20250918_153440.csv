@@ -1,0 +1,2 @@
+id,title,agency,original_url,last_seen_date,suspected_cause,archive_link,status,current_status
+dataset_002,COVID-19 Case Data,CDC,https://data.cdc.gov/dataset/covid-19-cases,2024-01-20,Policy change - COVID data sunset,https://web.archive.org/web/*/https://data.cdc.gov/dataset/covid-19-cases,Removed,"{'url': 'https://data.cdc.gov/dataset/covid-19-cases', 'status_code': 404, 'available': False, 'last_checked': '2025-09-18T15:34:39.683273'}"

@@ -1,0 +1,808 @@
+{% extends "layouts/layout.html" %}
+
+{% block title %}Timeline Dashboard - Dataset State Historian{% endblock %}
+
+{% block extra_css %}
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+.timeline-container {
+    padding: var(--space-6);
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.timeline-header {
+    margin-bottom: var(--space-6);
+}
+
+.timeline-title {
+    font-size: var(--text-3xl);
+    font-weight: var(--font-bold);
+    color: var(--gray-900);
+    margin-bottom: var(--space-2);
+}
+
+.timeline-subtitle {
+    font-size: var(--text-lg);
+    color: var(--gray-600);
+    margin-bottom: var(--space-4);
+}
+
+.nav-tabs {
+    display: flex;
+    gap: var(--space-2);
+    margin-bottom: var(--space-6);
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.nav-tab {
+    padding: var(--space-3) var(--space-4);
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    color: var(--gray-600);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.nav-tab:hover {
+    color: var(--primary);
+}
+
+.nav-tab.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.chart-container {
+    background: white;
+    border: 1px solid var(--gray-200);
+    padding: var(--space-6);
+    margin-bottom: var(--space-6);
+}
+
+.chart-title {
+    font-size: var(--text-xl);
+    font-weight: var(--font-semibold);
+    color: var(--gray-900);
+    margin-bottom: var(--space-4);
+    text-align: center;
+}
+
+.chart-wrapper {
+    position: relative;
+    height: 400px;
+    margin: var(--space-4) 0;
+}
+
+.loading {
+    text-align: center;
+    padding: var(--space-8);
+    color: var(--gray-500);
+}
+
+.error {
+    background: var(--gray-100);
+    color: var(--error);
+    padding: var(--space-4);
+    border: 1px solid var(--gray-200);
+    border-radius: 0;
+    margin: var(--space-4) 0;
+}
+
+/* Chromogram Styles */
+.chromogram-controls {
+    display: flex;
+    gap: var(--space-4);
+    margin-bottom: var(--space-6);
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.chromogram-controls select,
+.chromogram-controls input {
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid var(--gray-300);
+    border-radius: 0;
+    font-size: var(--text-sm);
+    background: white;
+}
+
+.chromogram-controls button {
+    padding: var(--space-2) var(--space-4);
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 0;
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    cursor: pointer;
+    transition: background var(--transition-fast);
+}
+
+.chromogram-controls button:hover {
+    background: var(--primary-dark);
+}
+
+.chromogram-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+    margin-top: var(--space-4);
+    padding: var(--space-4);
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--text-sm);
+}
+
+.legend-color {
+    width: 16px;
+    height: 16px;
+    border: 1px solid var(--gray-300);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="timeline-container">
+    <div class="timeline-header">
+        <h1 class="timeline-title">Timeline Dashboard</h1>
+        <p class="timeline-subtitle">Interactive timeline visualization and change analysis</p>
+    </div>
+        
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showTab('overview')">Overview</button>
+            <button class="nav-tab" onclick="showTab('changes')">Changes</button>
+            <button class="nav-tab" onclick="showTab('volatility')">Volatility</button>
+            <button class="nav-tab" onclick="showTab('events')">Events</button>
+            <button class="nav-tab" onclick="showTab('chromogram')">Chromogram</button>
+        </div>
+        
+        <!-- Overview Tab -->
+        <div id="overview" class="tab-content active">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="total-datasets">-</div>
+                    <div class="stat-label">Total Datasets</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="total-changes">-</div>
+                    <div class="stat-label">Total Changes</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="active-datasets">-</div>
+                    <div class="stat-label">Active Datasets</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="vanished-datasets">-</div>
+                    <div class="stat-label">Vanished Datasets</div>
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <div class="chart-title">Dataset Activity Over Time</div>
+                <canvas id="activityChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+        
+        <!-- Changes Tab -->
+        <div id="changes" class="tab-content">
+            <div class="chart-container">
+                <div class="chart-title">Recent Changes</div>
+                <div class="changes-list" id="changes-list">
+                    <!-- Populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- Volatility Tab -->
+        <div id="volatility" class="tab-content">
+            <div class="chart-container">
+                <div class="chart-title">Dataset Volatility</div>
+                <canvas id="volatilityChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+        
+        <!-- Events Tab -->
+        <div id="events" class="tab-content">
+            <div class="chart-container">
+                <div class="chart-title">System Events</div>
+                <div class="events-list" id="events-list">
+                    <!-- Populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- Chromogram Tab -->
+        <div id="chromogram" class="tab-content">
+            <div class="chart-container">
+                <div class="chart-title">Dataset Change Chromogram</div>
+                <div class="chromogram-controls">
+                    <select id="dataset-selector">
+                        <option value="">Select a dataset...</option>
+                    </select>
+                    <input type="date" id="start-date" placeholder="Start Date">
+                    <input type="date" id="end-date" placeholder="End Date">
+                    <button onclick="loadChromogram()">Load Chromogram</button>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="chromogramChart"></canvas>
+                </div>
+                <div class="chromogram-legend" id="chromogram-legend">
+                    <!-- Legend will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Timeline Dashboard JavaScript
+        let activityChart = null;
+        let volatilityChart = null;
+        
+        function showTab(tabName) {
+            // Hide all tab contents
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(tab => tab.classList.remove('active'));
+            
+            // Remove active class from all tabs
+            const tabs = document.querySelectorAll('.nav-tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Show selected tab content
+            document.getElementById(tabName).classList.add('active');
+            
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+        }
+        
+        function loadTimelineData() {
+            // Load overview data with cross-checking
+            Promise.all([
+                fetch('/api/timeline').then(r => r.json()),
+                fetch('/api/stats').then(r => r.json()),
+                fetch('/api/timeline/monthly').then(r => r.json())
+            ]).then(([timelineData, statsData, monthlyData]) => {
+                // Cross-check and use the most reliable data
+                const totalDatasets = timelineData.summary?.total_datasets || statsData.unique_datasets || 0;
+                const availableDatasets = timelineData.summary?.available_datasets || statsData.availability_stats?.available || 0;
+                const unavailableDatasets = timelineData.summary?.unavailable_datasets || statsData.availability_stats?.unavailable || 0;
+                const totalChanges = timelineData.summary?.total_changes || monthlyData.summary?.total_changes || 0;
+                
+                // Update overview stats
+                document.getElementById('total-datasets').textContent = totalDatasets.toLocaleString();
+                document.getElementById('active-datasets').textContent = availableDatasets.toLocaleString();
+                document.getElementById('vanished-datasets').textContent = unavailableDatasets.toLocaleString();
+                document.getElementById('total-changes').textContent = totalChanges.toLocaleString();
+                
+                // Create activity chart with cross-checked data
+                createActivityChart(timelineData, monthlyData);
+                
+            }).catch(error => {
+                console.error('Error loading timeline data:', error);
+                // Fallback to basic stats
+                fetch('/api/stats')
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('total-datasets').textContent = data.unique_datasets || '0';
+                        document.getElementById('active-datasets').textContent = data.availability_stats?.available || '0';
+                        document.getElementById('vanished-datasets').textContent = data.availability_stats?.unavailable || '0';
+                    });
+            });
+        }
+        
+        function updateChangesList(changes) {
+            const changesList = document.getElementById('changes-list');
+            changesList.innerHTML = changes.map(change => `
+                <div class="change-item">
+                    <div class="change-description">${change.description}</div>
+                    <div class="change-date">${change.date}</div>
+                </div>
+            `).join('');
+        }
+        
+        function createActivityChart(timelineData, monthlyData) {
+            const ctx = document.getElementById('activityChart');
+            if (!ctx) return;
+            
+            // Destroy existing chart
+            if (activityChart) {
+                activityChart.destroy();
+            }
+            
+            // Parse chart data from monthly data
+            let chartData = null;
+            if (monthlyData.charts && monthlyData.charts.dataset_count) {
+                try {
+                    chartData = JSON.parse(monthlyData.charts.dataset_count);
+                } catch (e) {
+                    console.error('Error parsing chart data:', e);
+                }
+            }
+            
+            // Fallback to basic data if parsing fails
+            if (!chartData) {
+                chartData = {
+                    type: 'line',
+                    data: {
+                        labels: ['Total', 'Available', 'Unavailable'],
+                        datasets: [{
+                            label: 'Dataset Count',
+                            data: [
+                                timelineData.summary?.total_datasets || 0,
+                                timelineData.summary?.available_datasets || 0,
+                                timelineData.summary?.unavailable_datasets || 0
+                            ],
+                            backgroundColor: ['#4a90e2', '#7ed321', '#f5a623'],
+                            borderColor: ['#4a90e2', '#7ed321', '#f5a623'],
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Dataset Activity Overview'
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                };
+            }
+            
+            activityChart = new Chart(ctx, chartData);
+        }
+        
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            loadTimelineData();
+            
+            // Set up real-time updates
+            setInterval(loadTimelineData, 30000); // Update every 30 seconds
+        });
+    </script>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Tab switching functionality
+function showTab(tabName) {
+    // Hide all tab contents
+    document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    
+    // Remove active class from all tabs
+    document.querySelectorAll('.nav-tab').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    
+    // Show selected tab content
+    document.getElementById(tabName).classList.add('active');
+    
+    // Add active class to clicked tab
+    event.target.classList.add('active');
+    
+    // Load data for the selected tab
+    loadTabData(tabName);
+}
+
+// Load data for specific tab
+function loadTabData(tabName) {
+    switch(tabName) {
+        case 'overview':
+            loadOverviewData();
+            break;
+        case 'changes':
+            loadChangesData();
+            break;
+        case 'volatility':
+            loadVolatilityData();
+            break;
+        case 'events':
+            loadEventsData();
+            break;
+    }
+}
+
+// Load overview data with cross-checking
+function loadOverviewData() {
+    console.log('Loading overview data with cross-checking...');
+    
+    // Cross-check data from multiple sources
+    Promise.all([
+        fetch('/api/timeline').then(r => r.json()),
+        fetch('/api/stats').then(r => r.json()),
+        fetch('/api/timeline/monthly').then(r => r.json())
+    ]).then(([timelineData, statsData, monthlyData]) => {
+        // Use the most reliable data source
+        const totalDatasets = timelineData.summary?.total_datasets || statsData.unique_datasets || 0;
+        const availableDatasets = timelineData.summary?.available_datasets || statsData.availability_stats?.available || 0;
+        const unavailableDatasets = timelineData.summary?.unavailable_datasets || statsData.availability_stats?.unavailable || 0;
+        const totalChanges = timelineData.summary?.total_changes || monthlyData.summary?.total_changes || 0;
+        
+        // Update stats with cross-checked data
+        document.getElementById('total-datasets').textContent = totalDatasets.toLocaleString();
+        document.getElementById('active-datasets').textContent = availableDatasets.toLocaleString();
+        document.getElementById('vanished-datasets').textContent = unavailableDatasets.toLocaleString();
+        document.getElementById('total-changes').textContent = totalChanges.toLocaleString();
+        
+        // Create comprehensive activity chart
+        createActivityChart(timelineData, monthlyData);
+        
+    }).catch(error => {
+        console.error('Error in cross-checked overview data:', error);
+        // Fallback to single source
+        loadTimelineData();
+    });
+}
+
+// Load changes data with cross-checking
+function loadChangesData() {
+    console.log('Loading changes data with cross-checking...');
+    
+    // Cross-check changes from multiple sources
+    Promise.all([
+        fetch('/api/timeline/monthly').then(r => r.json()),
+        fetch('/api/changes').then(r => r.json()).catch(() => ({})),
+        fetch('/api/monitoring/stats').then(r => r.json()).catch(() => ({}))
+    ]).then(([monthlyData, changesData, monitoringData]) => {
+        // Parse changes chart data
+        let changesChartData = null;
+        if (monthlyData.charts && monthlyData.charts.changes) {
+            try {
+                changesChartData = JSON.parse(monthlyData.charts.changes);
+            } catch (e) {
+                console.error('Error parsing changes chart data:', e);
+            }
+        }
+        
+        // Create changes chart
+        if (changesChartData) {
+            const ctx = document.getElementById('changesChart');
+            if (ctx) {
+                new Chart(ctx, changesChartData);
+            }
+        }
+        
+        // Update changes list with cross-checked data
+        const recentChanges = changesData.recent_changes || [];
+        updateChangesList(recentChanges);
+        
+    }).catch(error => {
+        console.error('Error in cross-checked changes data:', error);
+    });
+}
+
+// Load volatility data with cross-checking
+function loadVolatilityData() {
+    console.log('Loading volatility data with cross-checking...');
+    
+    // Cross-check volatility from multiple sources
+    Promise.all([
+        fetch('/api/timeline/monthly').then(r => r.json()),
+        fetch('/api/analytics/trends').then(r => r.json()).catch(() => ({})),
+        fetch('/api/analytics/quality').then(r => r.json()).catch(() => ({}))
+    ]).then(([monthlyData, trendsData, qualityData]) => {
+        // Parse volatility chart data
+        let volatilityChartData = null;
+        if (monthlyData.charts && monthlyData.charts.data_volume) {
+            try {
+                volatilityChartData = JSON.parse(monthlyData.charts.data_volume);
+            } catch (e) {
+                console.error('Error parsing volatility chart data:', e);
+            }
+        }
+        
+        // Create volatility chart
+        if (volatilityChartData) {
+            const ctx = document.getElementById('volatilityChart');
+            if (ctx) {
+                if (volatilityChart) {
+                    volatilityChart.destroy();
+                }
+                volatilityChart = new Chart(ctx, volatilityChartData);
+            }
+        }
+        
+    }).catch(error => {
+        console.error('Error in cross-checked volatility data:', error);
+    });
+}
+
+// Load events data with cross-checking
+function loadEventsData() {
+    console.log('Loading events data with cross-checking...');
+    
+    // Cross-check events from multiple sources
+    Promise.all([
+        fetch('/api/monitoring/stats').then(r => r.json()),
+        fetch('/api/timeline/monthly').then(r => r.json()),
+        fetch('/api/vanished').then(r => r.json()).catch(() => ({}))
+    ]).then(([monitoringData, monthlyData, vanishedData]) => {
+        // Create events list with cross-checked data
+        const eventsList = document.getElementById('events-list');
+        if (eventsList) {
+            const events = [];
+            
+            // Add monitoring events
+            if (monitoringData.monitoring_stats) {
+                Object.entries(monitoringData.monitoring_stats).forEach(([status, count]) => {
+                    events.push({
+                        type: 'monitoring',
+                        description: `${count} datasets with ${status} status`,
+                        timestamp: new Date().toISOString(),
+                        severity: status === 'error' ? 'high' : 'medium'
+                    });
+                });
+            }
+            
+            // Add vanished dataset events
+            if (vanishedData.vanished_datasets) {
+                vanishedData.vanished_datasets.slice(0, 5).forEach(dataset => {
+                    events.push({
+                        type: 'vanished',
+                        description: `Dataset "${dataset.title}" became unavailable`,
+                        timestamp: dataset.last_seen,
+                        severity: 'high'
+                    });
+                });
+            }
+            
+            // Sort by timestamp and display
+            events.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            
+            eventsList.innerHTML = events.map(event => `
+                <div class="event-item ${event.severity}">
+                    <div class="event-type">${event.type.toUpperCase()}</div>
+                    <div class="event-description">${event.description}</div>
+                    <div class="event-timestamp">${new Date(event.timestamp).toLocaleString()}</div>
+                </div>
+            `).join('');
+        }
+        
+    }).catch(error => {
+        console.error('Error in cross-checked events data:', error);
+    });
+}
+
+// Load chromogram data
+function loadChromogram() {
+    const datasetId = document.getElementById('dataset-selector').value;
+    const startDate = document.getElementById('start-date').value;
+    const endDate = document.getElementById('end-date').value;
+    
+    if (!datasetId) {
+        alert('Please select a dataset');
+        return;
+    }
+    
+    const ctx = document.getElementById('chromogramChart').getContext('2d');
+    
+    // Load events timeline
+    let url = `/api/dataset/${datasetId}/events/timeline`;
+    if (startDate) url += `?start_date=${startDate}`;
+    if (endDate) url += `${startDate ? '&' : '?'}end_date=${endDate}`;
+    
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            if (data.timeline && data.timeline.length > 0) {
+                createChromogram(ctx, data.timeline);
+            } else {
+                ctx.canvas.parentElement.innerHTML = '<div class="loading">No events found for this dataset</div>';
+            }
+        })
+        .catch(error => {
+            console.error('Error loading chromogram:', error);
+            ctx.canvas.parentElement.innerHTML = '<div class="error">Error loading chromogram</div>';
+        });
+}
+
+// Create chromogram visualization
+function createChromogram(ctx, events) {
+    // Group events by date
+    const eventsByDate = {};
+    events.forEach(event => {
+        const date = event.timestamp.split('T')[0];
+        if (!eventsByDate[date]) {
+            eventsByDate[date] = [];
+        }
+        eventsByDate[date].push(event);
+    });
+    
+    const dates = Object.keys(eventsByDate).sort();
+    const eventTypes = [...new Set(events.map(e => e.event_type))];
+    
+    // Color mapping for event types
+    const colors = {
+        'TITLE_CHANGED': '#3B82F6',
+        'AGENCY_CHANGED': '#EF4444',
+        'URL_CHANGED': '#F59E0B',
+        'DESCRIPTION_CHANGED': '#10B981',
+        'LICENSE_CHANGED': '#8B5CF6',
+        'SCHEMA_SHRINK': '#F97316',
+        'SCHEMA_EXPAND': '#06B6D4',
+        'ROW_COUNT_INCREASED': '#84CC16',
+        'ROW_COUNT_DECREASED': '#DC2626',
+        'CONTENT_DRIFT': '#7C3AED',
+        'BECAME_AVAILABLE': '#059669',
+        'BECAME_UNAVAILABLE': '#DC2626',
+        'STATUS_CODE_CHANGED': '#D97706'
+    };
+    
+    // Create heatmap data
+    const heatmapData = [];
+    dates.forEach((date, dateIndex) => {
+        eventTypes.forEach((eventType, typeIndex) => {
+            const dayEvents = eventsByDate[date].filter(e => e.event_type === eventType);
+            if (dayEvents.length > 0) {
+                heatmapData.push({
+                    x: dateIndex,
+                    y: typeIndex,
+                    v: dayEvents.length,
+                    events: dayEvents
+                });
+            }
+        });
+    });
+    
+    // Create the chart
+    if (window.chromogramChart) {
+        window.chromogramChart.destroy();
+    }
+    
+    window.chromogramChart = new Chart(ctx, {
+        type: 'scatter',
+        data: {
+            datasets: eventTypes.map((eventType, index) => ({
+                label: eventType.replace(/_/g, ' '),
+                data: heatmapData.filter(d => d.y === index).map(d => ({
+                    x: d.x,
+                    y: d.y,
+                    v: d.v,
+                    events: d.events
+                })),
+                backgroundColor: colors[eventType] || '#6B7280',
+                borderColor: colors[eventType] || '#6B7280',
+                pointRadius: function(context) {
+                    return Math.max(5, context.parsed.v * 3);
+                }
+            }))
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Dataset Change Chromogram',
+                    font: {
+                        family: 'Funnel Sans'
+                    }
+                },
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        title: function(context) {
+                            const dataPoint = context[0];
+                            return dates[dataPoint.parsed.x];
+                        },
+                        label: function(context) {
+                            const dataPoint = context.parsed;
+                            return `${eventTypes[dataPoint.y].replace(/_/g, ' ')}: ${dataPoint.v} events`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    type: 'linear',
+                    position: 'bottom',
+                    title: {
+                        display: true,
+                        text: 'Date',
+                        font: {
+                            family: 'Funnel Sans'
+                        }
+                    },
+                    ticks: {
+                        callback: function(value) {
+                            return dates[value] ? dates[value].substring(5) : '';
+                        },
+                        font: {
+                            family: 'Funnel Sans'
+                        }
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Event Type',
+                        font: {
+                            family: 'Funnel Sans'
+                        }
+                    },
+                    ticks: {
+                        callback: function(value) {
+                            return eventTypes[value] ? eventTypes[value].replace(/_/g, ' ') : '';
+                        },
+                        font: {
+                            family: 'Funnel Sans'
+                        }
+                    }
+                }
+            }
+        }
+    });
+    
+    // Create legend
+    createChromogramLegend(eventTypes, colors);
+}
+
+// Create chromogram legend
+function createChromogramLegend(eventTypes, colors) {
+    const legend = document.getElementById('chromogram-legend');
+    legend.innerHTML = eventTypes.map(eventType => `
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: ${colors[eventType] || '#6B7280'}"></div>
+            <span>${eventType.replace(/_/g, ' ')}</span>
+        </div>
+    `).join('');
+}
+
+// Load dataset selector
+function loadDatasetSelector() {
+    fetch('/api/datasets?limit=100')
+        .then(response => response.json())
+        .then(data => {
+            const selector = document.getElementById('dataset-selector');
+            selector.innerHTML = '<option value="">Select a dataset...</option>';
+            
+            if (data.datasets && data.datasets.length > 0) {
+                data.datasets.forEach(dataset => {
+                    const option = document.createElement('option');
+                    option.value = dataset.dataset_id;
+                    option.textContent = `${dataset.title || 'Unknown'} (${dataset.agency || 'Unknown Agency'})`;
+                    selector.appendChild(option);
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error loading datasets:', error);
+        });
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    loadTabData('overview');
+    loadDatasetSelector();
+});
+</script>
+{% endblock %}

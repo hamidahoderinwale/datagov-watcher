@@ -1,0 +1,432 @@
+/* Chromogram Timeline Styles - Historian Design System */
+
+/* Timeline Controls */
+.timeline-controls {
+    display: flex;
+    gap: var(--space-4);
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.control-group {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.control-group label {
+    font-weight: var(--font-weight-medium);
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+    min-width: 80px;
+}
+
+/* Chromogram Container */
+.chromogram-container {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius);
+    padding: var(--space-4);
+    overflow-x: auto;
+    margin-bottom: var(--space-6);
+}
+
+.chromogram-timeline {
+    min-width: 800px;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+}
+
+/* Chromogram Grid */
+.chromogram-grid {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
+}
+
+.chromogram-fields {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.chromogram-field {
+    padding: var(--space-2) var(--space-3);
+    background-color: var(--bg-tertiary);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-weight: var(--font-weight-medium);
+    border: 1px solid var(--border-light);
+    min-height: 32px;
+    display: flex;
+    align-items: center;
+}
+
+.chromogram-timeline-rows {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.chromogram-timeline-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    min-height: 32px;
+    position: relative;
+}
+
+/* Chromogram Cells */
+.chromogram-cell {
+    width: 16px;
+    height: 16px;
+    border-radius: var(--radius-sm);
+    display: inline-block;
+    margin: 1px;
+    transition: all var(--transition-fast);
+    cursor: pointer;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+.chromogram-cell.changed {
+    opacity: 1;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.chromogram-cell.unchanged {
+    opacity: 0.3;
+}
+
+.chromogram-cell:hover {
+    opacity: 1;
+    transform: scale(1.3);
+    z-index: 10;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Event Markers */
+.event-marker {
+    position: absolute;
+    top: -8px;
+    font-size: var(--text-sm);
+    z-index: 10;
+    cursor: pointer;
+    transition: transform var(--transition-fast);
+}
+
+.event-marker:hover {
+    transform: scale(1.2);
+}
+
+.event-marker.high {
+    color: var(--severity-high);
+}
+
+.event-marker.medium {
+    color: var(--severity-medium);
+}
+
+.event-marker.low {
+    color: var(--severity-low);
+}
+
+/* Timeline Legend */
+.timeline-legend {
+    background-color: var(--bg-tertiary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius);
+    padding: var(--space-4);
+}
+
+.timeline-legend h4 {
+    margin: 0 0 var(--space-3) 0;
+    color: var(--text-primary);
+    font-size: var(--text-sm);
+    font-weight: var(--font-weight-semibold);
+}
+
+.legend-items {
+    display: flex;
+    gap: var(--space-4);
+    flex-wrap: wrap;
+    margin-bottom: var(--space-3);
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+}
+
+.legend-color {
+    width: 16px;
+    height: 16px;
+    border-radius: var(--radius-sm);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.legend-notes {
+    display: flex;
+    gap: var(--space-4);
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+/* Event Timeline */
+.event-timeline {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.event-item {
+    display: flex;
+    align-items: center;
+    padding: var(--space-3) var(--space-4);
+    border-bottom: 1px solid var(--border-light);
+    transition: background-color var(--transition-fast);
+    cursor: pointer;
+}
+
+.event-item:hover {
+    background-color: var(--bg-tertiary);
+}
+
+.event-item:last-child {
+    border-bottom: none;
+}
+
+.event-date {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    min-width: 120px;
+    margin-right: var(--space-4);
+}
+
+.event-icon {
+    font-size: var(--text-lg);
+    margin-right: var(--space-3);
+    min-width: 24px;
+    text-align: center;
+}
+
+.event-icon.high {
+    color: var(--severity-high);
+}
+
+.event-icon.medium {
+    color: var(--severity-medium);
+}
+
+.event-icon.low {
+    color: var(--severity-low);
+}
+
+.event-details {
+    flex: 1;
+}
+
+.event-type {
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-primary);
+    margin-bottom: var(--space-1);
+}
+
+.event-description {
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+}
+
+/* Cell Detail Modal */
+.cell-detail-content {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+}
+
+.cell-detail-field {
+    background-color: var(--bg-tertiary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius);
+    padding: var(--space-3);
+    margin-bottom: var(--space-3);
+}
+
+.cell-detail-field h5 {
+    margin: 0 0 var(--space-2) 0;
+    color: var(--text-primary);
+    font-size: var(--text-sm);
+}
+
+.cell-detail-value {
+    color: var(--text-secondary);
+    word-break: break-all;
+}
+
+.cell-detail-changed {
+    background-color: rgba(0, 109, 119, 0.1);
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-sm);
+    border-left: 3px solid var(--accent-primary);
+}
+
+.cell-detail-unchanged {
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+/* Timeline Info */
+.timeline-info {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+}
+
+.timeline-stats {
+    display: flex;
+    gap: var(--space-4);
+}
+
+.timeline-stat {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+}
+
+.timeline-stat-value {
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-primary);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .timeline-controls {
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--space-3);
+    }
+    
+    .control-group {
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--space-1);
+    }
+    
+    .control-group label {
+        min-width: auto;
+    }
+    
+    .chromogram-container {
+        padding: var(--space-2);
+    }
+    
+    .chromogram-grid {
+        grid-template-columns: 150px 1fr;
+        font-size: 0.75rem;
+    }
+    
+    .chromogram-field {
+        padding: var(--space-1) var(--space-2);
+        min-height: 28px;
+    }
+    
+    .chromogram-cell {
+        width: 14px;
+        height: 14px;
+    }
+    
+    .legend-items {
+        flex-direction: column;
+        gap: var(--space-2);
+    }
+    
+    .legend-notes {
+        flex-direction: column;
+        gap: var(--space-1);
+    }
+    
+    .event-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-2);
+    }
+    
+    .event-date {
+        min-width: auto;
+        margin-right: 0;
+    }
+    
+    .timeline-stats {
+        flex-direction: column;
+        gap: var(--space-2);
+    }
+}
+
+@media (max-width: 480px) {
+    .chromogram-container {
+        padding: var(--space-1);
+    }
+    
+    .chromogram-grid {
+        grid-template-columns: 120px 1fr;
+        font-size: 0.7rem;
+    }
+    
+    .chromogram-cell {
+        width: 12px;
+        height: 12px;
+    }
+    
+    .event-icon {
+        font-size: var(--text-base);
+    }
+}
+
+/* Animation for loading states */
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.loading {
+    animation: pulse 2s infinite;
+}
+
+/* Tooltip styles */
+.chromogram-cell[title]:hover::after {
+    content: attr(title);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--text-primary);
+    color: var(--bg-secondary);
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-xs);
+    white-space: nowrap;
+    z-index: 1000;
+    pointer-events: none;
+}
+
+.chromogram-cell[title]:hover::before {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 4px solid transparent;
+    border-top-color: var(--text-primary);
+    z-index: 1000;
+    pointer-events: none;
+}

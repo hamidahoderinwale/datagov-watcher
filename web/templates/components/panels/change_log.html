@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Change Log - Dataset State Historian</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/historian-design-system.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/change-log.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <h1>Dataset State Historian</h1>
+            <p>Comprehensive monitoring and analysis of government datasets</p>
+        </div>
+    </header>
+    
+    <nav class="nav">
+        <div class="container">
+            <ul class="nav-list">
+                <li class="nav-item">
+                    <a href="/" class="nav-link">ANALYTICS Overview</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/catalog" class="nav-link">FOLDER Catalog</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/timeline" class="nav-link">GROWTH Timeline</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/vanished" class="nav-link">GHOST Vanished</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/agencies" class="nav-link">BUILDING Agencies</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    
+    <main class="container">
+        <!-- Change Log Filters -->
+        <div class="card mb-6">
+            <div class="card-body">
+                <div class="change-filters">
+                    <div class="filter-group">
+                        <div class="control-group">
+                            <label for="datasetFilter">Dataset:</label>
+                            <select id="datasetFilter" onchange="filterChanges()">
+                                <option value="">All Datasets</option>
+                            </select>
+                        </div>
+                        
+                        <div class="control-group">
+                            <label for="eventTypeFilter">Event Type:</label>
+                            <select id="eventTypeFilter" onchange="filterChanges()">
+                                <option value="">All Types</option>
+                                <option value="VANISHED">Vanished</option>
+                                <option value="LICENSE_CHANGED">License Changed</option>
+                                <option value="SCHEMA_SHRINK">Schema Shrink</option>
+                                <option value="CONTENT_DRIFT">Content Drift</option>
+                                <option value="URL_CHANGED">URL Changed</option>
+                                <option value="TITLE_CHANGED">Title Changed</option>
+                            </select>
+                        </div>
+                        
+                        <div class="control-group">
+                            <label for="severityFilter">Severity:</label>
+                            <select id="severityFilter" onchange="filterChanges()">
+                                <option value="">All Severities</option>
+                                <option value="high">High</option>
+                                <option value="medium">Medium</option>
+                                <option value="low">Low</option>
+                            </select>
+                        </div>
+                        
+                        <div class="control-group">
+                            <label for="dateRangeFilter">Date Range:</label>
+                            <select id="dateRangeFilter" onchange="filterChanges()">
+                                <option value="24">Last 24 hours</option>
+                                <option value="168">Last 7 days</option>
+                                <option value="720">Last 30 days</option>
+                                <option value="all">All time</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="filter-actions">
+                        <button class="btn btn-primary" onclick="loadChanges()">Refresh</button>
+                        <button class="btn btn-secondary" onclick="clearFilters()">Clear Filters</button>
+                        <button class="btn btn-secondary" onclick="exportChanges()">Export</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Change Log Summary -->
+        <div class="card mb-6">
+            <div class="card-header">
+                <h3>Change Summary</h3>
+                <div class="change-info">
+                    <span id="changeInfo">Loading changes...</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="change-summary-grid">
+                    <div class="change-stat">
+                        <div class="change-stat-value" id="totalChanges">-</div>
+                        <div class="change-stat-label">Total Changes</div>
+                    </div>
+                    <div class="change-stat">
+                        <div class="change-stat-value" id="highSeverityChanges">-</div>
+                        <div class="change-stat-label">High Severity</div>
+                    </div>
+                    <div class="change-stat">
+                        <div class="change-stat-value" id="vanishedDatasets">-</div>
+                        <div class="change-stat-label">Vanished</div>
+                    </div>
+                    <div class="change-stat">
+                        <div class="change-stat-value" id="recentChanges">-</div>
+                        <div class="change-stat-label">Last 24h</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Change Log Table -->
+        <div class="card">
+            <div class="card-header">
+                <h3>Change Log</h3>
+                <div class="table-controls">
+                    <div class="control-group">
+                        <label for="sortBy">Sort by:</label>
+                        <select id="sortBy" onchange="sortChanges()">
+                            <option value="date">Date</option>
+                            <option value="severity">Severity</option>
+                            <option value="type">Event Type</option>
+                            <option value="dataset">Dataset</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label for="sortOrder">Order:</label>
+                        <select id="sortOrder" onchange="sortChanges()">
+                            <option value="desc">Newest First</option>
+                            <option value="asc">Oldest First</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="change-log-table">
+                    <div class="table-header">
+                        <div class="col-date">Date</div>
+                        <div class="col-type">Event Type</div>
+                        <div class="col-severity">Severity</div>
+                        <div class="col-dataset">Dataset</div>
+                        <div class="col-description">Description</div>
+                        <div class="col-actions">Actions</div>
+                    </div>
+                    <div id="changeLogBody" class="table-body">
+                        <div class="loading">Loading changes...</div>
+                    </div>
+                </div>
+                
+                <!-- Pagination -->
+                <div id="changePagination" class="pagination"></div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Change Detail Modal -->
+    <div id="changeDetailModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="changeDetailTitle">Change Details</h3>
+                <button class="modal-close" onclick="closeChangeDetailModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="changeDetailContent">Loading...</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Loading Indicator -->
+    <div id="loadingIndicator" class="loading-indicator">
+        <div class="loading-spinner"></div>
+        <span>Loading...</span>
+    </div>
+    
+    <script src="{{ url_for('static', filename='js/change-log.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,529 @@
+{% extends "layouts/layout.html" %}
+
+{% block title %}Wayback - Dataset State Historian{% endblock %}
+
+{% block extra_css %}
+<style>
+.wayback-container {
+    padding: var(--space-6);
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.wayback-header {
+    margin-bottom: var(--space-8);
+}
+
+.wayback-title {
+    font-size: var(--text-4xl);
+    font-weight: var(--font-bold);
+    color: var(--gray-900);
+    margin-bottom: var(--space-2);
+}
+
+.wayback-subtitle {
+    font-size: var(--text-lg);
+    color: var(--gray-600);
+    margin-bottom: var(--space-6);
+}
+
+.search-section {
+    background: white;
+    padding: var(--space-6);
+    border: 1px solid var(--gray-200);
+    margin-bottom: var(--space-6);
+}
+
+.search-grid {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: var(--space-4);
+    align-items: end;
+}
+
+.search-input {
+    padding: var(--space-3);
+    border: 1px solid var(--gray-300);
+    border-radius: 0;
+    font-size: var(--text-base);
+}
+
+.search-button {
+    padding: var(--space-3) var(--space-6);
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 0;
+    cursor: pointer;
+    font-weight: var(--font-medium);
+}
+
+.search-button:hover {
+    background: var(--primary-dark);
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--space-4);
+    margin-bottom: var(--space-8);
+}
+
+.stat-card {
+    background: white;
+    padding: var(--space-6);
+    border: 1px solid var(--gray-200);
+    text-align: center;
+}
+
+.stat-value {
+    font-size: var(--text-3xl);
+    font-weight: var(--font-bold);
+    color: var(--primary);
+    margin-bottom: var(--space-2);
+}
+
+.stat-label {
+    font-size: var(--text-sm);
+    color: var(--gray-600);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.timeline-container {
+    background: white;
+    border: 1px solid var(--gray-200);
+    margin-bottom: var(--space-6);
+}
+
+.timeline-header {
+    padding: var(--space-6);
+    border-bottom: 1px solid var(--gray-200);
+    background: var(--gray-50);
+}
+
+.timeline-title {
+    font-size: var(--text-xl);
+    font-weight: var(--font-semibold);
+    color: var(--gray-900);
+    margin: 0;
+}
+
+.timeline-content {
+    padding: var(--space-6);
+}
+
+.timeline-item {
+    display: flex;
+    align-items: center;
+    padding: var(--space-4);
+    border-bottom: 1px solid var(--gray-100);
+    transition: background-color var(--transition-fast);
+}
+
+.timeline-item:hover {
+    background: var(--gray-50);
+}
+
+.timeline-item:last-child {
+    border-bottom: none;
+}
+
+.timeline-date {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--gray-500);
+    min-width: 120px;
+    margin-right: var(--space-4);
+}
+
+.timeline-changes {
+    flex: 1;
+    margin-right: var(--space-4);
+}
+
+.timeline-change-item {
+    font-size: var(--text-sm);
+    color: var(--gray-700);
+    margin-bottom: var(--space-1);
+}
+
+.timeline-change-item:last-child {
+    margin-bottom: 0;
+}
+
+.timeline-status {
+    padding: var(--space-1) var(--space-2);
+    border-radius: 0;
+    font-size: var(--text-xs);
+    font-weight: var(--font-medium);
+    text-transform: uppercase;
+}
+
+.status-available {
+    background: var(--gray-100);
+    color: var(--gray-700);
+}
+
+.status-unavailable {
+    background: var(--gray-200);
+    color: var(--gray-600);
+}
+
+.comparison-container {
+    background: white;
+    border: 1px solid var(--gray-200);
+    margin-bottom: var(--space-6);
+}
+
+.comparison-header {
+    padding: var(--space-6);
+    border-bottom: 1px solid var(--gray-200);
+    background: var(--gray-50);
+}
+
+.comparison-content {
+    padding: var(--space-6);
+}
+
+.comparison-grid {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: var(--space-6);
+    align-items: start;
+}
+
+.comparison-snapshot {
+    padding: var(--space-4);
+    border: 1px solid var(--gray-200);
+    background: var(--gray-50);
+}
+
+.comparison-snapshot-title {
+    font-size: var(--text-lg);
+    font-weight: var(--font-semibold);
+    color: var(--gray-900);
+    margin-bottom: var(--space-4);
+}
+
+.comparison-details {
+    font-size: var(--text-sm);
+    color: var(--gray-700);
+}
+
+.comparison-details div {
+    margin-bottom: var(--space-2);
+}
+
+.comparison-details div:last-child {
+    margin-bottom: 0;
+}
+
+.comparison-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--text-2xl);
+    color: var(--gray-400);
+}
+
+.diff-highlight {
+    background: var(--gray-100);
+    padding: var(--space-1) var(--space-2);
+    border-radius: 0;
+    font-weight: var(--font-medium);
+}
+
+.diff-added {
+    background: var(--gray-200);
+    color: var(--gray-800);
+}
+
+.diff-removed {
+    background: var(--gray-300);
+    color: var(--gray-600);
+}
+
+.loading {
+    text-align: center;
+    padding: var(--space-8);
+    color: var(--gray-500);
+}
+
+.error {
+    background: var(--gray-100);
+    color: var(--gray-700);
+    padding: var(--space-4);
+    border: 1px solid var(--gray-300);
+    margin: var(--space-4) 0;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="wayback-container">
+    <div class="wayback-header">
+        <h1 class="wayback-title">Dataset Wayback</h1>
+        <p class="wayback-subtitle">Explore historical changes and versions of datasets</p>
+    </div>
+
+    <!-- Search Section -->
+    <div class="search-section">
+        <div class="search-grid">
+            <input type="text" class="search-input" id="dataset-search" placeholder="Search for a dataset by ID, title, or agency...">
+            <input type="date" class="search-input" id="from-date">
+            <input type="date" class="search-input" id="to-date">
+            <button class="search-button" onclick="searchDataset()">Search</button>
+        </div>
+    </div>
+
+    <!-- Stats Section -->
+    <div class="stats-grid" id="stats-grid">
+        <div class="stat-card">
+            <div class="stat-value" id="total-snapshots">-</div>
+            <div class="stat-label">Total Snapshots</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="datasets-tracked">-</div>
+            <div class="stat-label">Datasets Tracked</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="recent-activity">-</div>
+            <div class="stat-label">Recent Activity</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="change-events">-</div>
+            <div class="stat-label">Change Events</div>
+        </div>
+    </div>
+
+    <!-- Timeline Section -->
+    <div class="timeline-container" id="timeline-container" style="display: none;">
+        <div class="timeline-header">
+            <h2 class="timeline-title">Dataset Timeline</h2>
+        </div>
+        <div class="timeline-content" id="timeline-content">
+            <!-- Timeline items will be populated here -->
+        </div>
+    </div>
+
+    <!-- Comparison Section -->
+    <div class="comparison-container" id="comparison-container" style="display: none;">
+        <div class="comparison-header">
+            <h2 class="comparison-title">Snapshot Comparison</h2>
+        </div>
+        <div class="comparison-content" id="comparison-content">
+            <!-- Comparison content will be populated here -->
+        </div>
+    </div>
+
+    <!-- Recent Changes Section -->
+    <div class="timeline-container">
+        <div class="timeline-header">
+            <h2 class="timeline-title">Recent Changes</h2>
+        </div>
+        <div class="timeline-content" id="recent-changes-content">
+            <div class="loading">Loading recent changes...</div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let currentDatasetId = null;
+
+// Load wayback stats
+function loadWaybackStats() {
+    fetch('/api/wayback/stats')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('total-snapshots').textContent = data.total_snapshots || '0';
+            document.getElementById('datasets-tracked').textContent = data.datasets_with_snapshots || '0';
+            document.getElementById('recent-activity').textContent = data.recent_snapshots || '0';
+            document.getElementById('change-events').textContent = data.change_events || '0';
+        })
+        .catch(error => {
+            console.error('Error loading wayback stats:', error);
+        });
+}
+
+// Load recent changes
+function loadRecentChanges() {
+    fetch('/api/wayback/changes/recent')
+        .then(response => response.json())
+        .then(data => {
+            const container = document.getElementById('recent-changes-content');
+            
+            if (data.changes && data.changes.length > 0) {
+                container.innerHTML = data.changes.map(change => `
+                    <div class="timeline-item">
+                        <div class="timeline-date">${new Date(change.date).toLocaleDateString()}</div>
+                        <div class="timeline-changes">
+                            <div class="timeline-change-item"><strong>${change.title}</strong></div>
+                            <div class="timeline-change-item">${change.agency}</div>
+                            <div class="timeline-change-item">
+                                ${change.row_count ? `${change.row_count} rows` : 'Unknown rows'} • 
+                                ${change.column_count ? `${change.column_count} columns` : 'Unknown columns'}
+                            </div>
+                        </div>
+                        <div class="timeline-status status-${change.status}">${change.status}</div>
+                    </div>
+                `).join('');
+            } else {
+                container.innerHTML = '<div class="loading">No recent changes found</div>';
+            }
+        })
+        .catch(error => {
+            console.error('Error loading recent changes:', error);
+            document.getElementById('recent-changes-content').innerHTML = '<div class="error">Error loading recent changes</div>';
+        });
+}
+
+// Search for dataset
+function searchDataset() {
+    const datasetId = document.getElementById('dataset-search').value.trim();
+    const fromDate = document.getElementById('from-date').value;
+    const toDate = document.getElementById('to-date').value;
+    
+    if (!datasetId) {
+        alert('Please enter a dataset ID');
+        return;
+    }
+    
+    currentDatasetId = datasetId;
+    
+    // Load timeline
+    fetch(`/api/wayback/timeline/${datasetId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.timeline && data.timeline.length > 0) {
+                displayTimeline(data.timeline);
+                document.getElementById('timeline-container').style.display = 'block';
+            } else {
+                alert('No timeline data found for this dataset');
+            }
+        })
+        .catch(error => {
+            console.error('Error loading timeline:', error);
+            alert('Error loading timeline data');
+        });
+    
+    // Load comparison if dates are provided
+    if (fromDate && toDate) {
+        fetch(`/api/wayback/compare/${datasetId}/${fromDate}/${toDate}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.from_snapshot && data.to_snapshot) {
+                    displayComparison(data);
+                    document.getElementById('comparison-container').style.display = 'block';
+                } else {
+                    alert('No comparison data found for the selected dates');
+                }
+            })
+            .catch(error => {
+                console.error('Error loading comparison:', error);
+                alert('Error loading comparison data');
+            });
+    }
+}
+
+// Display timeline
+function displayTimeline(timeline) {
+    const container = document.getElementById('timeline-content');
+    
+    container.innerHTML = timeline.map(item => `
+        <div class="timeline-item">
+            <div class="timeline-date">${new Date(item.date).toLocaleDateString()}</div>
+            <div class="timeline-changes">
+                ${item.changes.map(change => `<div class="timeline-change-item">${change}</div>`).join('')}
+                ${item.changes.length === 0 ? '<div class="timeline-change-item">No changes detected</div>' : ''}
+            </div>
+            <div class="timeline-status status-${item.status}">${item.status}</div>
+        </div>
+    `).join('');
+}
+
+// Display comparison
+function displayComparison(data) {
+    const container = document.getElementById('comparison-content');
+    
+    const fromSnapshot = data.from_snapshot;
+    const toSnapshot = data.to_snapshot;
+    const differences = data.differences;
+    
+    container.innerHTML = `
+        <div class="comparison-grid">
+            <div class="comparison-snapshot">
+                <div class="comparison-snapshot-title">From: ${new Date(fromSnapshot.date).toLocaleDateString()}</div>
+                <div class="comparison-details">
+                    <div><strong>Status:</strong> ${fromSnapshot.status}</div>
+                    <div><strong>Rows:</strong> ${fromSnapshot.row_count || 'Unknown'}</div>
+                    <div><strong>Columns:</strong> ${fromSnapshot.column_count || 'Unknown'}</div>
+                    <div><strong>File Size:</strong> ${fromSnapshot.file_size ? formatBytes(fromSnapshot.file_size) : 'Unknown'}</div>
+                </div>
+            </div>
+            <div class="comparison-arrow">→</div>
+            <div class="comparison-snapshot">
+                <div class="comparison-snapshot-title">To: ${new Date(toSnapshot.date).toLocaleDateString()}</div>
+                <div class="comparison-details">
+                    <div><strong>Status:</strong> ${toSnapshot.status}</div>
+                    <div><strong>Rows:</strong> ${toSnapshot.row_count || 'Unknown'}</div>
+                    <div><strong>Columns:</strong> ${toSnapshot.column_count || 'Unknown'}</div>
+                    <div><strong>File Size:</strong> ${toSnapshot.file_size ? formatBytes(toSnapshot.file_size) : 'Unknown'}</div>
+                </div>
+            </div>
+        </div>
+        <div style="margin-top: var(--space-6); padding: var(--space-4); background: var(--gray-50); border: 1px solid var(--gray-200);">
+            <h3 style="margin: 0 0 var(--space-4) 0; color: var(--gray-900);">Changes Detected:</h3>
+            <div style="font-size: var(--text-sm); color: var(--gray-700);">
+                ${Object.entries(differences).map(([key, value]) => {
+                    if (key === 'metadata_changes') return '';
+                    if (typeof value === 'boolean') {
+                        return value ? `<div>• ${key.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}</div>` : '';
+                    }
+                    if (typeof value === 'number' && value !== 0) {
+                        return `<div>• ${key.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}: ${value > 0 ? '+' : ''}${value}</div>`;
+                    }
+                    return '';
+                }).filter(Boolean).join('')}
+                ${Object.keys(differences.metadata_changes).length > 0 ? 
+                    `<div>• Metadata changes: ${Object.keys(differences.metadata_changes).length} fields</div>` : ''}
+            </div>
+        </div>
+    `;
+}
+
+// Format bytes
+function formatBytes(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    loadWaybackStats();
+    loadRecentChanges();
+    
+    // Set default dates
+    const today = new Date();
+    const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+    
+    document.getElementById('to-date').value = today.toISOString().split('T')[0];
+    document.getElementById('from-date').value = weekAgo.toISOString().split('T')[0];
+    
+    // Check for dataset parameter in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const datasetParam = urlParams.get('dataset');
+    if (datasetParam) {
+        document.getElementById('dataset-search').value = datasetParam;
+        // Auto-search for the dataset
+        searchDataset();
+    }
+});
+</script>
+{% endblock %}
+

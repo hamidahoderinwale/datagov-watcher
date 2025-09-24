@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historian Dashboard - Dataset State Historian</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+</head>
+<body>
+    <header class="header">
+        <h1>Dataset State Historian</h1>
+        <p>Data.gov provenance, statistics, and history</p>
+    </header>
+    
+    <nav class="nav">
+        <ul class="nav-list">
+            <li class="nav-item">
+                <a href="/metrics" class="nav-link">Overview</a>
+            </li>
+            <li class="nav-item">
+                <a href="/catalog" class="nav-link">Catalog</a>
+            </li>
+            <li class="nav-item">
+                <a href="/tags" class="nav-link">Tags</a>
+            </li>
+            <li class="nav-item">
+                <a href="/agencies" class="nav-link">Agencies</a>
+            </li>
+            <li class="nav-item">
+                <a href="/" class="nav-link">Dashboard</a>
+            </li>
+            <li class="nav-item">
+                <a href="/historian" class="nav-link active">Historian</a>
+            </li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <h1>Historian Dashboard</h1>
+        <p>Comprehensive monitoring and analysis of dataset changes over time</p>
+
+        <!-- Quick Stats -->
+        <section class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-content">
+                    <h3 id="total-datasets">-</h3>
+                    <p>Total Datasets</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-content">
+                    <h3 id="total-snapshots">-</h3>
+                    <p>Snapshots</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-content">
+                    <h3 id="total-events">-</h3>
+                    <p>Change Events</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-content">
+                    <h3 id="vanished-datasets">-</h3>
+                    <p>Vanished</p>
+                </div>
+            </div>
+        </section>
+
+            <!-- Main Actions -->
+            <section class="historian-actions">
+                <div class="action-grid">
+                    <a href="/historian/catalog" class="action-card">
+                        <div class="action-icon">FOLDER</div>
+                        <h3>Catalog Explorer</h3>
+                        <p>Browse and filter datasets with search and advanced filtering options</p>
+                        <div class="action-arrow">→</div>
+                    </a>
+                    
+                    <a href="/api/vanished-datasets" class="action-card" target="_blank">
+                        <div class="action-icon">GHOST</div>
+                        <h3>Vanished Datasets</h3>
+                        <p>View datasets that have disappeared from the live catalog</p>
+                        <div class="action-arrow">→</div>
+                    </a>
+                    
+                    <a href="/api/volatility/ranking" class="action-card" target="_blank">
+                        <div class="action-icon">ANALYTICS</div>
+                        <h3>Volatility Ranking</h3>
+                        <p>See which datasets change most frequently</p>
+                        <div class="action-arrow">→</div>
+                    </a>
+                    
+                    <a href="/api/events/summary" class="action-card" target="_blank">
+                        <div class="action-icon">LIST</div>
+                        <h3>Event Summary</h3>
+                        <p>Overview of all change events across the system</p>
+                        <div class="action-arrow">→</div>
+                    </a>
+                </div>
+            </section>
+
+            <!-- Recent Activity -->
+            <section class="historian-recent">
+                <h2>Recent Activity</h2>
+                <div class="recent-activity" id="recent-activity">
+                    <div class="loading">Loading recent activity...</div>
+                </div>
+            </section>
+
+            <!-- System Status -->
+            <section class="historian-status">
+                <h2>System Status</h2>
+                <div class="status-grid">
+                    <div class="status-item">
+                        <span class="status-label">Monitoring:</span>
+                        <span class="status-value" id="monitoring-status">-</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Last Updated:</span>
+                        <span class="status-value" id="last-updated">-</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Health Score:</span>
+                        <span class="status-value" id="health-score">-</span>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script src="/static/js/historian-dashboard.js"></script>
+</body>
+</html>

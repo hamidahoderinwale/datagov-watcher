@@ -1,0 +1,484 @@
+/* Post-mortem Report Styles - Historian Design System */
+
+/* Post-mortem Controls */
+.postmortem-controls {
+    display: flex;
+    gap: var(--space-4);
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.control-group {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.control-group label {
+    font-weight: var(--font-weight-medium);
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+    min-width: 80px;
+}
+
+/* Post-mortem Report */
+.postmortem-report {
+    font-family: var(--font-body);
+    line-height: var(--leading-relaxed);
+    color: var(--text-primary);
+}
+
+.postmortem-header {
+    text-align: center;
+    margin-bottom: var(--space-8);
+    padding: var(--space-6);
+    background-color: var(--bg-tertiary);
+    border-radius: var(--radius);
+    border: 1px solid var(--border-light);
+}
+
+.postmortem-title {
+    font-size: var(--text-3xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--text-primary);
+    margin-bottom: var(--space-2);
+}
+
+.postmortem-subtitle {
+    font-size: var(--text-lg);
+    color: var(--text-secondary);
+    margin-bottom: var(--space-4);
+}
+
+.postmortem-meta {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-6);
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+}
+
+.postmortem-section {
+    margin-bottom: var(--space-8);
+    page-break-inside: avoid;
+}
+
+.postmortem-section h2 {
+    font-size: var(--text-2xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--text-primary);
+    margin-bottom: var(--space-4);
+    padding-bottom: var(--space-2);
+    border-bottom: 2px solid var(--accent-primary);
+}
+
+.postmortem-section h3 {
+    font-size: var(--text-xl);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-primary);
+    margin-bottom: var(--space-3);
+    margin-top: var(--space-6);
+}
+
+.postmortem-section h4 {
+    font-size: var(--text-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-primary);
+    margin-bottom: var(--space-2);
+    margin-top: var(--space-4);
+}
+
+/* Dataset Information */
+.dataset-info {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius);
+    padding: var(--space-6);
+    margin-bottom: var(--space-6);
+}
+
+.dataset-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--space-4);
+}
+
+.dataset-info-item {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.dataset-info-label {
+    font-size: var(--text-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.dataset-info-value {
+    font-size: var(--text-base);
+    color: var(--text-primary);
+    font-weight: var(--font-weight-medium);
+}
+
+.dataset-status {
+    display: inline-flex;
+    align-items: center;
+    font-size: var(--text-sm);
+    font-weight: var(--font-weight-semibold);
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.dataset-status.vanished {
+    color: var(--severity-high);
+    background-color: rgba(215, 38, 61, 0.1);
+}
+
+.dataset-status.degraded {
+    color: var(--severity-medium);
+    background-color: rgba(255, 180, 0, 0.1);
+}
+
+.dataset-status.active {
+    color: var(--severity-low);
+    background-color: rgba(42, 157, 143, 0.1);
+}
+
+/* Timeline Section */
+.timeline-section {
+    background-color: var(--bg-tertiary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius);
+    padding: var(--space-6);
+    margin-bottom: var(--space-6);
+}
+
+.timeline-item {
+    display: flex;
+    align-items: flex-start;
+    padding: var(--space-4) 0;
+    border-bottom: 1px solid var(--border-light);
+    position: relative;
+}
+
+.timeline-item:last-child {
+    border-bottom: none;
+}
+
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background-color: var(--accent-primary);
+}
+
+.timeline-item::after {
+    content: '';
+    position: absolute;
+    left: -4px;
+    top: 20px;
+    width: 10px;
+    height: 10px;
+    background-color: var(--accent-primary);
+    border-radius: 50%;
+}
+
+.timeline-date {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    min-width: 120px;
+    margin-right: var(--space-4);
+    margin-left: var(--space-4);
+}
+
+.timeline-content {
+    flex: 1;
+}
+
+.timeline-event {
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-primary);
+    margin-bottom: var(--space-1);
+}
+
+.timeline-description {
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+    margin-bottom: var(--space-2);
+}
+
+.timeline-severity {
+    display: inline-flex;
+    align-items: center;
+    font-size: var(--text-xs);
+    font-weight: var(--font-weight-semibold);
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.timeline-severity.high {
+    color: var(--severity-high);
+    background-color: rgba(215, 38, 61, 0.1);
+}
+
+.timeline-severity.medium {
+    color: var(--severity-medium);
+    background-color: rgba(255, 180, 0, 0.1);
+}
+
+.timeline-severity.low {
+    color: var(--severity-low);
+    background-color: rgba(42, 157, 143, 0.1);
+}
+
+/* Analysis Section */
+.analysis-section {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius);
+    padding: var(--space-6);
+    margin-bottom: var(--space-6);
+}
+
+.analysis-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--space-4);
+    margin-bottom: var(--space-6);
+}
+
+.analysis-item {
+    text-align: center;
+    padding: var(--space-4);
+    background-color: var(--bg-tertiary);
+    border-radius: var(--radius);
+    border: 1px solid var(--border-light);
+}
+
+.analysis-value {
+    font-size: var(--text-2xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--text-primary);
+    margin-bottom: var(--space-1);
+}
+
+.analysis-label {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    font-weight: var(--font-weight-medium);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.analysis-description {
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+    margin-top: var(--space-2);
+}
+
+/* Conclusion Section */
+.conclusion-section {
+    background-color: var(--bg-tertiary);
+    border-left: 4px solid var(--accent-primary);
+    padding: var(--space-6);
+    margin-bottom: var(--space-6);
+}
+
+.conclusion-section h3 {
+    color: var(--text-primary);
+    margin-bottom: var(--space-4);
+}
+
+.conclusion-item {
+    margin-bottom: var(--space-4);
+}
+
+.conclusion-item:last-child {
+    margin-bottom: 0;
+}
+
+.conclusion-label {
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-primary);
+    margin-bottom: var(--space-1);
+}
+
+.conclusion-value {
+    color: var(--text-secondary);
+    line-height: var(--leading-relaxed);
+}
+
+/* Archive Information */
+.archive-info {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius);
+    padding: var(--space-6);
+    margin-bottom: var(--space-6);
+}
+
+.archive-links {
+    display: flex;
+    gap: var(--space-4);
+    flex-wrap: wrap;
+    margin-top: var(--space-4);
+}
+
+.archive-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-4);
+    background-color: var(--accent-primary);
+    color: white;
+    text-decoration: none;
+    border-radius: var(--radius);
+    font-size: var(--text-sm);
+    font-weight: var(--font-weight-medium);
+    transition: background-color var(--transition-fast);
+}
+
+.archive-link:hover {
+    background-color: var(--accent-primary-light);
+    color: white;
+    text-decoration: none;
+}
+
+/* Print Styles */
+@media print {
+    .postmortem-controls {
+        display: none;
+    }
+    
+    .postmortem-report {
+        font-size: 12pt;
+        line-height: 1.5;
+    }
+    
+    .postmortem-section {
+        page-break-inside: avoid;
+        margin-bottom: 20pt;
+    }
+    
+    .postmortem-section h2 {
+        page-break-after: avoid;
+    }
+    
+    .timeline-item {
+        page-break-inside: avoid;
+    }
+    
+    .analysis-grid {
+        page-break-inside: avoid;
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .postmortem-controls {
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--space-3);
+    }
+    
+    .control-group {
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--space-1);
+    }
+    
+    .control-group label {
+        min-width: auto;
+    }
+    
+    .postmortem-meta {
+        flex-direction: column;
+        gap: var(--space-2);
+    }
+    
+    .dataset-info-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .timeline-item {
+        flex-direction: column;
+        gap: var(--space-2);
+    }
+    
+    .timeline-date {
+        min-width: auto;
+        margin-right: 0;
+        margin-left: 0;
+    }
+    
+    .analysis-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .archive-links {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 480px) {
+    .postmortem-title {
+        font-size: var(--text-2xl);
+    }
+    
+    .postmortem-subtitle {
+        font-size: var(--text-base);
+    }
+    
+    .postmortem-section h2 {
+        font-size: var(--text-xl);
+    }
+    
+    .postmortem-section h3 {
+        font-size: var(--text-lg);
+    }
+    
+    .postmortem-section h4 {
+        font-size: var(--text-base);
+    }
+}
+
+/* Animation for loading states */
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.loading {
+    animation: pulse 2s infinite;
+}
+
+/* Report generation animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.postmortem-report.loaded {
+    animation: fadeIn 0.5s ease-in-out;
+}

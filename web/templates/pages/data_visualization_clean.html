@@ -1,0 +1,196 @@
+{% extends "layouts/layout.html" %}
+
+{% block title %}Data Visualization - Dataset State Historian{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/data-visualization.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="viz-container">
+    <div class="viz-header">
+        <h1 class="viz-title">Data Visualization</h1>
+        <p class="viz-subtitle">Interactive charts and visualizations for dataset analysis</p>
+    </div>
+
+    <!-- Visualization Controls -->
+    <div class="viz-controls">
+        <div class="control-group">
+            <label class="control-label">Time Period</label>
+            <select class="control-select" id="time-period">
+                <option value="7">Last 7 Days</option>
+                <option value="30" selected>Last 30 Days</option>
+                <option value="90">Last 90 Days</option>
+                <option value="365">Last Year</option>
+            </select>
+        </div>
+        
+        <div class="control-group">
+            <label class="control-label">Chart Type</label>
+            <select class="control-select" id="chart-type">
+                <option value="line">Line Chart</option>
+                <option value="bar" selected>Bar Chart</option>
+                <option value="pie">Pie Chart</option>
+                <option value="area">Area Chart</option>
+            </select>
+        </div>
+        
+        <div class="control-group">
+            <label class="control-label">Data Source</label>
+            <select class="control-select" id="data-source">
+                <option value="all" selected>All Data</option>
+                <option value="available">Available Only</option>
+                <option value="unavailable">Unavailable Only</option>
+                <option value="changes">Changes Only</option>
+            </select>
+        </div>
+        
+        <div class="control-group">
+            <label class="control-label">Agency Filter</label>
+            <select class="control-select" id="agency-filter">
+                <option value="all" selected>All Agencies</option>
+                <option value="top10">Top 10 Agencies</option>
+                <option value="top20">Top 20 Agencies</option>
+            </select>
+        </div>
+        
+        <button class="control-button" onclick="updateVisualizations()">
+            Update Charts
+        </button>
+        
+        <button class="control-button secondary" onclick="resetFilters()">
+            Reset
+        </button>
+    </div>
+
+    <!-- Visualization Grid -->
+    <div class="viz-grid">
+        <!-- Dataset Trends Chart -->
+        <div class="chart-container">
+            <div class="chart-header">
+                <h3 class="chart-title">Dataset Trends</h3>
+                <div class="chart-controls">
+                    <button class="chart-toggle active" onclick="toggleChart('trends', 'line')">Line</button>
+                    <button class="chart-toggle" onclick="toggleChart('trends', 'bar')">Bar</button>
+                    <button class="chart-toggle" onclick="toggleChart('trends', 'area')">Area</button>
+                </div>
+            </div>
+            <div class="chart-content" id="trends-chart">
+                <div class="chart-loading">
+                    <div class="spinner"></div>
+                    <div>Loading trends data...</div>
+                </div>
+            </div>
+            <div class="chart-legend" id="trends-legend"></div>
+            <div class="chart-stats" id="trends-stats"></div>
+        </div>
+
+        <!-- Status Distribution Chart -->
+        <div class="chart-container">
+            <div class="chart-header">
+                <h3 class="chart-title">Status Distribution</h3>
+                <div class="chart-controls">
+                    <button class="chart-toggle active" onclick="toggleChart('status', 'pie')">Pie</button>
+                    <button class="chart-toggle" onclick="toggleChart('status', 'bar')">Bar</button>
+                    <button class="chart-toggle" onclick="toggleChart('status', 'doughnut')">Doughnut</button>
+                </div>
+            </div>
+            <div class="chart-content" id="status-chart">
+                <div class="chart-loading">
+                    <div class="spinner"></div>
+                    <div>Loading status data...</div>
+                </div>
+            </div>
+            <div class="chart-legend" id="status-legend"></div>
+            <div class="chart-stats" id="status-stats"></div>
+        </div>
+
+        <!-- Agency Performance Chart -->
+        <div class="chart-container full-width-chart">
+            <div class="chart-header">
+                <h3 class="chart-title">Agency Performance</h3>
+                <div class="chart-controls">
+                    <button class="chart-toggle active" onclick="toggleChart('agencies', 'bar')">Bar</button>
+                    <button class="chart-toggle" onclick="toggleChart('agencies', 'line')">Line</button>
+                    <button class="chart-toggle" onclick="toggleChart('agencies', 'scatter')">Scatter</button>
+                </div>
+            </div>
+            <div class="chart-content" id="agencies-chart">
+                <div class="chart-loading">
+                    <div class="spinner"></div>
+                    <div>Loading agency data...</div>
+                </div>
+            </div>
+            <div class="chart-legend" id="agencies-legend"></div>
+            <div class="chart-stats" id="agencies-stats"></div>
+        </div>
+
+        <!-- Change Frequency Chart -->
+        <div class="chart-container">
+            <div class="chart-header">
+                <h3 class="chart-title">Change Frequency</h3>
+                <div class="chart-controls">
+                    <button class="chart-toggle active" onclick="toggleChart('changes', 'line')">Line</button>
+                    <button class="chart-toggle" onclick="toggleChart('changes', 'bar')">Bar</button>
+                    <button class="chart-toggle" onclick="toggleChart('changes', 'area')">Area</button>
+                </div>
+            </div>
+            <div class="chart-content" id="changes-chart">
+                <div class="chart-loading">
+                    <div class="spinner"></div>
+                    <div>Loading changes data...</div>
+                </div>
+            </div>
+            <div class="chart-legend" id="changes-legend"></div>
+            <div class="chart-stats" id="changes-stats"></div>
+        </div>
+
+        <!-- Data Quality Chart -->
+        <div class="chart-container">
+            <div class="chart-header">
+                <h3 class="chart-title">Data Quality Score</h3>
+                <div class="chart-controls">
+                    <button class="chart-toggle active" onclick="toggleChart('quality', 'bar')">Bar</button>
+                    <button class="chart-toggle" onclick="toggleChart('quality', 'line')">Line</button>
+                    <button class="chart-toggle" onclick="toggleChart('quality', 'radar')">Radar</button>
+                </div>
+            </div>
+            <div class="chart-content" id="quality-chart">
+                <div class="chart-loading">
+                    <div class="spinner"></div>
+                    <div>Loading quality data...</div>
+                </div>
+            </div>
+            <div class="chart-legend" id="quality-legend"></div>
+            <div class="chart-stats" id="quality-stats"></div>
+        </div>
+    </div>
+
+    <!-- Export Section -->
+    <div class="export-section">
+        <h2 class="chart-title">Export Visualizations</h2>
+        <p class="export-description">
+            Export chart data and images for further analysis
+        </p>
+        <div class="export-buttons">
+            <button class="export-button" onclick="exportChartData('csv')">
+                EXPORT CSV
+            </button>
+            <button class="export-button" onclick="exportChartData('json')">
+                EXPORT JSON
+            </button>
+            <button class="export-button secondary" onclick="exportChartData('png')">
+                EXPORT PNG
+            </button>
+            <button class="export-button secondary" onclick="exportChartData('pdf')">
+                EXPORT PDF
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ url_for('static', filename='js/data-visualization.js') }}"></script>
+{% endblock %}

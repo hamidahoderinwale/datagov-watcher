@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chromogram Timeline - Dataset State Historian</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/historian-design-system.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/chromogram-timeline.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <h1>Dataset State Historian</h1>
+            <p>Comprehensive monitoring and analysis of government datasets</p>
+        </div>
+    </header>
+    
+    <nav class="nav">
+        <div class="container">
+            <ul class="nav-list">
+                <li class="nav-item">
+                    <a href="/" class="nav-link">ANALYTICS Overview</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/catalog" class="nav-link">FOLDER Catalog</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link active">GROWTH Timeline</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/vanished" class="nav-link">GHOST Vanished</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/agencies" class="nav-link">BUILDING Agencies</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    
+    <main class="container">
+        <!-- Timeline Controls -->
+        <div class="card mb-6">
+            <div class="card-body">
+                <div class="timeline-controls">
+                    <div class="control-group">
+                        <label for="datasetSelect">Dataset:</label>
+                        <select id="datasetSelect" onchange="loadDatasetTimeline()">
+                            <option value="">Select a dataset...</option>
+                        </select>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label for="timeRange">Time Range:</label>
+                        <select id="timeRange" onchange="updateTimeline()">
+                            <option value="30">Last 30 days</option>
+                            <option value="90">Last 90 days</option>
+                            <option value="365">Last year</option>
+                            <option value="all">All time</option>
+                        </select>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label for="fieldFilter">Fields:</label>
+                        <select id="fieldFilter" onchange="filterFields()">
+                            <option value="all">All Fields</option>
+                            <option value="metadata">Metadata Only</option>
+                            <option value="content">Content Only</option>
+                        </select>
+                    </div>
+                    
+                    <div class="control-group">
+                        <button class="btn btn-primary" onclick="updateTimeline()">Refresh</button>
+                        <button class="btn btn-secondary" onclick="exportTimeline()">Export</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Chromogram Timeline -->
+        <div class="card">
+            <div class="card-header">
+                <h3 id="timelineTitle">Chromogram Timeline</h3>
+                <div class="timeline-info">
+                    <span id="timelineInfo">Select a dataset to view timeline</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="chromogram-container">
+                    <div id="chromogramTimeline" class="chromogram-timeline">
+                        <div class="loading">Select a dataset to view timeline</div>
+                    </div>
+                </div>
+                
+                <!-- Timeline Legend -->
+                <div class="timeline-legend">
+                    <h4>Legend</h4>
+                    <div class="legend-items">
+                        <div class="legend-item">
+                            <div class="legend-color" style="background-color: #006D77;"></div>
+                            <span>Title Changes</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background-color: #2A9D8F;"></div>
+                            <span>Agency Changes</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background-color: #FFB400;"></div>
+                            <span>License Changes</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background-color: #D7263D;"></div>
+                            <span>Row Count Changes</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background-color: #8B5CF6;"></div>
+                            <span>Column Count Changes</span>
+                        </div>
+                    </div>
+                    <div class="legend-notes">
+                        <span>● Bright = Changed at that snapshot</span>
+                        <span>○ Faded = Unchanged</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Event Timeline -->
+        <div class="card mt-6">
+            <div class="card-header">
+                <h3>Event Timeline</h3>
+            </div>
+            <div class="card-body">
+                <div id="eventTimeline" class="event-timeline">
+                    <div class="loading">Select a dataset to view events</div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Cell Detail Modal -->
+    <div id="cellDetailModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="cellDetailTitle">Cell Details</h3>
+                <button class="modal-close" onclick="closeCellDetailModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="cellDetailContent">Loading...</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Loading Indicator -->
+    <div id="loadingIndicator" class="loading-indicator">
+        <div class="loading-spinner"></div>
+        <span>Loading...</span>
+    </div>
+    
+    <script src="{{ url_for('static', filename='js/chromogram-timeline.js') }}"></script>
+</body>
+</html>

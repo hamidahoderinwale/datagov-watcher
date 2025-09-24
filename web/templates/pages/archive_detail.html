@@ -1,0 +1,212 @@
+{% extends "layouts/layout.html" %}
+
+{% block title %}Archive - {{ dataset_info[1] }} - Dataset State Historian{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/archive-detail.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="archive-container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1 class="page-title">Dataset Archive</h1>
+        <p class="page-subtitle">Historical information and archival sources for vanished dataset</p>
+    </div>
+
+    <!-- Dataset Information -->
+    <div class="dataset-info-section">
+        <div class="dataset-card">
+            <div class="dataset-header">
+                <h2 class="dataset-title">{{ dataset_info[1] or 'Unknown Title' }}</h2>
+                <div class="dataset-meta">
+                    <span class="dataset-id">{{ dataset_info[0] }}</span>
+                    <span class="dataset-agency">{{ dataset_info[2] or 'Unknown Agency' }}</span>
+                </div>
+            </div>
+            
+            <div class="dataset-details">
+                <div class="detail-row">
+                    <span class="detail-label">Status:</span>
+                    <span class="detail-value status-{{ dataset_info[5] or 'unknown' }}">
+                        {{ (dataset_info[5] or 'unknown').upper() }}
+                    </span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Last Seen:</span>
+                    <span class="detail-value">{{ dataset_info[4] or 'Unknown' }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Status Code:</span>
+                    <span class="detail-value">{{ dataset_info[6] or 'N/A' }}</span>
+                </div>
+                {% if dataset_info[3] %}
+                <div class="detail-row">
+                    <span class="detail-label">Original URL:</span>
+                    <span class="detail-value">
+                        <a href="{{ dataset_info[3] }}" target="_blank" class="external-link">
+                            {{ dataset_info[3] }}
+                        </a>
+                    </span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Archive Sources -->
+    <div class="archive-sources-section">
+        <h3>Archive Sources</h3>
+        <div class="archive-sources">
+            {% if wayback_url %}
+            <div class="archive-source">
+                <div class="source-header">
+                    <h4>Wayback Machine</h4>
+                    <span class="source-description">Internet Archive's web crawler</span>
+                </div>
+                <div class="source-actions">
+                    <a href="{{ wayback_url }}" target="_blank" class="btn btn-primary">
+                        View in Wayback Machine
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+            
+            {% if archive_url and archive_url != wayback_url %}
+            <div class="archive-source">
+                <div class="source-header">
+                    <h4>Specific Archive</h4>
+                    <span class="source-description">Archived version from last known date</span>
+                </div>
+                <div class="source-actions">
+                    <a href="{{ archive_url }}" target="_blank" class="btn btn-secondary">
+                        View Archived Version
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+            
+            {% if not wayback_url and not archive_url %}
+            <div class="no-archives">
+                <p>No archive sources available for this dataset.</p>
+                <p>The original URL may not have been archived or may be invalid.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Historical Snapshots -->
+    <div class="snapshots-section">
+        <h3>Historical Snapshots</h3>
+        {% if snapshots %}
+        <div class="snapshots-table">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Status Code</th>
+                        <th>Content Hash</th>
+                        <th>File Size</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for snapshot in snapshots %}
+                    <tr>
+                        <td>{{ snapshot[0] or 'N/A' }}</td>
+                        <td>
+                            <span class="status-badge {{ snapshot[1] or 'unknown' }}">
+                                {{ (snapshot[1] or 'unknown').upper() }}
+                            </span>
+                        </td>
+                        <td>{{ snapshot[2] or 'N/A' }}</td>
+                        <td class="hash-cell">{{ snapshot[3][:16] + '...' if snapshot[3] else 'N/A' }}</td>
+                        <td>{{ snapshot[4] | filesizeformat if snapshot[4] else 'N/A' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="no-data">
+            <p>No historical snapshots available for this dataset.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Monitoring History -->
+    <div class="monitoring-section">
+        <h3>Monitoring History</h3>
+        {% if monitoring_history %}
+        <div class="monitoring-table">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Last Checked</th>
+                        <th>Status</th>
+                        <th>Response Time</th>
+                        <th>Changes Detected</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for monitoring in monitoring_history %}
+                    <tr>
+                        <td>{{ monitoring[0] or 'N/A' }}</td>
+                        <td>
+                            <span class="status-badge {{ monitoring[1] or 'unknown' }}">
+                                {{ (monitoring[1] or 'unknown').upper() }}
+                            </span>
+                        </td>
+                        <td>{{ monitoring[2] }}ms</td>
+                        <td>
+                            <span class="change-indicator {{ 'changed' if monitoring[3] else 'unchanged' }}">
+                                {{ 'Yes' if monitoring[3] else 'No' }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="no-data">
+            <p>No monitoring history available for this dataset.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Actions -->
+    <div class="actions-section">
+        <div class="action-buttons">
+            <a href="/vanished" class="btn btn-secondary">Back to Vanished Datasets</a>
+            <a href="/" class="btn btn-primary">Return to Dashboard</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Add any interactive functionality here
+    document.addEventListener('DOMContentLoaded', function() {
+        // Format file sizes
+        const fileSizeCells = document.querySelectorAll('.file-size');
+        fileSizeCells.forEach(cell => {
+            const bytes = parseInt(cell.textContent);
+            if (!isNaN(bytes)) {
+                cell.textContent = formatFileSize(bytes);
+            }
+        });
+    });
+
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+</script>
+{% endblock %}
+
+

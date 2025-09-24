@@ -1,0 +1,611 @@
+{% extends "layouts/layout.html" %}
+
+{% block title %}Change Log View - Dataset State Historian{% endblock %}
+
+{% block extra_css %}
+<style>
+.change-log-container {
+    padding: var(--space-6);
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.change-log-header {
+    margin-bottom: var(--space-6);
+}
+
+.change-log-title {
+    font-size: var(--text-3xl);
+    font-weight: var(--font-bold);
+    color: var(--gray-900);
+    margin-bottom: var(--space-2);
+}
+
+.change-log-subtitle {
+    font-size: var(--text-lg);
+    color: var(--gray-600);
+    margin-bottom: var(--space-4);
+}
+
+.dataset-selector {
+    display: flex;
+    gap: var(--space-4);
+    align-items: center;
+    margin-bottom: var(--space-6);
+    padding: var(--space-4);
+    background: white;
+    border: 1px solid var(--gray-200);
+}
+
+.dataset-dropdown {
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid var(--gray-300);
+    border-radius: 0;
+    font-size: var(--text-sm);
+    font-family: var(--font-family);
+    background-color: white;
+    min-width: 300px;
+}
+
+.filters {
+    display: flex;
+    gap: var(--space-4);
+    margin-bottom: var(--space-6);
+    padding: var(--space-4);
+    background: white;
+    border: 1px solid var(--gray-200);
+    flex-wrap: wrap;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.filter-label {
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    color: var(--gray-700);
+}
+
+.filter-select {
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid var(--gray-300);
+    border-radius: 0;
+    font-size: var(--text-sm);
+    font-family: var(--font-family);
+    background-color: white;
+    min-width: 150px;
+}
+
+.change-log-table {
+    background: white;
+    border: 1px solid var(--gray-200);
+    margin-bottom: var(--space-6);
+}
+
+.change-log-header-row {
+    background: var(--gray-50);
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.change-log-header-cell {
+    padding: var(--space-4);
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
+    color: var(--gray-700);
+    text-align: left;
+    border-right: 1px solid var(--gray-200);
+}
+
+.change-log-header-cell:last-child {
+    border-right: none;
+}
+
+.change-log-row {
+    border-bottom: 1px solid var(--gray-100);
+    transition: background-color var(--transition-fast);
+}
+
+.change-log-row:hover {
+    background-color: var(--gray-50);
+}
+
+.change-log-row:last-child {
+    border-bottom: none;
+}
+
+.change-log-cell {
+    padding: var(--space-4);
+    font-size: var(--text-sm);
+    color: var(--gray-700);
+    border-right: 1px solid var(--gray-100);
+    vertical-align: top;
+}
+
+.change-log-cell:last-child {
+    border-right: none;
+}
+
+.event-type {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-1) var(--space-3);
+    border-radius: 0;
+    font-size: var(--text-xs);
+    font-weight: var(--font-medium);
+    text-transform: uppercase;
+}
+
+.event-type.availability {
+    background-color: #e3f2fd;
+    color: #1976d2;
+}
+
+.event-type.metadata {
+    background-color: #fff3e0;
+    color: #f57c00;
+}
+
+.event-type.schema {
+    background-color: #f3e5f5;
+    color: #7b1fa2;
+}
+
+.event-type.content {
+    background-color: #e8f5e8;
+    color: #388e3c;
+}
+
+.severity-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+}
+
+.severity-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.severity-high {
+    background-color: #d32f2f;
+}
+
+.severity-medium {
+    background-color: #f57c00;
+}
+
+.severity-low {
+    background-color: #388e3c;
+}
+
+.change-details {
+    font-size: var(--text-xs);
+    color: var(--gray-500);
+    margin-top: var(--space-1);
+}
+
+.export-controls {
+    display: flex;
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
+}
+
+.export-button {
+    padding: var(--space-2) var(--space-4);
+    background-color: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 0;
+    font-size: var(--text-sm);
+    font-family: var(--font-family);
+    cursor: pointer;
+    transition: background-color var(--transition-fast);
+}
+
+.export-button:hover {
+    background-color: var(--primary-dark);
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--space-2);
+    margin-top: var(--space-6);
+}
+
+.pagination-button {
+    padding: var(--space-2) var(--space-3);
+    background-color: white;
+    color: var(--gray-700);
+    border: 1px solid var(--gray-300);
+    border-radius: 0;
+    font-size: var(--text-sm);
+    font-family: var(--font-family);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.pagination-button:hover {
+    background-color: var(--gray-50);
+    border-color: var(--primary);
+}
+
+.pagination-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.pagination-button.active {
+    background-color: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+.loading {
+    text-align: center;
+    padding: var(--space-8);
+    color: var(--gray-500);
+}
+
+.error {
+    background: var(--gray-100);
+    color: var(--error);
+    padding: var(--space-4);
+    border: 1px solid var(--gray-200);
+    border-radius: 0;
+    margin: var(--space-4) 0;
+}
+
+.no-data {
+    text-align: center;
+    padding: var(--space-8);
+    color: var(--gray-500);
+    font-style: italic;
+}
+
+@media (max-width: 768px) {
+    .filters {
+        flex-direction: column;
+    }
+    
+    .dataset-selector {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .dataset-dropdown {
+        min-width: auto;
+    }
+    
+    .change-log-table {
+        overflow-x: auto;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="change-log-container">
+    <div class="change-log-header">
+        <h1 class="change-log-title">Change Log View</h1>
+        <p class="change-log-subtitle">Chronological record of significant changes across datasets</p>
+    </div>
+
+    <div class="dataset-selector">
+        <label for="dataset-select">Dataset:</label>
+        <select id="dataset-select" class="dataset-dropdown">
+            <option value="">All Datasets</option>
+        </select>
+        
+        <button id="load-changes" class="export-button" disabled>Load Changes</button>
+    </div>
+
+    <div class="filters">
+        <div class="filter-group">
+            <label class="filter-label">Event Type:</label>
+            <select id="event-type-filter" class="filter-select">
+                <option value="">All Types</option>
+                <option value="availability">Availability</option>
+                <option value="metadata">Metadata</option>
+                <option value="schema">Schema</option>
+                <option value="content">Content</option>
+            </select>
+        </div>
+        
+        <div class="filter-group">
+            <label class="filter-label">Severity:</label>
+            <select id="severity-filter" class="filter-select">
+                <option value="">All Severities</option>
+                <option value="high">High</option>
+                <option value="medium">Medium</option>
+                <option value="low">Low</option>
+            </select>
+        </div>
+        
+        <div class="filter-group">
+            <label class="filter-label">Date Range:</label>
+            <select id="date-range-filter" class="filter-select">
+                <option value="all">All Time</option>
+                <option value="7">Last 7 Days</option>
+                <option value="30">Last 30 Days</option>
+                <option value="90">Last 90 Days</option>
+            </select>
+        </div>
+        
+        <div class="filter-group">
+            <button id="apply-filters" class="export-button">Apply Filters</button>
+        </div>
+    </div>
+
+    <div class="export-controls">
+        <button id="export-csv" class="export-button">Export CSV</button>
+        <button id="export-json" class="export-button">Export JSON</button>
+        <button id="export-pdf" class="export-button">Export PDF</button>
+    </div>
+
+    <div class="change-log-table" id="change-log-table">
+        <div class="change-log-header-row">
+            <div class="change-log-header-cell" style="width: 120px;">Date</div>
+            <div class="change-log-header-cell" style="width: 200px;">Dataset</div>
+            <div class="change-log-header-cell" style="width: 150px;">Event Type</div>
+            <div class="change-log-header-cell" style="width: 100px;">Severity</div>
+            <div class="change-log-header-cell" style="width: 300px;">Description</div>
+            <div class="change-log-header-cell" style="width: 200px;">Details</div>
+        </div>
+        <div id="change-log-body">
+            <div class="loading">Select a dataset to view changes</div>
+        </div>
+    </div>
+
+    <div class="pagination" id="pagination" style="display: none;">
+        <button id="prev-page" class="pagination-button">Previous</button>
+        <span id="page-info">Page 1 of 1</span>
+        <button id="next-page" class="pagination-button">Next</button>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+class ChangeLogView {
+    constructor() {
+        this.currentDataset = null;
+        this.currentPage = 1;
+        this.pageSize = 50;
+        this.totalPages = 1;
+        this.changes = [];
+        this.filteredChanges = [];
+        this.init();
+    }
+
+    init() {
+        this.loadDatasets();
+        this.bindEvents();
+    }
+
+    async loadDatasets() {
+        try {
+            const response = await fetch('/api/datasets?limit=100');
+            const data = await response.json();
+            
+            const select = document.getElementById('dataset-select');
+            select.innerHTML = '<option value="">All Datasets</option>';
+            
+            data.datasets.forEach(dataset => {
+                const option = document.createElement('option');
+                option.value = dataset.dataset_id;
+                option.textContent = `${dataset.title || 'Unknown'} (${dataset.agency || 'Unknown Agency'})`;
+                select.appendChild(option);
+            });
+        } catch (error) {
+            console.error('Error loading datasets:', error);
+        }
+    }
+
+    bindEvents() {
+        document.getElementById('dataset-select').addEventListener('change', (e) => {
+            this.currentDataset = e.target.value;
+            document.getElementById('load-changes').disabled = false;
+        });
+
+        document.getElementById('load-changes').addEventListener('click', () => {
+            this.loadChanges();
+        });
+
+        document.getElementById('apply-filters').addEventListener('click', () => {
+            this.applyFilters();
+        });
+
+        document.getElementById('export-csv').addEventListener('click', () => {
+            this.exportData('csv');
+        });
+
+        document.getElementById('export-json').addEventListener('click', () => {
+            this.exportData('json');
+        });
+
+        document.getElementById('export-pdf').addEventListener('click', () => {
+            this.exportData('pdf');
+        });
+
+        document.getElementById('prev-page').addEventListener('click', () => {
+            if (this.currentPage > 1) {
+                this.currentPage--;
+                this.renderChanges();
+            }
+        });
+
+        document.getElementById('next-page').addEventListener('click', () => {
+            if (this.currentPage < this.totalPages) {
+                this.currentPage++;
+                this.renderChanges();
+            }
+        });
+    }
+
+    async loadChanges() {
+        try {
+            const url = this.currentDataset 
+                ? `/api/dataset/${this.currentDataset}/change-log`
+                : '/api/change-log';
+            
+            const response = await fetch(url);
+            const data = await response.json();
+            
+            this.changes = data.changes || [];
+            this.applyFilters();
+        } catch (error) {
+            console.error('Error loading changes:', error);
+            this.showError('Error loading changes');
+        }
+    }
+
+    applyFilters() {
+        const eventType = document.getElementById('event-type-filter').value;
+        const severity = document.getElementById('severity-filter').value;
+        const dateRange = document.getElementById('date-range-filter').value;
+        
+        this.filteredChanges = this.changes.filter(change => {
+            if (eventType && change.event_type !== eventType) return false;
+            if (severity && change.severity !== severity) return false;
+            
+            if (dateRange !== 'all') {
+                const days = parseInt(dateRange);
+                const changeDate = new Date(change.date);
+                const cutoffDate = new Date();
+                cutoffDate.setDate(cutoffDate.getDate() - days);
+                
+                if (changeDate < cutoffDate) return false;
+            }
+            
+            return true;
+        });
+        
+        this.currentPage = 1;
+        this.calculatePagination();
+        this.renderChanges();
+    }
+
+    calculatePagination() {
+        this.totalPages = Math.ceil(this.filteredChanges.length / this.pageSize);
+        document.getElementById('page-info').textContent = `Page ${this.currentPage} of ${this.totalPages}`;
+        
+        const pagination = document.getElementById('pagination');
+        pagination.style.display = this.totalPages > 1 ? 'flex' : 'none';
+        
+        document.getElementById('prev-page').disabled = this.currentPage === 1;
+        document.getElementById('next-page').disabled = this.currentPage === this.totalPages;
+    }
+
+    renderChanges() {
+        const startIndex = (this.currentPage - 1) * this.pageSize;
+        const endIndex = startIndex + this.pageSize;
+        const pageChanges = this.filteredChanges.slice(startIndex, endIndex);
+        
+        const body = document.getElementById('change-log-body');
+        
+        if (pageChanges.length === 0) {
+            body.innerHTML = '<div class="no-data">No changes found matching the current filters</div>';
+            return;
+        }
+        
+        body.innerHTML = pageChanges.map(change => `
+            <div class="change-log-row">
+                <div class="change-log-cell">${this.formatDate(change.date)}</div>
+                <div class="change-log-cell">
+                    <div>${this.escapeHtml(change.dataset_title || 'Unknown')}</div>
+                    <div class="change-details">${change.dataset_agency || 'Unknown Agency'}</div>
+                </div>
+                <div class="change-log-cell">
+                    <span class="event-type ${change.event_type}">${change.event_type}</span>
+                </div>
+                <div class="change-log-cell">
+                    <div class="severity-indicator">
+                        <div class="severity-dot severity-${change.severity}"></div>
+                        <span>${change.severity}</span>
+                    </div>
+                </div>
+                <div class="change-log-cell">${this.escapeHtml(change.description || 'No description')}</div>
+                <div class="change-log-cell">
+                    <div class="change-details">${this.escapeHtml(change.details || 'No details')}</div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    formatDate(dateString) {
+        return new Date(dateString).toLocaleDateString();
+    }
+
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    exportData(format) {
+        if (this.filteredChanges.length === 0) {
+            alert('No data to export');
+            return;
+        }
+        
+        let content, filename, mimeType;
+        
+        if (format === 'csv') {
+            content = this.convertToCSV();
+            filename = `change_log_${this.currentDataset || 'all'}.csv`;
+            mimeType = 'text/csv';
+        } else if (format === 'json') {
+            content = JSON.stringify(this.filteredChanges, null, 2);
+            filename = `change_log_${this.currentDataset || 'all'}.json`;
+            mimeType = 'application/json';
+        } else if (format === 'pdf') {
+            // For PDF export, we'd need a PDF generation library
+            alert('PDF export not implemented yet');
+            return;
+        }
+        
+        const blob = new Blob([content], { type: mimeType });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    convertToCSV() {
+        const headers = ['Date', 'Dataset', 'Agency', 'Event Type', 'Severity', 'Description', 'Details'];
+        const rows = this.filteredChanges.map(change => [
+            change.date,
+            change.dataset_title || 'Unknown',
+            change.dataset_agency || 'Unknown Agency',
+            change.event_type,
+            change.severity,
+            change.description || 'No description',
+            change.details || 'No details'
+        ]);
+        
+        return [headers, ...rows].map(row => 
+            row.map(field => `"${String(field).replace(/"/g, '""')}"`).join(',')
+        ).join('\n');
+    }
+
+    showError(message) {
+        const body = document.getElementById('change-log-body');
+        body.innerHTML = `<div class="error">${message}</div>`;
+    }
+}
+
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', () => {
+    new ChangeLogView();
+});
+</script>
+{% endblock %}

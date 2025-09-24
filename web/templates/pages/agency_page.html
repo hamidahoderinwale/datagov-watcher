@@ -1,0 +1,176 @@
+{% extends "layouts/layout.html" %}
+
+{% block title %}{{ agency_name }} - Dataset State Historian{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/agency-page.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="agency-container">
+        <!-- Agency Header -->
+        <header class="agency-header">
+            <div class="header-content">
+                <div class="title-section">
+                    <h1 id="agency-name">Loading...</h1>
+                    <div class="agency-meta">
+                        <span class="external-link">
+                            <a href="#" id="agency-url" target="_blank">Visit Agency Website</a>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Agency Stats -->
+        <section class="agency-stats">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="total-datasets">-</div>
+                    <div class="stat-label">Total Datasets</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="active-datasets">-</div>
+                    <div class="stat-label">Active</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="vanished-datasets">-</div>
+                    <div class="stat-label">Vanished</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="avg-volatility">-</div>
+                    <div class="stat-label">Avg Volatility</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="license-stability">-</div>
+                    <div class="stat-label">License Stability</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="median-lifespan">-</div>
+                    <div class="stat-label">Median Lifespan</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Content -->
+        <div class="content-layout">
+            <div class="main-panel">
+                <!-- Trends Chart -->
+                <section class="trends-section">
+                    <h2>Dataset Trends</h2>
+                    <div class="chart-container">
+                        <canvas id="trends-chart"></canvas>
+                    </div>
+                </section>
+
+                <!-- Most Volatile Datasets -->
+                <section class="volatile-section">
+                    <h2>Most Volatile Datasets</h2>
+                    <div class="dataset-table-container">
+                        <table class="dataset-table" id="volatile-table">
+                            <thead>
+                                <tr>
+                                    <th>Dataset</th>
+                                    <th>Volatility</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- At-Risk Datasets -->
+                <section class="at-risk-section">
+                    <h2>At-Risk Datasets</h2>
+                    <div class="dataset-table-container">
+                        <table class="dataset-table" id="at-risk-table">
+                            <thead>
+                                <tr>
+                                    <th>Dataset</th>
+                                    <th>Risk Score</th>
+                                    <th>Last Seen</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- All Datasets -->
+                <section class="all-datasets-section">
+                    <h2>All Datasets</h2>
+                    <div class="dataset-filters">
+                        <input type="text" id="dataset-search" placeholder="Search datasets..." class="search-input">
+                        <select id="status-filter" class="filter-select">
+                            <option value="">All Status</option>
+                            <option value="active">Active</option>
+                            <option value="vanished">Vanished</option>
+                        </select>
+                    </div>
+                    <div class="dataset-table-container">
+                        <table class="dataset-table" id="all-datasets-table">
+                            <thead>
+                                <tr>
+                                    <th>Dataset</th>
+                                    <th>Status</th>
+                                    <th>Volatility</th>
+                                    <th>Last Seen</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Context Sidebar -->
+            <aside class="context-sidebar">
+                <div class="sidebar-tabs">
+                    <button class="tab-btn active" onclick="switchTab('policy')">Policy</button>
+                    <button class="tab-btn" onclick="switchTab('news')">News</button>
+                </div>
+
+                <div class="tab-content">
+                    <div id="policy-tab" class="tab-panel active">
+                        <h3>Agency Policy</h3>
+                        <div class="policy-list" id="policy-list">
+                            <!-- Populated by JavaScript -->
+                        </div>
+                    </div>
+
+                    <div id="news-tab" class="tab-panel">
+                        <h3>News & Updates</h3>
+                        <div class="news-list" id="news-list">
+                            <!-- Populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/agency-page.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Get agency name from URL
+    const agencyName = window.location.pathname.split('/').pop();
+    
+    // Load agency data when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        loadAgencyData(agencyName);
+    });
+</script>
+{% endblock %}

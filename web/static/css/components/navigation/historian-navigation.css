@@ -1,0 +1,81 @@
+/* Historian Navigation Component Styles */
+
+.historian-nav {
+    background: white;
+    border-bottom: 1px solid var(--border-neutral);
+    padding: var(--spacing-md) 0;
+    margin-bottom: var(--spacing-lg);
+}
+
+.historian-nav-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 var(--spacing-md);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.historian-nav-brand h2 {
+    margin: 0;
+    color: var(--text-primary);
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.historian-nav-links {
+    display: flex;
+    gap: var(--spacing-lg);
+}
+
+.historian-nav-link {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    color: var(--text-secondary);
+    text-decoration: none;
+    border-radius: var(--card-border-radius);
+    transition: all 0.2s ease;
+    font-family: var(--font-body);
+    font-weight: 500;
+}
+
+.historian-nav-link:hover {
+    background: var(--background);
+    color: var(--accent);
+    text-decoration: none;
+}
+
+.historian-nav-link.active {
+    background: var(--accent);
+    color: white;
+}
+
+.nav-icon {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    min-width: 40px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .historian-nav-container {
+        flex-direction: column;
+        gap: var(--spacing-md);
+    }
+    
+    .historian-nav-links {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: var(--spacing-md);
+    }
+    
+    .historian-nav-brand h2 {
+        font-size: 1.25rem;
+    }
+}

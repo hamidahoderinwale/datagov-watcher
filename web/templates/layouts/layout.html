@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Dataset State Historian{% endblock %}</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/design-system.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/sidebar.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/top-nav.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Top Navigation Bar -->
+    <header class="top-nav">
+        <div class="top-nav-content">
+            <!-- Sidebar Toggle Button -->
+            <button class="sidebar-toggle" id="sidebar-toggle" onclick="toggleSidebar()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+            </button>
+
+
+            <!-- Top Navigation Links -->
+            <div class="top-nav-links">
+                <a href="/" class="top-nav-link {% if request.endpoint == 'index' %}active{% endif %}">Dashboard</a>
+                <a href="/catalog" class="top-nav-link {% if request.endpoint == 'catalog' %}active{% endif %}">Catalog</a>
+                <a href="/agencies" class="top-nav-link {% if request.endpoint == 'agencies' %}active{% endif %}">Agencies</a>
+                <a href="/tags" class="top-nav-link {% if request.endpoint == 'tags' %}active{% endif %}">Tags</a>
+                <a href="/metrics" class="top-nav-link {% if request.endpoint == 'metrics' %}active{% endif %}">Analytics</a>
+            </div>
+
+            <!-- Notification System -->
+            <div class="notification-container" id="notification-container">
+                <button class="notification-toggle" id="notification-toggle" onclick="toggleNotifications()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                    </svg>
+                    <span class="notification-badge" id="notification-badge" style="display: none;">0</span>
+                </button>
+                <div class="notification-panel" id="notification-panel">
+                    <div class="notification-header">
+                        <h3>System Notifications</h3>
+                        <button class="notification-close" onclick="toggleNotifications()">×</button>
+                    </div>
+                    <div class="notification-list" id="notification-list">
+                        <div class="notification-item loading">
+                            <div class="notification-content">
+                                <div class="notification-text">Loading notifications...</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="notification-footer">
+                        <button class="notification-clear" onclick="clearAllNotifications()">Clear All</button>
+                        <button class="notification-refresh" onclick="refreshNotifications()">Refresh</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sidebar Navigation -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a href="/" class="sidebar-brand">Dataset State Historian</a>
+            <p class="sidebar-subtitle">Comprehensive monitoring and analysis</p>
+        </div>
+
+        <!-- Search -->
+        <div class="sidebar-search">
+            <input type="text" class="sidebar-search-input" id="global-search" placeholder="Search datasets, agencies, tags..." onkeyup="handleGlobalSearch(event)">
+        </div>
+
+        <!-- Navigation -->
+        <div class="sidebar-nav">
+            <!-- Main Sections -->
+            <div class="sidebar-nav-section">
+                <h3 class="sidebar-nav-title">Overview</h3>
+                <ul class="sidebar-nav-list">
+                    <li class="sidebar-nav-item">
+                        <a href="/" class="sidebar-nav-link {% if request.endpoint == 'index' %}active{% endif %}">
+                            <span class="sidebar-nav-text">Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <a href="/metrics" class="sidebar-nav-link {% if request.endpoint == 'metrics' %}active{% endif %}">
+                            <span class="sidebar-nav-text">Analytics</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <a href="/timeline" class="sidebar-nav-link {% if request.endpoint == 'timeline' %}active{% endif %}">
+                            <span class="sidebar-nav-text">Timeline</span>
+                        </a>
+                    </li>
+                <li class="sidebar-nav-item">
+                    <a href="/visualization" class="sidebar-nav-link {% if request.endpoint == 'data_visualization' %}active{% endif %}">
+                        <span class="sidebar-nav-text">Visualization</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="/data-quality" class="sidebar-nav-link {% if request.endpoint == 'data_quality' %}active{% endif %}">
+                        <span class="sidebar-nav-text">Data Quality</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="/field-diff-panel" class="sidebar-nav-link {% if request.endpoint == 'field_diff_panel' %}active{% endif %}">
+                        <span class="sidebar-nav-text">Field Diff Panel</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="/content-drift-charts" class="sidebar-nav-link {% if request.endpoint == 'content_drift_charts' %}active{% endif %}">
+                        <span class="sidebar-nav-text">Content Drift</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="/change-log-view" class="sidebar-nav-link {% if request.endpoint == 'change_log_view' %}active{% endif %}">
+                        <span class="sidebar-nav-text">Change Log</span>
+                    </a>
+                </li>
+        <li class="sidebar-nav-item">
+            <a href="/postmortem-reports" class="sidebar-nav-link {% if request.endpoint == 'postmortem_reports' %}active{% endif %}">
+                <span class="sidebar-nav-text">Post-mortem</span>
+            </a>
+        </li>
+        <li class="sidebar-nav-item">
+            <a href="/volatility-metrics" class="sidebar-nav-link {% if request.endpoint == 'volatility_metrics' %}active{% endif %}">
+                <span class="sidebar-nav-text">Volatility</span>
+            </a>
+        </li>
+                </ul>
+            </div>
+
+            <!-- Data Exploration -->
+            <div class="sidebar-nav-section">
+                <h3 class="sidebar-nav-title">Data Exploration</h3>
+                <ul class="sidebar-nav-list">
+                    <li class="sidebar-nav-item">
+                        <a href="/catalog" class="sidebar-nav-link {% if request.endpoint == 'catalog' %}active{% endif %}">
+                            <span class="sidebar-nav-text">Catalog</span>
+                            <span class="sidebar-nav-badge" id="catalog-count">-</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <a href="/tags" class="sidebar-nav-link {% if request.endpoint == 'tags' %}active{% endif %}">
+                            <span class="sidebar-nav-text">Tags</span>
+                            <span class="sidebar-nav-badge" id="tags-count">-</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <a href="/agencies" class="sidebar-nav-link {% if request.endpoint == 'agencies' %}active{% endif %}">
+                            <span class="sidebar-nav-text">Agencies</span>
+                            <span class="sidebar-nav-badge" id="agencies-count">-</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Historical Analysis -->
+            <div class="sidebar-nav-section">
+                <h3 class="sidebar-nav-title">Historical Analysis</h3>
+                <ul class="sidebar-nav-list">
+                    <li class="sidebar-nav-item">
+                        <a href="/historian" class="sidebar-nav-link {% if request.endpoint == 'historian' %}active{% endif %}">
+                            <span class="sidebar-nav-text">Historian</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <a href="/wayback" class="sidebar-nav-link {% if request.endpoint == 'wayback' %}active{% endif %}">
+                            <span class="sidebar-nav-text">Wayback</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <a href="/vanished" class="sidebar-nav-link {% if request.endpoint == 'vanished' %}active{% endif %}">
+                            <span class="sidebar-nav-text">Vanished</span>
+                            <span class="sidebar-nav-badge" id="vanished-count">-</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <a href="/management" class="sidebar-nav-link {% if request.endpoint == 'management' %}active{% endif %}">
+                            <span class="sidebar-nav-text">Management</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <a href="/changes" class="sidebar-nav-link {% if request.endpoint == 'changes' %}active{% endif %}">
+                            <span class="sidebar-nav-text">Changes</span>
+                            <span class="sidebar-nav-badge" id="changes-count">-</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Real-time Monitoring -->
+            <div class="sidebar-nav-section">
+                <h3 class="sidebar-nav-title">Real-time</h3>
+                <ul class="sidebar-nav-list">
+                    <li class="sidebar-nav-item">
+                        <a href="/live-monitor" class="sidebar-nav-link {% if request.endpoint == 'live_monitor' %}active{% endif %}">
+                            <span class="sidebar-nav-text">Live Monitor</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <a href="/data-viewer" class="sidebar-nav-link {% if request.endpoint == 'data_viewer' %}active{% endif %}">
+                            <span class="sidebar-nav-text">Data Viewer</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Developer Tools -->
+            <div class="sidebar-nav-section">
+                <h3 class="sidebar-nav-title">Developer</h3>
+                <ul class="sidebar-nav-list">
+                    <li class="sidebar-nav-item">
+                        <a href="/api-docs" class="sidebar-nav-link {% if request.endpoint == 'api_docs' %}active{% endif %}">
+                            <span class="sidebar-nav-text">API Docs</span>
+                        </a>
+                    </li>
+                <li class="sidebar-nav-item">
+                    <a href="/backup" class="sidebar-nav-link {% if request.endpoint == 'backup' %}active{% endif %}">
+                        <span class="sidebar-nav-text">Backup & Restore</span>
+                    </a>
+                </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="sidebar-footer">
+            <div class="text-xs text-gray-500">
+                <div>Last updated: <span id="last-updated">-</span></div>
+                <div>Status: <span id="system-status" class="text-green-600">Online</span></div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content" id="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Global JavaScript -->
+    <script>
+        // Sidebar functionality
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('main-content');
+            const toggle = document.getElementById('sidebar-toggle');
+            
+            sidebar.classList.toggle('collapsed');
+            mainContent.classList.toggle('sidebar-collapsed');
+            
+            // Store preference
+            const isCollapsed = sidebar.classList.contains('collapsed');
+            localStorage.setItem('sidebar-collapsed', isCollapsed);
+        }
+
+        // Restore sidebar state
+        function restoreSidebarState() {
+            const isCollapsed = localStorage.getItem('sidebar-collapsed') === 'true';
+            if (isCollapsed) {
+                document.getElementById('sidebar').classList.add('collapsed');
+                document.getElementById('main-content').classList.add('sidebar-collapsed');
+            }
+        }
+
+        // Global search functionality
+        function handleGlobalSearch(event) {
+            if (event.key === 'Enter') {
+                const query = event.target.value.trim();
+                if (query) {
+                    window.location.href = `/search?q=${encodeURIComponent(query)}`;
+                }
+            }
+        }
+
+
+        // Update sidebar stats
+        function updateSidebarStats() {
+            fetch('/api/stats')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('catalog-count').textContent = data.total_datasets || '0';
+                    document.getElementById('vanished-count').textContent = data.vanished_datasets || '0';
+                    document.getElementById('changes-count').textContent = data.total_changes || '0';
+                    document.getElementById('last-updated').textContent = new Date().toLocaleTimeString();
+                })
+                .catch(error => console.error('Error updating stats:', error));
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            restoreSidebarState();
+            updateSidebarStats();
+            
+            // Update stats every 30 seconds
+            setInterval(updateSidebarStats, 30000);
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            if (window.innerWidth <= 1024) {
+                document.getElementById('sidebar').classList.add('collapsed');
+                document.getElementById('main-content').classList.add('sidebar-collapsed');
+            }
+        });
+    </script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

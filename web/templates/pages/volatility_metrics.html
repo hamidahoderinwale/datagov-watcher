@@ -1,0 +1,532 @@
+{% extends "layouts/layout.html" %}
+
+{% block title %}Volatility Metrics - Dataset State Historian{% endblock %}
+
+{% block extra_css %}
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+.volatility-container {
+    padding: var(--space-6);
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.volatility-header {
+    margin-bottom: var(--space-6);
+}
+
+.volatility-title {
+    font-size: var(--text-3xl);
+    font-weight: var(--font-bold);
+    color: var(--gray-900);
+    margin-bottom: var(--space-2);
+}
+
+.volatility-subtitle {
+    font-size: var(--text-lg);
+    color: var(--gray-600);
+    margin-bottom: var(--space-4);
+}
+
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--space-6);
+    margin-bottom: var(--space-8);
+}
+
+.metric-card {
+    background: white;
+    border: 1px solid var(--gray-200);
+    padding: var(--space-6);
+    text-align: center;
+}
+
+.metric-value {
+    font-size: var(--text-3xl);
+    font-weight: var(--font-bold);
+    color: var(--primary);
+    margin-bottom: var(--space-2);
+}
+
+.metric-label {
+    font-size: var(--text-sm);
+    color: var(--gray-600);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.chart-container {
+    background: white;
+    border: 1px solid var(--gray-200);
+    padding: var(--space-6);
+    margin-bottom: var(--space-6);
+}
+
+.chart-title {
+    font-size: var(--text-xl);
+    font-weight: var(--font-semibold);
+    color: var(--gray-900);
+    margin-bottom: var(--space-4);
+    text-align: center;
+}
+
+.chart-wrapper {
+    position: relative;
+    height: 400px;
+    margin: var(--space-4) 0;
+}
+
+.dataset-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: var(--space-4);
+}
+
+.dataset-table th,
+.dataset-table td {
+    padding: var(--space-3);
+    text-align: left;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.dataset-table th {
+    background: var(--gray-50);
+    font-weight: var(--font-semibold);
+    color: var(--gray-900);
+}
+
+.dataset-table tr:hover {
+    background: var(--gray-50);
+}
+
+.volatility-badge {
+    padding: var(--space-1) var(--space-2);
+    border-radius: 0;
+    font-size: var(--text-xs);
+    font-weight: var(--font-medium);
+    text-transform: uppercase;
+}
+
+.volatility-high {
+    background: var(--error-light);
+    color: var(--error);
+}
+
+.volatility-medium {
+    background: var(--warning-light);
+    color: var(--warning);
+}
+
+.volatility-low {
+    background: var(--success-light);
+    color: var(--success);
+}
+
+.loading {
+    text-align: center;
+    padding: var(--space-8);
+    color: var(--gray-500);
+}
+
+.error {
+    background: var(--gray-100);
+    color: var(--error);
+    padding: var(--space-4);
+    border: 1px solid var(--gray-200);
+    border-radius: 0;
+    margin: var(--space-4) 0;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="volatility-container">
+    <div class="volatility-header">
+        <h1 class="volatility-title">Volatility Metrics</h1>
+        <p class="volatility-subtitle">Dataset change patterns and stability analysis</p>
+    </div>
+
+    <!-- Summary Metrics -->
+    <div class="metrics-grid" id="summary-metrics">
+        <div class="metric-card">
+            <div class="metric-value" id="total-datasets">-</div>
+            <div class="metric-label">Total Datasets</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-value" id="avg-churn-rate">-</div>
+            <div class="metric-label">Avg Churn Rate</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-value" id="avg-content-drift">-</div>
+            <div class="metric-label">Avg Content Drift</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-value" id="total-license-flips">-</div>
+            <div class="metric-label">Total License Flips</div>
+        </div>
+    </div>
+
+    <!-- Volatility Charts -->
+    <div class="chart-container">
+        <h2 class="chart-title">Churn Rate Distribution</h2>
+        <div class="chart-wrapper">
+            <canvas id="churnChart"></canvas>
+        </div>
+    </div>
+
+    <div class="chart-container">
+        <h2 class="chart-title">Content Drift Over Time</h2>
+        <div class="chart-wrapper">
+            <canvas id="driftChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Most/Least Volatile Datasets -->
+    <div class="chart-container">
+        <h2 class="chart-title">Most Volatile Datasets</h2>
+        <table class="dataset-table" id="volatile-datasets">
+            <thead>
+                <tr>
+                    <th>Dataset ID</th>
+                    <th>Churn Rate</th>
+                    <th>Content Drift</th>
+                    <th>License Flips</th>
+                    <th>Schema Volatility</th>
+                    <th>Volatility Level</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td colspan="6" class="loading">Loading volatile datasets...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="chart-container">
+        <h2 class="chart-title">Least Volatile Datasets</h2>
+        <table class="dataset-table" id="stable-datasets">
+            <thead>
+                <tr>
+                    <th>Dataset ID</th>
+                    <th>Churn Rate</th>
+                    <th>Content Drift</th>
+                    <th>License Flips</th>
+                    <th>Schema Volatility</th>
+                    <th>Volatility Level</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td colspan="6" class="loading">Loading stable datasets...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let churnChart = null;
+let driftChart = null;
+
+// Load volatility data
+function loadVolatilityData() {
+    loadSummaryMetrics();
+    loadVolatileDatasets();
+    loadStableDatasets();
+    loadChurnChart();
+    loadDriftChart();
+}
+
+// Load summary metrics
+function loadSummaryMetrics() {
+    fetch('/api/volatility/summary')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('total-datasets').textContent = data.total_datasets || '0';
+            document.getElementById('avg-churn-rate').textContent = 
+                data.avg_churn_rate ? (data.avg_churn_rate * 100).toFixed(1) + '%' : '0%';
+            document.getElementById('avg-content-drift').textContent = 
+                data.avg_content_drift ? (data.avg_content_drift * 100).toFixed(1) + '%' : '0%';
+            document.getElementById('total-license-flips').textContent = data.total_license_flips || '0';
+        })
+        .catch(error => {
+            console.error('Error loading summary metrics:', error);
+        });
+}
+
+// Load volatile datasets
+function loadVolatileDatasets() {
+    fetch('/api/volatility/summary')
+        .then(response => response.json())
+        .then(data => {
+            const tbody = document.querySelector('#volatile-datasets tbody');
+            
+            if (data.most_volatile_datasets && data.most_volatile_datasets.length > 0) {
+                tbody.innerHTML = data.most_volatile_datasets.map(dataset => `
+                    <tr>
+                        <td>${dataset.dataset_id}</td>
+                        <td>${(dataset.churn_rate * 100).toFixed(1)}%</td>
+                        <td>${(dataset.content_drift * 100).toFixed(1)}%</td>
+                        <td>${dataset.license_flips}</td>
+                        <td>${(dataset.schema_volatility * 100).toFixed(1)}%</td>
+                        <td><span class="volatility-badge volatility-high">High</span></td>
+                    </tr>
+                `).join('');
+            } else {
+                tbody.innerHTML = '<tr><td colspan="6" class="loading">No volatile datasets found</td></tr>';
+            }
+        })
+        .catch(error => {
+            console.error('Error loading volatile datasets:', error);
+            document.querySelector('#volatile-datasets tbody').innerHTML = 
+                '<tr><td colspan="6" class="error">Error loading volatile datasets</td></tr>';
+        });
+}
+
+// Load stable datasets
+function loadStableDatasets() {
+    fetch('/api/volatility/summary')
+        .then(response => response.json())
+        .then(data => {
+            const tbody = document.querySelector('#stable-datasets tbody');
+            
+            if (data.least_volatile_datasets && data.least_volatile_datasets.length > 0) {
+                tbody.innerHTML = data.least_volatile_datasets.map(dataset => `
+                    <tr>
+                        <td>${dataset.dataset_id}</td>
+                        <td>${(dataset.churn_rate * 100).toFixed(1)}%</td>
+                        <td>${(dataset.content_drift * 100).toFixed(1)}%</td>
+                        <td>${dataset.license_flips}</td>
+                        <td>${(dataset.schema_volatility * 100).toFixed(1)}%</td>
+                        <td><span class="volatility-badge volatility-low">Low</span></td>
+                    </tr>
+                `).join('');
+            } else {
+                tbody.innerHTML = '<tr><td colspan="6" class="loading">No stable datasets found</td></tr>';
+            }
+        })
+        .catch(error => {
+            console.error('Error loading stable datasets:', error);
+            document.querySelector('#stable-datasets tbody').innerHTML = 
+                '<tr><td colspan="6" class="error">Error loading stable datasets</td></tr>';
+        });
+}
+
+// Load churn rate chart
+function loadChurnChart() {
+    const ctx = document.getElementById('churnChart').getContext('2d');
+    
+    fetch('/api/volatility/summary')
+        .then(response => response.json())
+        .then(data => {
+            if (data.datasets && data.datasets.length > 0) {
+                const churnRates = data.datasets.map(d => d.churn_rate * 100);
+                
+                // Create histogram data
+                const bins = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
+                const histogram = new Array(bins.length - 1).fill(0);
+                
+                churnRates.forEach(rate => {
+                    for (let i = 0; i < bins.length - 1; i++) {
+                        if (rate >= bins[i] && rate < bins[i + 1]) {
+                            histogram[i]++;
+                            break;
+                        }
+                    }
+                });
+                
+                const labels = bins.slice(0, -1).map((bin, i) => `${bin}-${bins[i + 1]}%`);
+                
+                if (churnChart) {
+                    churnChart.destroy();
+                }
+                
+                churnChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Number of Datasets',
+                            data: histogram,
+                            backgroundColor: 'rgba(59, 130, 246, 0.5)',
+                            borderColor: 'rgba(59, 130, 246, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Distribution of Churn Rates',
+                                font: {
+                                    family: 'Funnel Sans'
+                                }
+                            },
+                            legend: {
+                                labels: {
+                                    font: {
+                                        family: 'Funnel Sans'
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Churn Rate Range',
+                                    font: {
+                                        family: 'Funnel Sans'
+                                    }
+                                },
+                                ticks: {
+                                    font: {
+                                        family: 'Funnel Sans'
+                                    }
+                                }
+                            },
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: 'Number of Datasets',
+                                    font: {
+                                        family: 'Funnel Sans'
+                                    }
+                                },
+                                ticks: {
+                                    font: {
+                                        family: 'Funnel Sans'
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            } else {
+                ctx.canvas.parentElement.innerHTML = '<div class="loading">No data available for churn chart</div>';
+            }
+        })
+        .catch(error => {
+            console.error('Error loading churn chart:', error);
+            ctx.canvas.parentElement.innerHTML = '<div class="error">Error loading churn chart</div>';
+        });
+}
+
+// Load content drift chart
+function loadDriftChart() {
+    const ctx = document.getElementById('driftChart').getContext('2d');
+    
+    fetch('/api/volatility/summary')
+        .then(response => response.json())
+        .then(data => {
+            if (data.datasets && data.datasets.length > 0) {
+                const driftRates = data.datasets.map(d => d.content_drift * 100);
+                
+                // Create histogram data
+                const bins = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
+                const histogram = new Array(bins.length - 1).fill(0);
+                
+                driftRates.forEach(rate => {
+                    for (let i = 0; i < bins.length - 1; i++) {
+                        if (rate >= bins[i] && rate < bins[i + 1]) {
+                            histogram[i]++;
+                            break;
+                        }
+                    }
+                });
+                
+                const labels = bins.slice(0, -1).map((bin, i) => `${bin}-${bins[i + 1]}%`);
+                
+                if (driftChart) {
+                    driftChart.destroy();
+                }
+                
+                driftChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Number of Datasets',
+                            data: histogram,
+                            backgroundColor: 'rgba(16, 185, 129, 0.5)',
+                            borderColor: 'rgba(16, 185, 129, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Distribution of Content Drift',
+                                font: {
+                                    family: 'Funnel Sans'
+                                }
+                            },
+                            legend: {
+                                labels: {
+                                    font: {
+                                        family: 'Funnel Sans'
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Content Drift Range',
+                                    font: {
+                                        family: 'Funnel Sans'
+                                    }
+                                },
+                                ticks: {
+                                    font: {
+                                        family: 'Funnel Sans'
+                                    }
+                                }
+                            },
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: 'Number of Datasets',
+                                    font: {
+                                        family: 'Funnel Sans'
+                                    }
+                                },
+                                ticks: {
+                                    font: {
+                                        family: 'Funnel Sans'
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            } else {
+                ctx.canvas.parentElement.innerHTML = '<div class="loading">No data available for drift chart</div>';
+            }
+        })
+        .catch(error => {
+            console.error('Error loading drift chart:', error);
+            ctx.canvas.parentElement.innerHTML = '<div class="error">Error loading drift chart</div>';
+        });
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    loadVolatilityData();
+    
+    // Refresh data every 30 seconds
+    setInterval(loadVolatilityData, 30000);
+});
+</script>
+{% endblock %}

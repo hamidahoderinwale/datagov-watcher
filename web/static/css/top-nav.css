@@ -1,0 +1,98 @@
+/* Top Navigation Bar Styles */
+.top-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: white;
+    border-bottom: 1px solid var(--gray-200);
+    box-shadow: var(--shadow-sm);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+}
+
+.top-nav-content {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    padding: 0 var(--space-4);
+    gap: var(--space-4);
+}
+
+/* Sidebar Toggle Button */
+.sidebar-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: none;
+    border: 1px solid var(--gray-300);
+    border-radius: 0;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    color: var(--gray-600);
+}
+
+.sidebar-toggle:hover {
+    background: var(--gray-50);
+    border-color: var(--gray-400);
+    color: var(--gray-900);
+}
+
+
+/* Top Navigation Links */
+.top-nav-links {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.top-nav-link {
+    padding: var(--space-2) var(--space-3);
+    color: var(--gray-600);
+    text-decoration: none;
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    border-radius: 0;
+    transition: all var(--transition-fast);
+    white-space: nowrap;
+}
+
+.top-nav-link:hover {
+    color: var(--gray-900);
+    background: var(--gray-50);
+}
+
+.top-nav-link.active {
+    color: var(--primary);
+    background: var(--primary-light);
+}
+
+/* Main content positioning handled by sidebar.css */
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .top-nav-links {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .top-nav {
+        height: 50px;
+    }
+    
+    .top-nav-content {
+        padding: 0 var(--space-2);
+        gap: var(--space-2);
+    }
+    
+    .sidebar-toggle {
+        width: 36px;
+        height: 36px;
+    }
+}

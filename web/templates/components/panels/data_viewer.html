@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dataset State Historian</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+</head>
+<body>
+    <header class="header">
+        <h1>Data Viewer</h1>
+        <p>Browse and explore dataset information</p>
+    </header>
+    
+    <div class="container">
+        <div class="controls">
+            <div class="control-group">
+                <input type="text" id="searchInput" placeholder="Search datasets by title, agency, or ID...">
+            </div>
+            <div class="control-group">
+                <label for="agencyFilter">Agency:</label>
+                <select id="agencyFilter">
+                    <option value="">All Agencies</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <button class="btn btn-primary" onclick="applyFilters()">Apply Filters</button>
+                <button class="btn" onclick="clearFilters()">Clear</button>
+            </div>
+        </div>
+        
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Dataset ID</th>
+                        <th>Title</th>
+                        <th>Agency</th>
+                        <th>Status</th>
+                        <th>Rows</th>
+                        <th>Columns</th>
+                        <th>Last Checked</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="datasetsTableBody">
+                    <tr>
+                        <td colspan="8" class="loading">Loading datasets...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div id="pagination" class="pagination"></div>
+        
+        <div id="datasetDetails" class="data-viewer" style="display: none;">
+            <div class="data-viewer-header">
+                <h3 class="data-viewer-title">Dataset Details</h3>
+                <button class="btn btn-small" onclick="closeDatasetDetails()">Close</button>
+            </div>
+            <div id="datasetContent" class="data-content">
+                <div class="loading">Loading dataset details...</div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+        // Data viewer specific functionality
+        function showDatasetDetails(datasetId) {
+            const detailsContainer = document.getElementById('datasetDetails');
+            const contentContainer = document.getElementById('datasetContent');
+            
+            detailsContainer.style.display = 'block';
+            contentContainer.innerHTML = '<div class="loading">Loading dataset details...</div>';
+            
+            // Load dataset details
+            fetch(`/api/dataset/${datasetId}`)
+                .then(response => response.json())
+                .then(data => {
+                    contentContainer.innerHTML = `
+                        <div>
+                            <h4>${data.title || 'N/A'}</h4>
+                            <p><strong>Agency:</strong> ${data.agency || 'N/A'}</p>
+                            <p><strong>Status:</strong> <span class="status-badge ${data.availability || 'unknown'}">${data.availability || 'unknown'}</span></p>
+                            <p><strong>Rows:</strong> ${data.row_count || 'N/A'}</p>
+                            <p><strong>Columns:</strong> ${data.column_count || 'N/A'}</p>
+                            <p><strong>Last Checked:</strong> ${data.last_checked ? new Date(data.last_checked).toLocaleString() : 'N/A'}</p>
+                            <p><strong>URL:</strong> <a href="${data.url || '#'}" target="_blank">${data.url || 'N/A'}</a></p>
+                            <p><strong>Description:</strong> ${data.description || 'No description available'}</p>
+                        </div>
+                    `;
+                })
+                .catch(error => {
+                    console.error('Error loading dataset details:', error);
+                    contentContainer.innerHTML = '<div class="error">Error loading dataset details</div>';
+                });
+        }
+        
+        function closeDatasetDetails() {
+            document.getElementById('datasetDetails').style.display = 'none';
+        }
+        
+        // Override the renderTable function to add action buttons
+        const originalRenderTable = renderTable;
+        renderTable = function() {
+            const tableBody = document.getElementById('datasetsTableBody');
+            if (!tableBody) return;
+            
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const pageData = filteredDatasets.slice(startIndex, endIndex);
+            
+            if (pageData.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="8" class="text-center">No datasets found</td></tr>';
+                return;
+            }
+            
+            tableBody.innerHTML = pageData.map(dataset => `
+                <tr>
+                    <td>${dataset.dataset_id || 'N/A'}</td>
+                    <td>${dataset.title || 'N/A'}</td>
+                    <td>${dataset.agency || 'N/A'}</td>
+                    <td><span class="status-badge ${dataset.availability || 'unknown'}">${dataset.availability || 'unknown'}</span></td>
+                    <td>${dataset.row_count || 'N/A'}</td>
+                    <td>${dataset.column_count || 'N/A'}</td>
+                    <td>${dataset.last_checked ? new Date(dataset.last_checked).toLocaleString() : 'N/A'}</td>
+                    <td><button class="btn btn-small" onclick="showDatasetDetails('${dataset.dataset_id}')">View Details</button></td>
+                </tr>
+            `).join('');
+            
+            updatePagination();
+        };
+        
+        // Initialize data viewer
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDashboardData();
+        });
+    </script>
+</body>
+</html>
