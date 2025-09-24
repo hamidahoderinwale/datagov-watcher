@@ -1,0 +1,32 @@
+{
+  "id": "proc_1758689690456",
+  "name": "Test Procedure",
+  "description": "A test procedure for validation",
+  "category": "exploration",
+  "sessions": [
+    "session_001"
+  ],
+  "steps": [
+    {
+      "sequence": 1,
+      "action": "code",
+      "description": "Initialize analysis environment",
+      "codePattern": "import pandas as pd\nimport numpy as np\nimport matplotlib.pyplot as plt"
+    },
+    {
+      "sequence": 2,
+      "action": "analysis",
+      "description": "Load and inspect data",
+      "codePattern": "df = pd.read_csv(\"{{dataset_path}}\")\nprint(df.head())\nprint(df.info())"
+    },
+    {
+      "sequence": 3,
+      "action": "visualization",
+      "description": "Create initial visualizations",
+      "codePattern": "df.hist(figsize=(12, 8))\nplt.tight_layout()\nplt.show()"
+    }
+  ],
+  "success_rate": 0.85,
+  "avg_duration": 15,
+  "created_at": "2025-09-24T04:54:50.456Z"
+}

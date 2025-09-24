@@ -1,0 +1,46 @@
+/* Main App styles following macOS HIG */
+
+.app {
+  width: 100%;
+  height: 100vh;
+  background: #ffffff;
+  border: 1px solid #d4d4d4;
+  border-radius: 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.app.collapsed {
+  height: 48px;
+}
+
+.app.expanded {
+  height: 480px;
+  min-height: 200px;
+  max-height: 800px;
+}
+
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .app {
+    background: #1a1a1a;
+    border-color: #404040;
+    color: #ffffff;
+  }
+}
+
+/* Responsive behavior */
+@media (max-height: 600px) {
+  .app.expanded {
+    height: 400px;
+  }
+}

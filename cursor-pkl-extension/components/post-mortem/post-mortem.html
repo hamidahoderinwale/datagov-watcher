@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Post-mortem Analysis - PKL Extension</title>
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="../../assets/css/variables.css" as="style">
+    <link rel="preload" href="../../assets/css/main.css" as="style">
+    
+    <!-- Load stylesheets -->
+    <link rel="stylesheet" href="../../assets/css/variables.css">
+    <link rel="stylesheet" href="../../assets/css/main.css">
+    <link rel="stylesheet" href="post-mortem.css">
+    
+    <!-- Load Chart.js for timeline visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="container">
+                <div class="header-content">
+                    <div class="header-left">
+                        <h1 class="header-title">Post-mortem Analysis</h1>
+                        <p class="header-subtitle">Forensic analysis of missing or unavailable resources</p>
+                    </div>
+                    <div class="header-actions">
+                        <button class="btn btn-secondary btn-sm" onclick="scanForMissing()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="m21 21-6-6m2-5a7 7 0 1 1-14 0 7 7 0 0 1 14 0z"></path>
+                            </svg>
+                            Scan Missing Files
+                        </button>
+                        <button class="btn btn-primary btn-sm" onclick="createPostMortem()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            Create Post-mortem
+                        </button>
+                        <button class="btn btn-secondary btn-sm" onclick="window.location.href='/'">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                            </svg>
+                            Dashboard
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="container">
+                <!-- Summary Stats -->
+                <section class="summary-stats">
+                    <div class="stat-card">
+                        <div class="stat-icon alert">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path>
+                                <line x1="12" y1="9" x2="12" y2="13"></line>
+                                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                            </svg>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value" id="total-post-mortems">0</div>
+                            <div class="stat-label">Total Post-mortems</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon warning">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="8" x2="12" y2="12"></line>
+                                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                            </svg>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value" id="active-cases">0</div>
+                            <div class="stat-label">Active Cases</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon success">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                <polyline points="22,4 12,14.01 9,11.01"></polyline>
+                            </svg>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value" id="resolved-cases">0</div>
+                            <div class="stat-label">Resolved Cases</div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Post-mortem List -->
+                <section class="post-mortems-section">
+                    <div class="section-header">
+                        <h2 class="section-title">Post-mortem Reports</h2>
+                        <div class="section-filters">
+                            <select class="filter-select" id="status-filter">
+                                <option value="">All Status</option>
+                                <option value="active">Active</option>
+                                <option value="resolved">Resolved</option>
+                                <option value="archived">Archived</option>
+                            </select>
+                            <select class="filter-select" id="cause-filter">
+                                <option value="">All Causes</option>
+                                <option value="file_not_found">File Not Found</option>
+                                <option value="permission_denied">Permission Denied</option>
+                                <option value="repo_moved">Repository Moved</option>
+                                <option value="directory_moved">Directory Moved</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="post-mortems-list" id="post-mortems-list">
+                        <!-- Post-mortems will be loaded here -->
+                        <div class="loading-state">
+                            <div class="loading-spinner"></div>
+                            <p>Loading post-mortems...</p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- Post-mortem Detail Modal -->
+        <div class="modal" id="postMortemModal">
+            <div class="modal-content post-mortem-modal">
+                <div class="modal-header">
+                    <h2 id="post-mortem-title">Post-mortem Details</h2>
+                    <button class="modal-close" onclick="closePostMortemModal()">&times;</button>
+                </div>
+                
+                <div class="modal-body">
+                    <div class="post-mortem-tabs">
+                        <button class="tab-btn active" onclick="switchTab('overview')">Overview</button>
+                        <button class="tab-btn" onclick="switchTab('forensics')">Forensics</button>
+                        <button class="tab-btn" onclick="switchTab('recovery')">Recovery</button>
+                        <button class="tab-btn" onclick="switchTab('timeline')">Timeline</button>
+                    </div>
+                    
+                    <div class="tab-content">
+                        <!-- Overview Tab -->
+                        <div class="tab-pane active" id="overview-tab">
+                            <div class="resource-info" id="resource-info">
+                                <!-- Resource information will be loaded here -->
+                            </div>
+                            
+                            <div class="suspected-cause" id="suspected-cause">
+                                <!-- Suspected cause information will be loaded here -->
+                            </div>
+                            
+                            <div class="last-snapshot" id="last-snapshot">
+                                <!-- Last snapshot information will be loaded here -->
+                            </div>
+                        </div>
+                        
+                        <!-- Forensics Tab -->
+                        <div class="tab-pane" id="forensics-tab">
+                            <div class="forensic-analysis" id="forensic-analysis">
+                                <!-- Forensic analysis will be loaded here -->
+                            </div>
+                            
+                            <div class="prior-diffs" id="prior-diffs">
+                                <!-- Prior diffs will be loaded here -->
+                            </div>
+                        </div>
+                        
+                        <!-- Recovery Tab -->
+                        <div class="tab-pane" id="recovery-tab">
+                            <div class="recovery-options" id="recovery-options">
+                                <!-- Recovery options will be loaded here -->
+                            </div>
+                            
+                            <div class="archived-versions" id="archived-versions">
+                                <!-- Archived versions will be loaded here -->
+                            </div>
+                        </div>
+                        
+                        <!-- Timeline Tab -->
+                        <div class="tab-pane" id="timeline-tab">
+                            <div class="timeline-chart">
+                                <canvas id="timelineChart" width="600" height="300"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="closePostMortemModal()">Close</button>
+                    <button class="btn btn-primary" onclick="exportPostMortemPDF()">Export PDF</button>
+                    <button class="btn btn-warning" id="update-status-btn" onclick="updatePostMortemStatus()">Update Status</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Create Post-mortem Modal -->
+        <div class="modal" id="createPostMortemModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Create New Post-mortem</h2>
+                    <button class="modal-close" onclick="closeCreateModal()">&times;</button>
+                </div>
+                
+                <div class="modal-body">
+                    <form id="create-post-mortem-form">
+                        <div class="form-group">
+                            <label for="file-path">File Path *</label>
+                            <input type="text" id="file-path" name="filePath" required 
+                                   placeholder="/path/to/missing/file.ipynb">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="last-seen">Last Seen (optional)</label>
+                            <input type="datetime-local" id="last-seen" name="lastSeen">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="file-url">URL (optional)</label>
+                            <input type="url" id="file-url" name="url" 
+                                   placeholder="https://github.com/user/repo/blob/main/file.ipynb">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="file-size">File Size (optional)</label>
+                            <input type="number" id="file-size" name="size" 
+                                   placeholder="Size in bytes">
+                        </div>
+                    </form>
+                </div>
+                
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="closeCreateModal()">Cancel</button>
+                    <button class="btn btn-primary" onclick="submitCreatePostMortem()">Create Post-mortem</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load JavaScript -->
+    <script src="post-mortem.js"></script>
+</body>
+</html>

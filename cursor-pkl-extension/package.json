@@ -1,0 +1,32 @@
+{
+  "name": "cursor-pkl-extension",
+  "version": "1.0.0",
+  "description": "Cursor Procedural Knowledge Library Extension for macOS",
+  "main": "web-server.js",
+  "author": "PKL Development Team",
+  "license": "MIT",
+  "private": true,
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "start": "node web-server.js",
+    "dev": "node web-server.js",
+    "build": "tsc",
+    "type-check": "tsc --noEmit",
+    "test": "node scripts/test-end-to-end.sh",
+    "quick-start": "node scripts/quick-start.sh"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.2.0",
+    "chokidar": "^3.5.3",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "nanoid": "^5.0.4"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^20.10.4",
+    "typescript": "^5.3.2"
+  }
+}

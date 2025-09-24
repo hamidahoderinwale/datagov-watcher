@@ -1,0 +1,84 @@
+{
+  "id": "9XBnFsuawEHDjqQjMCjCS",
+  "timestamp": "2025-09-22T17:39:39.872Z",
+  "resourceInfo": {
+    "filePath": "/path/to/missing/test-file.ipynb",
+    "fileName": "test-file.ipynb",
+    "lastSeen": "2025-09-22T10:00:00.000Z",
+    "resourceType": "jupyter_notebook",
+    "size": null,
+    "checksum": null
+  },
+  "lastSnapshot": null,
+  "priorDiffs": {
+    "totalSessions": 0,
+    "totalChanges": 0,
+    "changePattern": null,
+    "recentActivity": [],
+    "timeline": []
+  },
+  "suspectedCause": {
+    "primary": {
+      "type": "file_not_found",
+      "confidence": 0.9,
+      "description": "File no longer exists at expected location",
+      "evidence": "ENOENT error for /path/to/missing/test-file.ipynb"
+    },
+    "all": [
+      {
+        "type": "file_not_found",
+        "confidence": 0.9,
+        "description": "File no longer exists at expected location",
+        "evidence": "ENOENT error for /path/to/missing/test-file.ipynb"
+      },
+      {
+        "type": "directory_moved",
+        "confidence": 0.7,
+        "description": "Parent directory no longer accessible",
+        "evidence": "ENOENT: no such file or directory, access '/path/to/missing'"
+      },
+      {
+        "type": "notebook_cleanup",
+        "confidence": 0.5,
+        "description": "Jupyter notebook may have been cleaned up or moved",
+        "evidence": "File is a Jupyter notebook"
+      }
+    ],
+    "investigationSuggestions": [
+      "Check if file was moved to a different location",
+      "Search for files with similar names in the directory tree",
+      "Check system logs for file system events",
+      "Review backup systems for recent copies"
+    ]
+  },
+  "archivedVersions": [],
+  "recoveryOptions": [
+    {
+      "type": "manual_search",
+      "description": "Manual search and recovery",
+      "action": "Search file system, backups, and cloud storage",
+      "confidence": 0.3,
+      "automated": false
+    }
+  ],
+  "forensicAnalysis": {
+    "timeline": [],
+    "patterns": [],
+    "riskFactors": [],
+    "recommendations": [
+      "Set up automated backups for critical notebooks",
+      "Use version control (git) for important projects",
+      "Regular snapshots of work-in-progress files",
+      "Monitor file system changes for early detection"
+    ]
+  },
+  "status": "resolved",
+  "notes": [
+    {
+      "timestamp": "2025-09-22T17:41:52.235Z",
+      "content": "Test resolution"
+    }
+  ],
+  "createdAt": "2025-09-22T17:39:39.872Z",
+  "updatedAt": "2025-09-22T17:41:52.235Z"
+}

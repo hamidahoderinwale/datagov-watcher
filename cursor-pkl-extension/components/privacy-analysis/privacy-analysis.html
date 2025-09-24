@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy-Preserving Workflow Analysis - PKL Extension</title>
+    <link rel="stylesheet" href="../../assets/css/variables.css">
+    <link rel="stylesheet" href="../../assets/css/main.css">
+    <link rel="stylesheet" href="privacy-analysis.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+</head>
+<body>
+    <div class="privacy-analysis-container">
+        <!-- Header -->
+        <header class="privacy-header">
+            <div class="header-content">
+                <div class="header-left">
+                    <button class="back-button" onclick="window.location.href='/'">
+                        ← Back to Dashboard
+                    </button>
+                    <h1>Privacy-Preserving Workflow Analysis</h1>
+                </div>
+                <div class="header-right">
+                    <button class="export-button" id="export-analysis">Export Analysis</button>
+                    <button class="refresh-button" id="refresh-data">Refresh Data</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Privacy Controls Panel -->
+        <div class="privacy-controls">
+            <div class="control-section">
+                <h3>Privacy Configuration</h3>
+                <div class="privacy-sliders">
+                    <div class="slider-group">
+                        <label for="epsilon-slider">Differential Privacy (ε)</label>
+                        <input type="range" id="epsilon-slider" min="0.1" max="10" step="0.1" value="1.0">
+                        <span class="slider-value" id="epsilon-value">1.0</span>
+                    </div>
+                    <div class="slider-group">
+                        <label for="redaction-slider">Token Redaction Level</label>
+                        <input type="range" id="redaction-slider" min="0" max="100" step="5" value="50">
+                        <span class="slider-value" id="redaction-value">50%</span>
+                    </div>
+                    <div class="slider-group">
+                        <label for="abstraction-slider">Procedural Abstraction</label>
+                        <input type="range" id="abstraction-slider" min="1" max="5" step="1" value="3">
+                        <span class="slider-value" id="abstraction-value">Level 3</span>
+                    </div>
+                </div>
+                <div class="privacy-options">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="redact-names" checked>
+                        <span>Redact Names & Identifiers</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="redact-numbers" checked>
+                        <span>Redact Numbers & Values</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="redact-emails" checked>
+                        <span>Redact Email Addresses</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Analysis Views -->
+        <div class="analysis-views">
+            <!-- Privacy-Expressiveness Curves -->
+            <div class="view-section">
+                <h3>Privacy-Expressiveness Trade-off</h3>
+                <div class="curve-container">
+                    <div class="chart-wrapper">
+                        <canvas id="privacy-curve-chart"></canvas>
+                    </div>
+                    <div class="metrics-panel">
+                        <div class="metric-card">
+                            <h4>Current Privacy Budget</h4>
+                            <div class="metric-value" id="current-epsilon">ε = 1.0</div>
+                        </div>
+                        <div class="metric-card">
+                            <h4>Expressiveness Score</h4>
+                            <div class="metric-value" id="expressiveness-score">0.75</div>
+                        </div>
+                        <div class="metric-card">
+                            <h4>Cluster Quality (Silhouette)</h4>
+                            <div class="metric-value" id="silhouette-score">0.68</div>
+                        </div>
+                        <div class="metric-card">
+                            <h4>Classification Accuracy</h4>
+                            <div class="metric-value" id="classification-accuracy">0.82</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Aligned Trace View -->
+            <div class="view-section">
+                <h3>Aligned Trace Comparison</h3>
+                <div class="trace-comparison">
+                    <div class="trace-panel">
+                        <h4>Original Workflow Trace</h4>
+                        <div class="trace-container" id="original-trace">
+                            <div class="loading-placeholder">Loading original traces...</div>
+                        </div>
+                    </div>
+                    <div class="trace-panel">
+                        <h4>Privacy-Transformed Trace</h4>
+                        <div class="trace-container" id="transformed-trace">
+                            <div class="loading-placeholder">Loading transformed traces...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Workflow Clustering -->
+            <div class="view-section">
+                <h3>Workflow Pattern Clustering</h3>
+                <div class="clustering-view">
+                    <div class="cluster-visualization">
+                        <div id="cluster-plot"></div>
+                    </div>
+                    <div class="cluster-stats">
+                        <div class="stat-item">
+                            <span class="stat-label">Clusters Identified:</span>
+                            <span class="stat-value" id="cluster-count">5</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Workflow Entropy:</span>
+                            <span class="stat-value" id="workflow-entropy">2.34</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Shape Preservation:</span>
+                            <span class="stat-value" id="shape-preservation">0.91</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interactive Zoom Levels -->
+            <div class="view-section">
+                <h3>Multi-Scale Workflow Analysis</h3>
+                <div class="zoom-controls">
+                    <button class="zoom-level active" data-level="token">Token Level</button>
+                    <button class="zoom-level" data-level="step">Step Level</button>
+                    <button class="zoom-level" data-level="workflow">Workflow Level</button>
+                </div>
+                <div class="zoom-content">
+                    <div class="zoom-view" id="token-view">
+                        <div class="token-analysis">
+                            <div class="token-grid" id="token-grid">
+                                <!-- Token-level analysis will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="zoom-view hidden" id="step-view">
+                        <div class="step-analysis">
+                            <div class="step-timeline" id="step-timeline">
+                                <!-- Step-level analysis will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="zoom-view hidden" id="workflow-view">
+                        <div class="workflow-analysis">
+                            <div class="workflow-graph" id="workflow-graph">
+                                <!-- Workflow-level analysis will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Aggregate Statistics -->
+            <div class="view-section">
+                <h3>Aggregate Privacy Statistics</h3>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h4>Total Sessions Analyzed</h4>
+                        <div class="stat-number" id="total-sessions">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h4>Tokens Processed</h4>
+                        <div class="stat-number" id="total-tokens">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h4>Privacy Violations Detected</h4>
+                        <div class="stat-number" id="privacy-violations">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h4>Redaction Rate</h4>
+                        <div class="stat-number" id="redaction-rate">0%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Export Modal -->
+        <div class="export-modal hidden" id="export-modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Export Privacy Analysis</h3>
+                    <button class="close-button" onclick="closeExportModal()">×</button>
+                </div>
+                <div class="modal-body">
+                    <div class="export-options">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="export-curves" checked>
+                            <span>Privacy-Expressiveness Curves</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="export-traces" checked>
+                            <span>Aligned Trace Comparisons</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="export-clusters" checked>
+                            <span>Clustering Analysis</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="export-stats" checked>
+                            <span>Aggregate Statistics</span>
+                        </label>
+                    </div>
+                    <div class="format-selection">
+                        <label>Export Format:</label>
+                        <select id="export-format">
+                            <option value="json">JSON</option>
+                            <option value="csv">CSV</option>
+                            <option value="pdf">PDF Report</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="cancel-button" onclick="closeExportModal()">Cancel</button>
+                    <button class="export-confirm-button" onclick="performExport()">Export</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="privacy-analysis.js"></script>
+</body>
+</html>

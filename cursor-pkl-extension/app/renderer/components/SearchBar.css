@@ -1,0 +1,90 @@
+/* Search bar component styles */
+
+.search-bar {
+  padding: 16px;
+  border-bottom: 1px solid #d4d4d4;
+  background: #ffffff;
+}
+
+.search-input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-input {
+  width: 100%;
+  height: 32px;
+  padding: 8px 12px;
+  border: 1px solid #d4d4d4;
+  border-radius: 6px;
+  font-size: 12px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  background: #ffffff;
+  color: #1a1a1a;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.search-input:focus {
+  border-color: #007AFF;
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+}
+
+.search-input::placeholder {
+  color: #737373;
+}
+
+.search-clear {
+  position: absolute;
+  right: 8px;
+  width: 20px;
+  height: 20px;
+  border: none;
+  background: none;
+  color: #737373;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3px;
+  transition: background-color 0.2s ease;
+}
+
+.search-clear:hover {
+  background: #f5f5f5;
+  color: #1a1a1a;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .search-bar {
+    background: #1a1a1a;
+    border-bottom-color: #404040;
+  }
+
+  .search-input {
+    background: #2a2a2a;
+    border-color: #404040;
+    color: #ffffff;
+  }
+
+  .search-input:focus {
+    border-color: #007AFF;
+  }
+
+  .search-input::placeholder {
+    color: #737373;
+  }
+
+  .search-clear {
+    color: #737373;
+  }
+
+  .search-clear:hover {
+    background: #404040;
+    color: #ffffff;
+  }
+}

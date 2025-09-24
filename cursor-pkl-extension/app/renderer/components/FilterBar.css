@@ -1,0 +1,114 @@
+/* Filter Bar component styles */
+
+.filter-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid #e5e5e5;
+  background: #f8f8f8;
+  gap: 16px;
+}
+
+.filter-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.filter-group label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #1a1a1a;
+  white-space: nowrap;
+}
+
+.filter-select {
+  padding: 4px 8px;
+  border: 1px solid #e5e5e5;
+  border-radius: 4px;
+  font-size: 12px;
+  background: #ffffff;
+  color: #1a1a1a;
+  cursor: pointer;
+  min-width: 100px;
+}
+
+.filter-select:focus {
+  outline: none;
+  border-color: #007AFF;
+  box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.2);
+}
+
+.clear-filters-btn {
+  padding: 4px 8px;
+  border: 1px solid #e5e5e5;
+  border-radius: 4px;
+  background: #ffffff;
+  color: #737373;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.clear-filters-btn:hover {
+  background: #f5f5f5;
+  color: #1a1a1a;
+}
+
+.filter-results {
+  display: flex;
+  align-items: center;
+}
+
+.results-count {
+  font-size: 12px;
+  color: #737373;
+  font-weight: 500;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .filter-bar {
+    background: #2a2a2a;
+    border-bottom-color: #404040;
+  }
+
+  .filter-group label {
+    color: #ffffff;
+  }
+
+  .filter-select {
+    background: #1a1a1a;
+    border-color: #404040;
+    color: #ffffff;
+  }
+
+  .filter-select:focus {
+    border-color: #007AFF;
+  }
+
+  .clear-filters-btn {
+    background: #1a1a1a;
+    border-color: #404040;
+    color: #d4d4d4;
+  }
+
+  .clear-filters-btn:hover {
+    background: #404040;
+    color: #ffffff;
+  }
+
+  .results-count {
+    color: #d4d4d4;
+  }
+}
+
+

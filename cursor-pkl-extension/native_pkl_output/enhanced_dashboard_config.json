@@ -1,0 +1,112 @@
+{
+  "dashboard_name": "Native PKL Integration Dashboard",
+  "version": "2.0.0",
+  "components": [
+    {
+      "id": "pklcluster-tree",
+      "name": "PKLCluster-Tree",
+      "type": "hierarchical_tree",
+      "props": [
+        "clusterTree",
+        "cluster"
+      ],
+      "features": [
+        "Interactive state management",
+        "Hierarchical display",
+        "Expandable nodes",
+        "Selection handling"
+      ],
+      "pkl_enhancements": [
+        "Show procedure success rates",
+        "Display complexity indicators",
+        "Highlight reusable patterns",
+        "Add template generation buttons"
+      ]
+    },
+    {
+      "id": "pklupload-form",
+      "name": "PKLUpload-Form",
+      "type": "generic_component",
+      "props": [],
+      "features": [],
+      "pkl_enhancements": []
+    },
+    {
+      "id": "pklcluster-map",
+      "name": "PKLCluster-Map",
+      "type": "scatter_plot",
+      "props": [],
+      "features": [
+        "Scatter plot visualization",
+        "Interactive selection",
+        "Zoom controls"
+      ],
+      "pkl_enhancements": [
+        "Color by data science workflow",
+        "Size by session complexity",
+        "Show library ecosystem clusters",
+        "Overlay procedure templates"
+      ]
+    },
+    {
+      "id": "pklconversation-dialog",
+      "name": "PKLConversation-Dialog",
+      "type": "generic_component",
+      "props": [],
+      "features": [],
+      "pkl_enhancements": []
+    },
+    {
+      "id": "pklcluster-details",
+      "name": "PKLCluster-Details",
+      "type": "detail_panel",
+      "props": [],
+      "features": [
+        "Interactive state management"
+      ],
+      "pkl_enhancements": [
+        "Show code delta summaries",
+        "Display library usage",
+        "Highlight key insights",
+        "Generate procedure templates"
+      ]
+    }
+  ],
+  "layouts": {
+    "main": {
+      "type": "three_panel",
+      "left": "pkl_cluster_tree",
+      "center": "pkl_umap_plot",
+      "right": "pkl_session_details"
+    },
+    "analysis": {
+      "type": "tabbed",
+      "tabs": [
+        "facet_analysis",
+        "procedure_templates",
+        "success_metrics"
+      ]
+    }
+  },
+  "interactions": [
+    {
+      "trigger": "tree_node_click",
+      "action": "highlight_umap_points",
+      "target": "pkl_umap_plot"
+    },
+    {
+      "trigger": "umap_selection",
+      "action": "show_session_details",
+      "target": "pkl_session_details"
+    },
+    {
+      "trigger": "facet_filter",
+      "action": "update_all_views",
+      "target": [
+        "pkl_cluster_tree",
+        "pkl_umap_plot"
+      ]
+    }
+  ],
+  "data_sources": {}
+}

@@ -1,0 +1,439 @@
+{
+  "analysis_timestamp": "2025-09-24T01:11:48.816695",
+  "input_sessions": 2,
+  "conversations": [
+    {
+      "chat_id": "session_001",
+      "created_at": "2024-01-15T10:30:00Z",
+      "messages": [
+        {
+          "role": "user",
+          "content": "I need to analyze customer data",
+          "timestamp": "2024-01-15T10:30:00Z"
+        },
+        {
+          "role": "assistant",
+          "content": "I can help you explore the customer dataset",
+          "timestamp": "2024-01-15T10:31:00Z"
+        }
+      ],
+      "metadata": {
+        "intent": "explore",
+        "outcome": "success",
+        "confidence": 0.92,
+        "phase": null
+      },
+      "pkl_session_data": {
+        "currentFile": "customer_analysis.ipynb",
+        "codeDeltas": [
+          {
+            "afterContent": "import pandas as pd\ndf = pd.read_csv(\"data.csv\")"
+          }
+        ],
+        "fileChanges": [],
+        "linkedEvents": [],
+        "annotations": []
+      }
+    },
+    {
+      "chat_id": "session_002",
+      "created_at": "2024-01-15T14:20:00Z",
+      "messages": [
+        {
+          "role": "user",
+          "content": "I'm working on a debug task in model_training.py. I've made 1 code changes.",
+          "timestamp": "2024-01-15T14:20:00Z"
+        },
+        {
+          "role": "assistant",
+          "content": "We encountered some challenges with the debug task. Let me help you troubleshoot.",
+          "timestamp": "2024-01-15T14:20:00Z"
+        }
+      ],
+      "metadata": {
+        "intent": "debug",
+        "outcome": "stuck",
+        "confidence": 0.65,
+        "phase": null
+      },
+      "pkl_session_data": {
+        "currentFile": "model_training.py",
+        "codeDeltas": [
+          {
+            "afterContent": "model.fit(X_train, y_train)"
+          }
+        ],
+        "fileChanges": [],
+        "linkedEvents": [],
+        "annotations": []
+      }
+    }
+  ],
+  "faceted_analysis": {
+    "facet_results": {
+      "DataScienceWorkflow": [
+        "Exploratory Data Analysis",
+        "Model Debugging"
+      ],
+      "NotebookComplexity": [
+        "1",
+        "1"
+      ],
+      "LibraryEcosystem": [
+        "Jupyter/Pandas Ecosystem",
+        "Python/Scikit-learn Ecosystem"
+      ],
+      "ProcedureReusability": [
+        "4",
+        "2"
+      ],
+      "AnalysisRequest": [
+        "User requested explore assistance",
+        "User requested debug assistance"
+      ],
+      "DataScienceTask": [
+        "Perform explore analysis on dataset",
+        "Perform debug analysis on dataset"
+      ]
+    },
+    "conversation_facet_values": {
+      "DataScienceWorkflow": {
+        "session_001": "Exploratory Data Analysis",
+        "session_002": "Model Debugging"
+      },
+      "NotebookComplexity": {
+        "session_001": "1",
+        "session_002": "1"
+      },
+      "LibraryEcosystem": {
+        "session_001": "Jupyter/Pandas Ecosystem",
+        "session_002": "Python/Scikit-learn Ecosystem"
+      },
+      "ProcedureReusability": {
+        "session_001": "4",
+        "session_002": "2"
+      },
+      "AnalysisRequest": {
+        "session_001": "User requested explore assistance",
+        "session_002": "User requested debug assistance"
+      },
+      "DataScienceTask": {
+        "session_001": "Perform explore analysis on dataset",
+        "session_002": "Perform debug analysis on dataset"
+      }
+    },
+    "facet_statistics": {
+      "DataScienceWorkflow": {
+        "Exploratory Data Analysis": 1,
+        "Model Debugging": 1
+      },
+      "NotebookComplexity": {
+        "mean": 1.0,
+        "std": 0.0,
+        "min": 1.0,
+        "max": 1.0
+      },
+      "LibraryEcosystem": {
+        "Jupyter/Pandas Ecosystem": 1,
+        "Python/Scikit-learn Ecosystem": 1
+      },
+      "ProcedureReusability": {
+        "mean": 3.0,
+        "std": 1.0,
+        "min": 2.0,
+        "max": 4.0
+      },
+      "AnalysisRequest": {
+        "User requested explore assistance": 1,
+        "User requested debug assistance": 1
+      },
+      "DataScienceTask": {
+        "Perform explore analysis on dataset": 1,
+        "Perform debug analysis on dataset": 1
+      }
+    }
+  },
+  "native_clusters": [
+    {
+      "id": "pkl_cluster_0",
+      "name": "Exploratory Data Analysis (Complexity 1)",
+      "summary": "Sessions involving exploratory data analysis with complexity level 1",
+      "conversations": [
+        "session_001"
+      ],
+      "facet_values": {
+        "DataScienceWorkflow": [
+          "Exploratory Data Analysis"
+        ],
+        "NotebookComplexity": [
+          "1"
+        ]
+      },
+      "size": 1,
+      "success_rate": 0.8,
+      "avg_duration": 15.0,
+      "procedure_template": null
+    },
+    {
+      "id": "pkl_cluster_1",
+      "name": "Model Debugging (Complexity 1)",
+      "summary": "Sessions involving model debugging with complexity level 1",
+      "conversations": [
+        "session_002"
+      ],
+      "facet_values": {
+        "DataScienceWorkflow": [
+          "Model Debugging"
+        ],
+        "NotebookComplexity": [
+          "1"
+        ]
+      },
+      "size": 1,
+      "success_rate": 0.8,
+      "avg_duration": 15.0,
+      "procedure_template": null
+    }
+  ],
+  "visualizations": [
+    {
+      "type": "hierarchical_tree",
+      "name": "PKL Procedure Hierarchy",
+      "data": {
+        "name": "All PKL Sessions",
+        "children": [
+          {
+            "name": "Exploratory Data Analysis",
+            "children": [
+              {
+                "name": "Exploratory Data Analysis (Complexity 1)",
+                "size": 1,
+                "success_rate": 0.8,
+                "avg_duration": 15.0,
+                "conversations": [
+                  "session_001"
+                ]
+              }
+            ],
+            "size": 1,
+            "success_rate": 0.8
+          },
+          {
+            "name": "Model Debugging",
+            "children": [
+              {
+                "name": "Model Debugging (Complexity 1)",
+                "size": 1,
+                "success_rate": 0.8,
+                "avg_duration": 15.0,
+                "conversations": [
+                  "session_002"
+                ]
+              }
+            ],
+            "size": 1,
+            "success_rate": 0.8
+          }
+        ],
+        "size": 2
+      },
+      "features": [
+        "expandable_nodes",
+        "success_indicators",
+        "complexity_colors"
+      ],
+      "pkl_enhancements": [
+        "Show procedure templates",
+        "Display reusability scores",
+        "Highlight successful patterns"
+      ]
+    },
+    {
+      "type": "umap_scatter",
+      "name": "Session Relationship Map",
+      "data": [
+        {
+          "id": "session_001",
+          "x": -0.04797819611026284,
+          "y": 0.014408728084276406,
+          "cluster_id": "pkl_cluster_0",
+          "cluster_name": "Exploratory Data Analysis (Complexity 1)",
+          "workflow": "Exploratory Data Analysis",
+          "complexity": 1,
+          "success_rate": 0.8
+        },
+        {
+          "id": "session_002",
+          "x": 0.2153569238026795,
+          "y": 0.11705631730628947,
+          "cluster_id": "pkl_cluster_1",
+          "cluster_name": "Model Debugging (Complexity 1)",
+          "workflow": "Model Debugging",
+          "complexity": 1,
+          "success_rate": 0.8
+        }
+      ],
+      "features": [
+        "interactive_selection",
+        "facet_coloring",
+        "zoom_controls"
+      ],
+      "pkl_enhancements": [
+        "Color by workflow type",
+        "Size by complexity",
+        "Show library ecosystems"
+      ]
+    },
+    {
+      "type": "facet_dashboard",
+      "name": "Data Science Facet Analysis",
+      "data": {
+        "workflow_distribution": {
+          "Exploratory Data Analysis": 1,
+          "Model Debugging": 1
+        },
+        "complexity_distribution": {
+          "1": 2
+        },
+        "success_by_workflow": {
+          "Exploratory Data Analysis": 0.8,
+          "Model Debugging": 0.8
+        },
+        "reusability_scores": {}
+      },
+      "features": [
+        "multi_facet_view",
+        "filter_controls",
+        "statistics_panel"
+      ],
+      "pkl_enhancements": [
+        "Workflow distribution charts",
+        "Complexity heatmaps",
+        "Success rate trends"
+      ]
+    }
+  ],
+  "procedure_templates": [
+    {
+      "id": "template_pkl_cluster_0",
+      "name": "Exploratory Data Analysis (Complexity 1) Procedure",
+      "description": "Reusable procedure for sessions involving exploratory data analysis with complexity level 1",
+      "workflow_type": "Exploratory Data Analysis",
+      "complexity_level": "1",
+      "success_rate": 0.8,
+      "based_on_sessions": [
+        "session_001"
+      ],
+      "steps": [
+        {
+          "step": 1,
+          "action": "Load and inspect data",
+          "code": "df = pd.read_csv(\"{{dataset_path}}\")\nprint(df.head())\nprint(df.info())"
+        },
+        {
+          "step": 2,
+          "action": "Check data quality",
+          "code": "print(df.isnull().sum())\nprint(df.describe())"
+        },
+        {
+          "step": 3,
+          "action": "Create visualizations",
+          "code": "df.hist(figsize=(12, 8))\nplt.tight_layout()\nplt.show()"
+        },
+        {
+          "step": 4,
+          "action": "Analyze correlations",
+          "code": "correlation_matrix = df.corr()\nsns.heatmap(correlation_matrix, annot=True)"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "dataset_path",
+          "type": "string",
+          "description": "Path to the dataset file"
+        },
+        {
+          "name": "target_column",
+          "type": "string",
+          "description": "Name of the target variable column"
+        },
+        {
+          "name": "figure_size",
+          "type": "tuple",
+          "description": "Size of generated plots",
+          "default": "(12, 8)"
+        }
+      ],
+      "expected_outputs": [
+        "Data shape and basic statistics",
+        "Missing value analysis",
+        "Distribution visualizations",
+        "Correlation heatmap",
+        "Key insights and patterns"
+      ]
+    },
+    {
+      "id": "template_pkl_cluster_1",
+      "name": "Model Debugging (Complexity 1) Procedure",
+      "description": "Reusable procedure for sessions involving model debugging with complexity level 1",
+      "workflow_type": "Model Debugging",
+      "complexity_level": "1",
+      "success_rate": 0.8,
+      "based_on_sessions": [
+        "session_002"
+      ],
+      "steps": [
+        {
+          "step": 1,
+          "action": "Load model and data",
+          "code": "model = joblib.load(\"{{model_path}}\")\nX_test = pd.read_csv(\"{{test_data_path}}\")"
+        },
+        {
+          "step": 2,
+          "action": "Check predictions",
+          "code": "predictions = model.predict(X_test)\nprint(f\"Prediction range: {predictions.min()} - {predictions.max()}\")"
+        },
+        {
+          "step": 3,
+          "action": "Analyze errors",
+          "code": "errors = y_test - predictions\nplt.scatter(predictions, errors)\nplt.xlabel(\"Predictions\")\nplt.ylabel(\"Errors\")"
+        },
+        {
+          "step": 4,
+          "action": "Feature importance",
+          "code": "if hasattr(model, \"feature_importances_\"):\n    importance_df = pd.DataFrame({\"feature\": X_test.columns, \"importance\": model.feature_importances_})\n    print(importance_df.sort_values(\"importance\", ascending=False))"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "model_path",
+          "type": "string",
+          "description": "Path to the saved model file"
+        },
+        {
+          "name": "test_data_path",
+          "type": "string",
+          "description": "Path to test dataset"
+        },
+        {
+          "name": "target_column",
+          "type": "string",
+          "description": "Name of the target variable"
+        }
+      ],
+      "expected_outputs": [
+        "Model performance metrics",
+        "Error analysis plots",
+        "Feature importance rankings",
+        "Diagnostic insights",
+        "Improvement recommendations"
+      ]
+    }
+  ],
+  "integration_metadata": {
+    "openclio_facets_used": 0,
+    "kura_pipeline_stages": 4,
+    "pkl_specific_facets": 6,
+    "repository_parsing_success": true
+  }
+}

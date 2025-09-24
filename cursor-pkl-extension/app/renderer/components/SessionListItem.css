@@ -1,0 +1,158 @@
+/* Session list item component styles */
+
+.session-item {
+  padding: 8px 16px;
+  border-bottom: 1px solid #f5f5f5;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  position: relative;
+}
+
+.session-item:hover {
+  background: #f5f5f5;
+}
+
+.session-item.selected {
+  background: #e3f2fd;
+  border-left: 3px solid #007AFF;
+}
+
+.session-item-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 32px;
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+  font-size: 11px;
+}
+
+.session-bullet {
+  color: #737373;
+  font-weight: bold;
+  width: 8px;
+  flex-shrink: 0;
+}
+
+.session-time {
+  color: #737373;
+  width: 40px;
+  flex-shrink: 0;
+}
+
+.session-intent {
+  font-size: 11px;
+  color: #404040;
+  width: 60px;
+  flex-shrink: 0;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.session-file {
+  font-size: 11px;
+  color: #1a1a1a;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+}
+
+.session-outcome {
+  font-size: 11px;
+  font-weight: 500;
+  width: 20px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.session-outcome.success {
+  color: #34C759;
+}
+
+.session-outcome.stuck {
+  color: #FF3B30;
+}
+
+.session-outcome.in-progress {
+  color: #007AFF;
+}
+
+.session-actions {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  gap: 8px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.session-item.selected .session-actions {
+  opacity: 1;
+}
+
+.action-button {
+  padding: 4px 8px;
+  border: 1px solid #d4d4d4;
+  border-radius: 4px;
+  background: #ffffff;
+  color: #1a1a1a;
+  font-size: 10px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.action-button:hover {
+  background: #f5f5f5;
+  border-color: #007AFF;
+}
+
+.return-button {
+  color: #007AFF;
+}
+
+.resume-button {
+  color: #34C759;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .session-item {
+    border-bottom-color: #404040;
+  }
+
+  .session-item:hover {
+    background: #2a2a2a;
+  }
+
+  .session-item.selected {
+    background: #1a2332;
+    border-left-color: #007AFF;
+  }
+
+  .session-time {
+    color: #d4d4d4;
+  }
+
+  .session-intent {
+    color: #ffffff;
+  }
+
+  .session-file {
+    color: #ffffff;
+  }
+
+  .action-button {
+    background: #2a2a2a;
+    border-color: #404040;
+    color: #ffffff;
+  }
+
+  .action-button:hover {
+    background: #404040;
+    border-color: #007AFF;
+  }
+}

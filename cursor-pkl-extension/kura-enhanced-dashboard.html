@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PKL Extension - Enhanced Kura Dashboard</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="kura-dashboard.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <div class="header-content">
+                <h1>🧠 PKL Extension - Enhanced Analytics Dashboard</h1>
+                <div class="header-controls">
+                    <button id="refresh-btn" class="btn btn-primary">🔄 Refresh</button>
+                    <button id="export-btn" class="btn btn-secondary">📊 Export</button>
+                    <div class="search-container">
+                        <input type="text" id="global-search" placeholder="🔍 Search sessions..." />
+                        <button id="search-btn" class="btn btn-icon">🔍</button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Dashboard Layout -->
+        <div class="dashboard-main">
+            <!-- Left Panel: Hierarchical Cluster Tree -->
+            <div class="left-panel">
+                <div class="panel-header">
+                    <h2>📊 Hierarchical Clusters</h2>
+                    <div class="cluster-controls">
+                        <button id="expand-all-btn" class="btn btn-sm">Expand All</button>
+                        <button id="collapse-all-btn" class="btn btn-sm">Collapse All</button>
+                    </div>
+                </div>
+                <div class="cluster-tree-container">
+                    <div id="cluster-tree" class="cluster-tree"></div>
+                </div>
+                
+                <!-- Cluster Statistics -->
+                <div class="cluster-stats">
+                    <h3>📈 Cluster Statistics</h3>
+                    <div id="cluster-stats-content"></div>
+                </div>
+            </div>
+
+            <!-- Center Panel: UMAP Visualization -->
+            <div class="center-panel">
+                <div class="panel-header">
+                    <h2>🗺️ Session Relationship Map (UMAP)</h2>
+                    <div class="umap-controls">
+                        <select id="color-by-select">
+                            <option value="intent">Color by Intent</option>
+                            <option value="outcome">Color by Outcome</option>
+                            <option value="file_type">Color by File Type</option>
+                            <option value="cluster">Color by Cluster</option>
+                        </select>
+                        <button id="reset-zoom-btn" class="btn btn-sm">Reset Zoom</button>
+                        <button id="fullscreen-btn" class="btn btn-sm">⛶ Fullscreen</button>
+                    </div>
+                </div>
+                <div class="umap-container">
+                    <div id="umap-plot" class="umap-plot"></div>
+                    <div class="umap-legend" id="umap-legend"></div>
+                </div>
+
+                <!-- Selection Info -->
+                <div class="selection-info" id="selection-info">
+                    <h3>📋 Selection Details</h3>
+                    <div id="selection-content">
+                        <p>Click on points or draw a selection box to see details</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel: Session Details & Patterns -->
+            <div class="right-panel">
+                <!-- Session Details -->
+                <div class="session-details-container">
+                    <div class="panel-header">
+                        <h2>🔍 Session Details</h2>
+                        <button id="close-details-btn" class="btn btn-sm">✕</button>
+                    </div>
+                    <div id="session-details" class="session-details">
+                        <p>Select a session to view details</p>
+                    </div>
+                </div>
+
+                <!-- Pattern Insights -->
+                <div class="pattern-insights-container">
+                    <div class="panel-header">
+                        <h2>🎯 Pattern Insights</h2>
+                        <select id="insight-type-select">
+                            <option value="success_patterns">Success Patterns</option>
+                            <option value="failure_patterns">Failure Patterns</option>
+                            <option value="temporal_patterns">Temporal Patterns</option>
+                            <option value="file_patterns">File Patterns</option>
+                        </select>
+                    </div>
+                    <div id="pattern-insights" class="pattern-insights"></div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="quick-actions-container">
+                    <div class="panel-header">
+                        <h2>⚡ Quick Actions</h2>
+                    </div>
+                    <div class="quick-actions">
+                        <button id="generate-notebook-btn" class="btn btn-primary">📓 Generate Analysis Notebook</button>
+                        <button id="export-cluster-btn" class="btn btn-secondary">📁 Export Selected Cluster</button>
+                        <button id="create-procedure-btn" class="btn btn-success">🔧 Create Procedure Template</button>
+                        <button id="share-insights-btn" class="btn btn-info">🔗 Share Insights</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status Bar -->
+        <div class="status-bar">
+            <div class="status-left">
+                <span id="session-count">0 sessions loaded</span>
+                <span id="cluster-count">0 clusters</span>
+                <span id="selected-count">0 selected</span>
+            </div>
+            <div class="status-right">
+                <span id="last-updated">Never updated</span>
+                <span id="analysis-mode">Mock Mode</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    
+    <!-- Notebook Generation Modal -->
+    <div id="notebook-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📓 Generate Analysis Notebook</h2>
+                <button class="modal-close" onclick="closeModal('notebook-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="notebook-template">Template Type:</label>
+                    <select id="notebook-template">
+                        <option value="eda">Exploratory Data Analysis</option>
+                        <option value="debugging">Debugging Analysis</option>
+                        <option value="implementation">Implementation Review</option>
+                        <option value="custom">Custom Analysis</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="notebook-title">Notebook Title:</label>
+                    <input type="text" id="notebook-title" placeholder="Analysis of Selected Sessions">
+                </div>
+                <div class="form-group">
+                    <label for="include-options">Include:</label>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" id="include-conversations" checked> Conversations</label>
+                        <label><input type="checkbox" id="include-code-deltas" checked> Code Changes</label>
+                        <label><input type="checkbox" id="include-patterns" checked> Pattern Analysis</label>
+                        <label><input type="checkbox" id="include-visualizations" checked> Visualizations</label>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('notebook-modal')">Cancel</button>
+                <button class="btn btn-primary" onclick="generateNotebook()">Generate & Open in Cursor</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Procedure Template Modal -->
+    <div id="procedure-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🔧 Create Procedure Template</h2>
+                <button class="modal-close" onclick="closeModal('procedure-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="procedure-name">Procedure Name:</label>
+                    <input type="text" id="procedure-name" placeholder="e.g., Data Quality Assessment">
+                </div>
+                <div class="form-group">
+                    <label for="procedure-description">Description:</label>
+                    <textarea id="procedure-description" rows="3" placeholder="Describe what this procedure accomplishes..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="procedure-category">Category:</label>
+                    <select id="procedure-category">
+                        <option value="exploration">Data Exploration</option>
+                        <option value="debugging">Debugging</option>
+                        <option value="implementation">Implementation</option>
+                        <option value="validation">Validation</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Based on Sessions:</label>
+                    <div id="selected-sessions-list" class="selected-sessions"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('procedure-modal')">Cancel</button>
+                <button class="btn btn-primary" onclick="createProcedure()">Create Procedure</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay" style="display: none;">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p>Analyzing sessions with Kura...</p>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="assets/js/dashboard.js"></script>
+    <script src="kura-dashboard.js"></script>
+    <script>
+        // Initialize enhanced dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeKuraDashboard();
+        });
+    </script>
+</body>
+</html>
