@@ -11,7 +11,7 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from src.unified_app import app, socketio
+from unified_app import app, socketio
 
 if __name__ == "__main__":
     print("Starting Dataset State Historian...")

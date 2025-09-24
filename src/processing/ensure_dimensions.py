@@ -9,8 +9,8 @@ import argparse
 import json
 import logging
 from datetime import datetime
-from src.processing.enhanced_row_column_computer import EnhancedRowColumnComputer
-from src.processing.backfill_dimensions import DimensionBackfillProcessor
+from processing.enhanced_row_column_computer import EnhancedRowColumnComputer
+from processing.backfill_dimensions import DimensionBackfillProcessor
 
 # Configure logging
 logging.basicConfig(

@@ -8,7 +8,7 @@ import sqlite3
 import json
 import logging
 from datetime import datetime
-from src.core.historian_core import DatasetStateHistorian
+from core.historian_core import DatasetStateHistorian
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')

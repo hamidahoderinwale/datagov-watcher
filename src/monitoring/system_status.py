@@ -12,8 +12,8 @@ import json
 # Add the current directory to Python path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from src.core.data_fetcher import DataFetcher
-from src.analysis.diff_engine import DiffEngine
+from core.data_fetcher import DataFetcher
+from analysis.diff_engine import DiffEngine
 
 def get_system_status():
     """Get comprehensive system status"""

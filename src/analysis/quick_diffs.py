@@ -5,7 +5,7 @@ Quick diff generation to populate dashboard
 
 import sqlite3
 import json
-from src.core.historian_core import DatasetStateHistorian
+from core.historian_core import DatasetStateHistorian
 
 def generate_quick_diffs():
     print("🚀 Quick diff generation for dashboard...")

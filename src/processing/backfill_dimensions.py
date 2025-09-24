@@ -9,7 +9,7 @@ import json
 import logging
 from datetime import datetime
 from typing import Dict, List, Optional
-from src.processing.enhanced_row_column_computer import EnhancedRowColumnComputer
+from processing.enhanced_row_column_computer import EnhancedRowColumnComputer
 
 logger = logging.getLogger(__name__)
 

@@ -13,7 +13,7 @@ import os
 
 # Add src to path for imports
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
-from src.analysis.dataset_enhancer import DatasetEnhancer
+from analysis.dataset_enhancer import DatasetEnhancer
 
 enhanced_dataset_bp = Blueprint('enhanced_dataset', __name__)
 

@@ -6,13 +6,13 @@ import json
 from datetime import datetime, timedelta
 from typing import List, Dict, Optional, Any
 from flask import Blueprint, request, jsonify
-from src.core.enhanced_models import (
+from core.enhanced_models import (
     DatasetProfile, AgencyMetrics, TagMetrics, SystemMetrics,
     TimelineEmbed, ContextSidebar, DatasetStatus, Tag, UsageRef, PolicyRef, NewsMention
 )
-from src.visualization.chromogram_timeline_v2 import ChromogramTimelineV2
-from src.analysis.event_extractor import EventExtractor
-from src.core.availability_detector import AvailabilityDetector
+from visualization.chromogram_timeline_v2 import ChromogramTimelineV2
+from analysis.event_extractor import EventExtractor
+from core.availability_detector import AvailabilityDetector
 
 # Create blueprint for enhanced endpoints
 enhanced_bp = Blueprint('enhanced', __name__, url_prefix='/api/enhanced')

@@ -12,16 +12,16 @@ import threading
 from datetime import datetime, timedelta
 from pathlib import Path
 import os
-from src.monitoring.enhanced_monitor import EnhancedConcordanceMonitor
-from src.analysis.time_series_manager import TimeSeriesManager
-from src.visualization.timeline_visualizer import TimelineVisualizer
-from src.analysis.agency_analytics import AgencyAnalytics
-from src.integrations.lil_integration import LILIntegration
-from src.analysis.enhanced_diff_engine import EnhancedDiffEngine
-from src.visualization.chromogram_timeline import ChromogramTimeline
-from src.processing.full_database_processor import FullDatabaseProcessor
-from src.monitoring.scaled_monitor import ScaledMonitor
-from src.processing.enhanced_row_column_computer import EnhancedRowColumnComputer
+from monitoring.enhanced_monitor import EnhancedConcordanceMonitor
+from analysis.time_series_manager import TimeSeriesManager
+from visualization.timeline_visualizer import TimelineVisualizer
+from analysis.agency_analytics import AgencyAnalytics
+from integrations.lil_integration import LILIntegration
+from analysis.enhanced_diff_engine import EnhancedDiffEngine
+from visualization.chromogram_timeline import ChromogramTimeline
+from processing.full_database_processor import FullDatabaseProcessor
+from monitoring.scaled_monitor import ScaledMonitor
+from processing.enhanced_row_column_computer import EnhancedRowColumnComputer
 from processing.backfill_dimensions import DimensionBackfillProcessor
 
 # New enhanced systems
@@ -42,9 +42,9 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 app.register_blueprint(enhanced_bp)
 
 # Import and register additional API blueprints
-from src.api.datasets_api import datasets_bp
-from src.api.wayback_api import wayback_bp
-from src.api.analytics_api import analytics_bp
+from api.datasets_api import datasets_bp
+from api.wayback_api import wayback_bp
+from api.analytics_api import analytics_bp
 app.register_blueprint(datasets_bp)
 app.register_blueprint(wayback_bp)
 app.register_blueprint(analytics_bp)
@@ -393,7 +393,7 @@ def api_licenses():
         total_datasets = sum(row[1] for row in license_data)
         
         # Process license data with intelligent classification
-        from src.core.license_classifier import license_classifier
+        from core.license_classifier import license_classifier
         
         licenses = []
         license_categories = {}
@@ -1564,7 +1564,7 @@ def api_monitoring_stats():
         
         # Get rate limiting statistics
         try:
-            from src.monitoring.rate_limiter import rate_limiter
+            from monitoring.rate_limiter import rate_limiter
             rate_limiting_stats = rate_limiter.get_rate_limit_stats()
         except Exception as e:
             rate_limiting_stats = {'error': str(e)}
@@ -1587,7 +1587,7 @@ def api_monitoring_stats():
 def start_discovery():
     """Start comprehensive dataset discovery"""
     try:
-        from src.core.comprehensive_discovery import ComprehensiveDiscovery
+        from core.comprehensive_discovery import ComprehensiveDiscovery
         
         discovery = ComprehensiveDiscovery()
         
@@ -1619,7 +1619,7 @@ def start_discovery():
 def discovery_status():
     """Get discovery status and statistics"""
     try:
-        from src.core.comprehensive_discovery import ComprehensiveDiscovery
+        from core.comprehensive_discovery import ComprehensiveDiscovery
         
         discovery = ComprehensiveDiscovery()
         stats = discovery.get_discovery_stats()
@@ -1633,7 +1633,7 @@ def discovery_status():
 def start_monitoring():
     """Start comprehensive monitoring"""
     try:
-        from src.monitoring.comprehensive_scheduler import ComprehensiveScheduler
+        from monitoring.comprehensive_scheduler import ComprehensiveScheduler
         
         scheduler = ComprehensiveScheduler()
         
@@ -1663,7 +1663,7 @@ def start_monitoring():
 def monitoring_status():
     """Get monitoring status and statistics"""
     try:
-        from src.monitoring.comprehensive_scheduler import ComprehensiveScheduler
+        from monitoring.comprehensive_scheduler import ComprehensiveScheduler
         
         scheduler = ComprehensiveScheduler()
         status = scheduler.get_monitoring_status()
@@ -1677,7 +1677,7 @@ def monitoring_status():
 def init_monitoring():
     """Initialize monitoring schedule for all datasets"""
     try:
-        from src.monitoring.comprehensive_scheduler import ComprehensiveScheduler
+        from monitoring.comprehensive_scheduler import ComprehensiveScheduler
         
         scheduler = ComprehensiveScheduler()
         
@@ -3293,7 +3293,7 @@ def api_chromogram_html(dataset_id):
 def api_postmortem(dataset_id):
     """Generate post-mortem analysis for vanished dataset"""
     try:
-        from src.analysis.postmortem_system import PostMortemSystem
+        from analysis.postmortem_system import PostMortemSystem
         
         # Initialize post-mortem system
         postmortem_system = PostMortemSystem()
@@ -3597,8 +3597,8 @@ def api_compare_datasets():
         def run_comparison():
             try:
                 # Import the comparison logic
-                from src.core.data_fetcher import DataFetcher
-                from src.analysis.diff_engine import DiffEngine
+                from core.data_fetcher import DataFetcher
+                from analysis.diff_engine import DiffEngine
                 
                 # Initialize components
                 data_fetcher = DataFetcher()
@@ -4186,7 +4186,7 @@ if __name__ == '__main__':
 def api_system_health():
     """Get system health check"""
     try:
-        from src.monitoring.system_monitor import SystemMonitor
+        from monitoring.system_monitor import SystemMonitor
         
         monitor = SystemMonitor()
         health = asyncio.run(monitor._check_system_health())
