@@ -13,10 +13,10 @@ sys.path.insert(0, str(project_root))
 from src.unified_app import app, socketio
 
 if __name__ == "__main__":
-    print("🚀 Starting Dataset State Historian...")
-    print("📊 Dashboard: http://127.0.0.1:8081")
-    print("📈 Timeline: http://127.0.0.1:8081/timeline")
-    print("🔧 API: http://127.0.0.1:8081/api")
+    print("Starting Dataset State Historian...")
+    print("Dashboard: http://127.0.0.1:8081")
+    print("Timeline: http://127.0.0.1:8081/timeline")
+    print("API: http://127.0.0.1:8081/api")
     print("")
     
     # Run the application

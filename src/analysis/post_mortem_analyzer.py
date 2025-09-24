@@ -426,14 +426,14 @@ class PostMortemAnalyzer:
             <strong>Confidence Score:</strong> <span class="confidence-{'high' if postmortem['confidence_score'] > 0.7 else 'medium' if postmortem['confidence_score'] > 0.4 else 'low'}">{postmortem['confidence_score']:.1%}</span>
         </div>
         
-        <h2>🎯 Suspected Cause</h2>
+        <h2> Suspected Cause</h2>
         <div class="evidence-list">
             <strong>{postmortem['suspected_cause']['description']}</strong><br>
             <strong>Confidence:</strong> {postmortem['suspected_cause']['confidence']:.1%}<br>
             <strong>Evidence:</strong> {', '.join(postmortem['suspected_cause']['evidence'])}
         </div>
         
-        <h2>📊 Disappearance Analysis</h2>
+        <h2> Disappearance Analysis</h2>
         <table>
             <tr><td>Pattern</td><td>{postmortem['disappearance_analysis']['pattern']}</td></tr>
             <tr><td>Snapshots</td><td>{postmortem['disappearance_analysis']['snapshots']}</td></tr>
@@ -442,7 +442,7 @@ class PostMortemAnalyzer:
             <tr><td>Stable Before Disappearance</td><td>{'Yes' if postmortem['disappearance_analysis']['stable_before_disappearance'] else 'No'}</td></tr>
         </table>
         
-        <h2>🌐 URL Analysis</h2>
+        <h2> URL Analysis</h2>
         <table>
             <tr><td>Status</td><td>{postmortem['url_analysis']['status']}</td></tr>
             <tr><td>Status Code</td><td>{postmortem['url_analysis'].get('status_code', 'N/A')}</td></tr>

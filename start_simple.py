@@ -10,7 +10,7 @@ from pathlib import Path
 
 def main():
     """Start the Dataset State Historian with proper path setup"""
-    print("🚀 Starting Dataset State Historian...")
+    print("Starting Starting Dataset State Historian...")
     print("=" * 50)
     
     # Get the project root directory
@@ -28,10 +28,10 @@ def main():
         # Import the Flask app
         from unified_app import app, socketio
         
-        print("✅ Application loaded successfully")
-        print(f"📂 Working directory: {os.getcwd()}")
-        print(f"🌐 Dashboard: http://127.0.0.1:8081")
-        print(f"📊 API: http://127.0.0.1:8081/api")
+        print("Success Application loaded successfully")
+        print(f" Working directory: {os.getcwd()}")
+        print(f" Dashboard: http://127.0.0.1:8081")
+        print(f" API: http://127.0.0.1:8081/api")
         print("=" * 50)
         
         # Start the application with debug disabled to avoid restart issues
@@ -44,12 +44,12 @@ def main():
         )
         
     except ImportError as e:
-        print(f"❌ Import error: {e}")
+        print(f"Error Import error: {e}")
         print("Make sure all dependencies are installed:")
         print("  pip install -r requirements.txt")
         return 1
     except Exception as e:
-        print(f"❌ Error starting application: {e}")
+        print(f"Error Error starting application: {e}")
         return 1
     finally:
         # Restore original working directory

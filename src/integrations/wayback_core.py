@@ -427,7 +427,7 @@ def main():
             print(f"       Last seen: {vd['last_seen_date']} from {vd['last_seen_source']}")
             print(f"       Wayback snapshots: {vd['wayback_snapshots']}")
     
-    print("\n✅ Wayback Core is fully operational!")
+    print("\nSuccess Wayback Core is fully operational!")
     print("\nKey capabilities:")
     print("  ✓ Vanished dataset detection")
     print("  ✓ Wayback Machine API integration")

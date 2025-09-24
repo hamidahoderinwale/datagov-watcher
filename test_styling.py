@@ -17,25 +17,25 @@ def test_app():
     try:
         from unified_app import app
         
-        print("✅ Application loaded successfully")
+        print("Success Application loaded successfully")
         
         # Test with Flask test client
         with app.test_client() as client:
             # Test main page
             response = client.get('/')
-            print(f"✅ Main page: {response.status_code}")
+            print(f"Success Main page: {response.status_code}")
             
             # Test API
             response = client.get('/api/stats')
-            print(f"✅ API stats: {response.status_code}")
+            print(f"Success API stats: {response.status_code}")
             
             if response.status_code == 200:
                 data = response.get_json()
                 print(f"   Total datasets: {data.get('total_datasets', 'N/A')}")
                 print(f"   Total snapshots: {data.get('total_snapshots', 'N/A')}")
         
-        print("\n✅ Application is working correctly")
-        print("✅ Styling changes applied:")
+        print("\nSuccess Application is working correctly")
+        print("Success Styling changes applied:")
         print("   - Grayscale color scheme")
         print("   - Inter font family")
         print("   - No border radius (sharp corners)")
@@ -44,7 +44,7 @@ def test_app():
         return True
         
     except Exception as e:
-        print(f"❌ Error: {e}")
+        print(f"Error Error: {e}")
         return False
 
 if __name__ == '__main__':

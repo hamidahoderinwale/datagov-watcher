@@ -136,7 +136,7 @@ def print_data_summary():
     
     summary = get_data_summary()
     
-    print(f"\n📊 OVERVIEW")
+    print(f"\n OVERVIEW")
     print(f"Total Datasets Analyzed: {summary['total_datasets']}")
     print(f"Datasets with Data Files: {summary['datasets_with_data']}")
     print(f"Datasets with HTML/Web Pages: {summary['datasets_with_html']}")
@@ -173,7 +173,7 @@ def print_data_summary():
     print(f"• Schema analysis works on the captured HTML content structure")
     print(f"• This provides a foundation for monitoring dataset availability and changes")
     
-    print(f"\n🌐 ACCESS YOUR DATA")
+    print(f"\n ACCESS YOUR DATA")
     print(f"• Main Dashboard: http://127.0.0.1:8081")
     print(f"• Data Viewer: http://127.0.0.1:8082")
     print(f"• Individual Reports: state_reports/ directory")

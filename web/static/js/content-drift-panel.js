@@ -533,9 +533,9 @@ class ContentDriftPanel {
     
     getEventIcon(type) {
         const icons = {
-            'Row Count Drift': '📊',
-            'Schema Drift': '🔧',
-            'Content Drift': '📈',
+            'Row Count Drift': '',
+            'Schema Drift': '',
+            'Content Drift': '',
             'Structure Change': '🏗️'
         };
         

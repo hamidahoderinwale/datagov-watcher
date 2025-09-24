@@ -319,7 +319,7 @@ def main():
         vanished_datasets = fetcher.run_comparison()
         
         if vanished_datasets:
-            print(f"\n✅ Successfully found {len(vanished_datasets)} vanished datasets!")
+            print(f"\nSuccess Successfully found {len(vanished_datasets)} vanished datasets!")
             print("\nSample vanished datasets:")
             for i, dataset in enumerate(vanished_datasets[:5]):
                 print(f"  {i+1}. {dataset['title']} ({dataset['organization'].get('title', 'Unknown')})")
@@ -331,7 +331,7 @@ def main():
             
     except Exception as e:
         logger.error(f"Error in main process: {e}")
-        print(f"\n❌ Error: {e}")
+        print(f"\nError Error: {e}")
 
 if __name__ == "__main__":
     main()

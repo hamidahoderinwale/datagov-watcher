@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 def generate_diffs_and_volatility():
     """Generate diffs and volatility metrics for all datasets"""
-    print("🔧 Generating diffs and volatility metrics...")
+    print(" Generating diffs and volatility metrics...")
     print("=" * 60)
     
     # Initialize historian
@@ -123,7 +123,7 @@ def generate_diffs_and_volatility():
     conn.commit()
     conn.close()
     
-    print(f"\n✅ Generated {diffs_generated} diffs and {volatility_metrics_generated} volatility metrics")
+    print(f"\nSuccess Generated {diffs_generated} diffs and {volatility_metrics_generated} volatility metrics")
     
     # Show final statistics
     conn = sqlite3.connect("datasets.db")
@@ -157,12 +157,12 @@ def generate_diffs_and_volatility():
     
     conn.close()
     
-    print("\n🎉 Dashboard data generation completed!")
+    print("\n Dashboard data generation completed!")
     print("Your dashboard should now show:")
-    print("  ✅ Change Events: Real detected changes")
-    print("  ✅ High Risk Datasets: Datasets with volatility > 0.7")
-    print("  ✅ Recent Changes: Actual recent changes")
-    print("  ✅ Top Volatile Datasets: Real volatility rankings")
+    print("  Success Change Events: Real detected changes")
+    print("  Success High Risk Datasets: Datasets with volatility > 0.7")
+    print("  Success Recent Changes: Actual recent changes")
+    print("  Success Top Volatile Datasets: Real volatility rankings")
 
 if __name__ == "__main__":
     generate_diffs_and_volatility()

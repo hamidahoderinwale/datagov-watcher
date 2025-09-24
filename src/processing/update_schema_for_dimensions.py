@@ -18,7 +18,7 @@ def update_database_schema(db_path: str = "datasets.db"):
     cursor = conn.cursor()
     
     try:
-        print("🔧 Updating database schema for enhanced dimension tracking...")
+        print(" Updating database schema for enhanced dimension tracking...")
         
         # Check if dataset_states table exists and add dimension tracking columns
         cursor.execute("PRAGMA table_info(dataset_states)")
@@ -40,7 +40,7 @@ def update_database_schema(db_path: str = "datasets.db"):
             if column_name not in columns:
                 try:
                     cursor.execute(f'ALTER TABLE dataset_states ADD COLUMN {column_name} {column_type}')
-                    print(f"✅ Added column: {column_name}")
+                    print(f"Success Added column: {column_name}")
                 except sqlite3.OperationalError as e:
                     if "duplicate column name" not in str(e).lower():
                         print(f"⚠️  Could not add column {column_name}: {e}")
@@ -65,7 +65,7 @@ def update_database_schema(db_path: str = "datasets.db"):
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         ''')
-        print("✅ Created dimension_computation_log table")
+        print("Success Created dimension_computation_log table")
         
         # Create dimension history table for tracking changes over time
         cursor.execute('''
@@ -83,7 +83,7 @@ def update_database_schema(db_path: str = "datasets.db"):
                 UNIQUE(dataset_id, snapshot_date)
             )
         ''')
-        print("✅ Created dimension_history table")
+        print("Success Created dimension_history table")
         
         # Create dimension quality metrics table
         cursor.execute('''
@@ -96,7 +96,7 @@ def update_database_schema(db_path: str = "datasets.db"):
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         ''')
-        print("✅ Created dimension_quality_metrics table")
+        print("Success Created dimension_quality_metrics table")
         
         # Create indexes for better performance
         indexes = [
@@ -111,7 +111,7 @@ def update_database_schema(db_path: str = "datasets.db"):
         for index_sql in indexes:
             try:
                 cursor.execute(index_sql)
-                print(f"✅ Created index: {index_sql.split('idx_')[1].split(' ON')[0]}")
+                print(f"Success Created index: {index_sql.split('idx_')[1].split(' ON')[0]}")
             except sqlite3.OperationalError as e:
                 print(f"⚠️  Could not create index: {e}")
         
@@ -126,7 +126,7 @@ def update_database_schema(db_path: str = "datasets.db"):
             AND column_count > 0
         ''')
         updated_records = cursor.rowcount
-        print(f"✅ Updated {updated_records} existing records to mark dimensions as computed")
+        print(f"Success Updated {updated_records} existing records to mark dimensions as computed")
         
         # Create a view for easy access to dimension statistics
         cursor.execute('''
@@ -149,11 +149,11 @@ def update_database_schema(db_path: str = "datasets.db"):
             GROUP BY ds.agency
             ORDER BY total_datasets DESC
         ''')
-        print("✅ Created dimension_summary view")
+        print("Success Created dimension_summary view")
         
         # Commit all changes
         conn.commit()
-        print("\n🎉 Database schema update completed successfully!")
+        print("\n Database schema update completed successfully!")
         
         # Show summary statistics
         cursor.execute("SELECT COUNT(*) FROM dataset_states WHERE dimensions_computed = TRUE")
@@ -165,14 +165,14 @@ def update_database_schema(db_path: str = "datasets.db"):
         cursor.execute("SELECT COUNT(DISTINCT dataset_id) FROM dataset_states")
         total_datasets = cursor.fetchone()[0]
         
-        print(f"\n📊 Current Status:")
+        print(f"\n Current Status:")
         print(f"   Total datasets: {total_datasets}")
         print(f"   With dimensions: {with_dimensions}")
         print(f"   Missing dimensions: {missing_dimensions}")
         print(f"   Completion rate: {(with_dimensions / total_datasets * 100):.1f}%" if total_datasets > 0 else "   Completion rate: 0%")
         
     except Exception as e:
-        print(f"❌ Error updating schema: {e}")
+        print(f"Error Error updating schema: {e}")
         conn.rollback()
         raise
     finally:
@@ -188,7 +188,7 @@ def main():
     args = parser.parse_args()
     
     print("🧬 Dataset State Historian - Schema Update")
-    print(f"📊 Database: {args.db}")
+    print(f" Database: {args.db}")
     print(f"⏰ Started at: {datetime.now().isoformat()}")
     print("-" * 60)
     

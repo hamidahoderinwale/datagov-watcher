@@ -234,7 +234,7 @@ class ChromogramTimeline {
             'VANISHED': '👻',
             'LICENSE_CHANGED': '🔒',
             'SCHEMA_SHRINK': '✂️',
-            'CONTENT_DRIFT': '📊',
+            'CONTENT_DRIFT': '',
             'URL_CHANGED': '🔗',
             'TITLE_CHANGED': '📝'
         };

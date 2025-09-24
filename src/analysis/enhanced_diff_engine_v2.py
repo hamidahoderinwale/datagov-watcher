@@ -555,7 +555,7 @@ def main():
     diff_result = engine.compute_diff(dataset_id, from_date, to_date)
     
     if diff_result:
-        print(f"✅ Diff computed successfully")
+        print(f"Success Diff computed successfully")
         print(f"Severity: {diff_result.severity}")
         print(f"Metadata changes: {len(diff_result.metadata_changes)}")
         print(f"Schema changes: {len(diff_result.schema_changes.added_columns)} added, {len(diff_result.schema_changes.removed_columns)} removed")
@@ -566,7 +566,7 @@ def main():
         diff_id = engine.store_diff(diff_result)
         print(f"Stored diff with ID: {diff_id}")
     else:
-        print("❌ Failed to compute diff")
+        print("Error Failed to compute diff")
 
 if __name__ == "__main__":
     main()

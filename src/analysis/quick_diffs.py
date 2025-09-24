@@ -8,7 +8,7 @@ import json
 from core.historian_core import DatasetStateHistorian
 
 def generate_quick_diffs():
-    print("🚀 Quick diff generation for dashboard...")
+    print("Starting Quick diff generation for dashboard...")
     
     historian = DatasetStateHistorian("datasets.db")
     
@@ -65,16 +65,16 @@ def generate_quick_diffs():
             ))
             
             diffs_generated += 1
-            print(f"  ✅ Generated diff (volatility: {diff.volatility_score:.3f})")
+            print(f"  Success Generated diff (volatility: {diff.volatility_score:.3f})")
             
         except Exception as e:
-            print(f"  ❌ Error: {e}")
+            print(f"  Error Error: {e}")
             continue
     
     conn.commit()
     conn.close()
     
-    print(f"\n🎉 Generated {diffs_generated} diffs!")
+    print(f"\n Generated {diffs_generated} diffs!")
     
     # Show final stats
     conn = sqlite3.connect("datasets.db")

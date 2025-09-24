@@ -42,18 +42,18 @@ async def main():
     backfill = DimensionBackfillProcessor(args.db)
     
     print(f"🧬 Dataset State Historian - Dimension Computation")
-    print(f"📊 Mode: {args.mode}")
-    print(f"🔧 Database: {args.db}")
+    print(f" Mode: {args.mode}")
+    print(f" Database: {args.db}")
     print(f"⚡ Force recompute: {args.force}")
     print("-" * 60)
     
     if args.mode == 'stats':
         # Show current statistics
-        print("📈 Current Dimension Statistics:")
+        print(" Current Dimension Statistics:")
         stats = computer.get_dimension_statistics()
         print(json.dumps(stats, indent=2))
         
-        print("\n📊 Backfill Statistics:")
+        print("\n Backfill Statistics:")
         backfill_stats = backfill.get_backfill_statistics()
         print(json.dumps(backfill_stats, indent=2))
         
@@ -68,10 +68,10 @@ async def main():
         print("🔄 Starting Backfill Process...")
         results = await backfill.backfill_all_missing_dimensions(args.force)
         
-        print("\n📊 Backfill Results:")
-        print(f"✅ Datasets processed: {results['datasets_processed']}")
-        print(f"✅ Datasets updated: {results['datasets_updated']}")
-        print(f"❌ Datasets failed: {results['datasets_failed']}")
+        print("\n Backfill Results:")
+        print(f"Success Datasets processed: {results['datasets_processed']}")
+        print(f"Success Datasets updated: {results['datasets_updated']}")
+        print(f"Error Datasets failed: {results['datasets_failed']}")
         print(f"⏭️  Datasets skipped: {results['datasets_skipped']}")
         
         if results['errors']:
@@ -81,13 +81,13 @@ async def main():
         
     elif args.mode == 'compute':
         # Run comprehensive computation
-        print("🚀 Starting Comprehensive Dimension Computation...")
+        print("Starting Starting Comprehensive Dimension Computation...")
         results = await computer.ensure_all_datasets_have_dimensions(args.force)
         
-        print("\n📊 Computation Results:")
-        print(f"✅ Datasets processed: {results['datasets_processed']}")
-        print(f"✅ Datasets updated: {results['datasets_updated']}")
-        print(f"❌ Datasets failed: {results['datasets_failed']}")
+        print("\n Computation Results:")
+        print(f"Success Datasets processed: {results['datasets_processed']}")
+        print(f"Success Datasets updated: {results['datasets_updated']}")
+        print(f"Error Datasets failed: {results['datasets_failed']}")
         print(f"⏭️  Datasets skipped: {results['datasets_skipped']}")
         
         if results['errors']:
@@ -95,7 +95,7 @@ async def main():
             for error in results['errors'][:10]:  # Show first 10 errors
                 print(f"   - {error}")
     
-    print("\n🎉 Process completed!")
+    print("\n Process completed!")
     print(f"⏰ Finished at: {datetime.now().isoformat()}")
 
 if __name__ == '__main__':

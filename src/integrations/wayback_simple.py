@@ -314,7 +314,7 @@ def main():
             else:
                 print(f"   Archival search error: {archival_sources['error']}")
     
-    print("\n✅ Wayback Simple is fully operational!")
+    print("\nSuccess Wayback Simple is fully operational!")
     print("\nKey capabilities:")
     print("  ✓ Read-only database analysis")
     print("  ✓ Vanished dataset detection")
@@ -323,7 +323,7 @@ def main():
     print("  ✓ No database modifications (avoiding locks)")
     print("  ✓ Timeline reconstruction")
     
-    print(f"\n📊 Dashboard Summary:")
+    print(f"\n Dashboard Summary:")
     print(f"  - Total Datasets: {stats.get('total_datasets', 0):,}")
     print(f"  - Total Snapshots: {stats.get('total_snapshots', 0):,}")
     print(f"  - Change Events: {stats.get('total_diffs', 0):,}")

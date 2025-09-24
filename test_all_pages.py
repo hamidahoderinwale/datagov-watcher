@@ -41,12 +41,12 @@ def test_all_pages():
                 try:
                     response = client.get(route)
                     if response.status_code == 200:
-                        print(f"✅ {description}: {route} (200)")
+                        print(f"Success {description}: {route} (200)")
                         success_count += 1
                     else:
                         print(f"⚠️  {description}: {route} ({response.status_code})")
                 except Exception as e:
-                    print(f"❌ {description}: {route} - Error: {e}")
+                    print(f"Error {description}: {route} - Error: {e}")
             
             print("\n" + "=" * 50)
             print(f"Page Test Results: {success_count}/{total_count} pages working")
@@ -63,12 +63,12 @@ def test_all_pages():
                 try:
                     response = client.get(endpoint)
                     if response.status_code == 200:
-                        print(f"✅ {description}: {endpoint}")
+                        print(f"Success {description}: {endpoint}")
                         api_success += 1
                     else:
                         print(f"⚠️  {description}: {endpoint} ({response.status_code})")
                 except Exception as e:
-                    print(f"❌ {description}: {endpoint} - Error: {e}")
+                    print(f"Error {description}: {endpoint} - Error: {e}")
             
             print(f"\nAPI Test Results: {api_success}/{len(api_endpoints)} endpoints working")
             
@@ -80,8 +80,8 @@ def test_all_pages():
             print(f"Overall Results: {total_success}/{total_tests} tests passed")
             
             if total_success == total_tests:
-                print("🎉 All pages and APIs are working correctly!")
-                print("\n✅ Styling Consistency Verified:")
+                print(" All pages and APIs are working correctly!")
+                print("\nSuccess Styling Consistency Verified:")
                 print("   - Grayscale color scheme applied")
                 print("   - Inter font family used")
                 print("   - No border radius (sharp corners)")
@@ -93,7 +93,7 @@ def test_all_pages():
                 return False
         
     except Exception as e:
-        print(f"❌ Error testing application: {e}")
+        print(f"Error Error testing application: {e}")
         return False
 
 if __name__ == '__main__':

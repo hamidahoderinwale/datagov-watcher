@@ -15,7 +15,7 @@ sys.path.insert(0, str(src_path))
 
 def main():
     """Start the Dataset State Historian"""
-    print("🚀 Starting Dataset State Historian...")
+    print("Starting Dataset State Historian...")
     print("=" * 50)
     
     try:
@@ -32,10 +32,10 @@ def main():
         # Import the Flask app from the unified_app module
         from unified_app import app, socketio
         
-        print("✅ Application loaded successfully")
-        print(f"📂 Working directory: {os.getcwd()}")
-        print(f"🌐 Dashboard: http://127.0.0.1:8081")
-        print(f"📊 API: http://127.0.0.1:8081/api")
+        print("Application loaded successfully")
+        print(f"Working directory: {os.getcwd()}")
+        print(f"Dashboard: http://127.0.0.1:8081")
+        print(f"API: http://127.0.0.1:8081/api")
         print("=" * 50)
         
         # Start the application
@@ -48,11 +48,11 @@ def main():
         )
         
     except ImportError as e:
-        print(f"❌ Import error: {e}")
+        print(f"Import error: {e}")
         print("Make sure all dependencies are installed")
         return 1
     except Exception as e:
-        print(f"❌ Error starting application: {e}")
+        print(f"Error starting application: {e}")
         return 1
 
 if __name__ == '__main__':

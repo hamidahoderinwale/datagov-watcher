@@ -169,7 +169,7 @@ def print_status(status):
     # Recommendations
     print("Recommendations:")
     if status['health'] == 'healthy':
-        print("  🎉 System is running optimally!")
+        print("   System is running optimally!")
     elif status['health'] == 'degraded':
         print("  ⚠️  System is partially functional - check API connectivity")
     else:

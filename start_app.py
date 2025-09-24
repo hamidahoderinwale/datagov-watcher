@@ -13,7 +13,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 def main():
     """Start the application"""
-    print("🧬 Dataset State Historian - Starting Application")
+    print("Dataset State Historian - Starting Application")
     print("=" * 60)
     
     try:
@@ -27,9 +27,9 @@ def main():
         # Check if database exists
         db_path = "datasets.db"
         if os.path.exists(db_path):
-            print(f"✅ Database found: {db_path}")
+            print(f"Database found: {db_path}")
         else:
-            print(f"⚠️  Database not found: {db_path}")
+            print(f"Database not found: {db_path}")
             print("   The app will create it on first run")
         
         print()
@@ -44,11 +44,11 @@ def main():
         socketio.run(app, debug=True, host='127.0.0.1', port=8089, allow_unsafe_werkzeug=True)
         
     except ImportError as e:
-        print(f"❌ Import error: {e}")
+        print(f"Import error: {e}")
         print("Make sure you're in the correct directory and have installed dependencies")
         sys.exit(1)
     except Exception as e:
-        print(f"❌ Error starting application: {e}")
+        print(f"Error starting application: {e}")
         sys.exit(1)
 
 if __name__ == '__main__':

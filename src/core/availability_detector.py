@@ -393,7 +393,7 @@ def main():
             status_counts[event.status.value] = status_counts.get(event.status.value, 0) + 1
             severity_counts[event.severity] = severity_counts.get(event.severity, 0) + 1
         
-        print("\n📊 Summary:")
+        print("\n Summary:")
         print(f"Total events: {len(events)}")
         print(f"Status breakdown: {status_counts}")
         print(f"Severity breakdown: {severity_counts}")
