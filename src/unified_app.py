@@ -4178,19 +4178,7 @@ if __name__ == '__main__':
         except Exception as e:
             print(f"Failed to start monitoring: {e}")
     
-@app.route('/api/system/status')
-def api_system_status():
-    """Get comprehensive system status"""
-    try:
-        from src.monitoring.system_monitor import SystemMonitor
-        
-        monitor = SystemMonitor()
-        status = monitor.get_system_status()
-        
-        return jsonify(status)
-        
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+# Duplicate route removed - using the first definition above
 
 @app.route('/api/system/health')
 def api_system_health():
