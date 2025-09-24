@@ -22,8 +22,8 @@
     gap: var(--space-4);
 }
 
-/* Sidebar Toggle Button */
-.sidebar-toggle {
+/* Sidebar Toggle Button in Top Nav */
+.top-nav .sidebar-toggle {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -37,7 +37,7 @@
     color: var(--gray-600);
 }
 
-.sidebar-toggle:hover {
+.top-nav .sidebar-toggle:hover {
     background: var(--gray-50);
     border-color: var(--gray-400);
     color: var(--gray-900);
@@ -91,7 +91,7 @@
         gap: var(--space-2);
     }
     
-    .sidebar-toggle {
+    .top-nav .sidebar-toggle {
         width: 36px;
         height: 36px;
     }
