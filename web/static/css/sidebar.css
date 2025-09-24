@@ -176,6 +176,7 @@
 
 .main-content.sidebar-collapsed {
   margin-left: 0;
+  padding-left: var(--space-4);
 }
 
 /* Search in sidebar */
