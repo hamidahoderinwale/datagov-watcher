@@ -22,14 +22,15 @@ from src.visualization.chromogram_timeline import ChromogramTimeline
 from src.processing.full_database_processor import FullDatabaseProcessor
 from src.monitoring.scaled_monitor import ScaledMonitor
 from src.processing.enhanced_row_column_computer import EnhancedRowColumnComputer
-from src.processing.backfill_dimensions import DimensionBackfillProcessor
+from processing.backfill_dimensions import DimensionBackfillProcessor
 
 # New enhanced systems
-from src.core.availability_detector import AvailabilityDetector, DatasetStatus
-from src.analysis.enhanced_diff_engine_v2 import EnhancedDiffEngineV2
-from src.analysis.event_extractor import EventExtractor, EventType, EventSeverity
-from src.visualization.chromogram_timeline_v2 import ChromogramTimelineV2
-from src.api.enhanced_endpoints import enhanced_bp
+from core.availability_detector import AvailabilityDetector, DatasetStatus
+from analysis.enhanced_diff_engine_v2 import EnhancedDiffEngineV2
+from analysis.event_extractor import EventExtractor, EventType, EventSeverity
+from visualization.chromogram_timeline_v2 import ChromogramTimelineV2
+from api.enhanced_endpoints import enhanced_bp
+from api.notifications_api import notifications_bp
 
 app = Flask(__name__, 
            template_folder='../web/templates',
@@ -47,6 +48,7 @@ from src.api.analytics_api import analytics_bp
 app.register_blueprint(datasets_bp)
 app.register_blueprint(wayback_bp)
 app.register_blueprint(analytics_bp)
+app.register_blueprint(notifications_bp)
 
 # Global instances
 monitor = EnhancedConcordanceMonitor()

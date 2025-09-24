@@ -65,6 +65,7 @@ def get_notifications():
         conn.close()
         
         return jsonify({
+            'success': True,
             'notifications': notifications,
             'total': len(notifications),
             'unread_count': len(notifications)  # In real implementation, track read status
@@ -80,7 +81,27 @@ def mark_notification_read():
     
     # In real implementation, you'd update a read status in database
     # For now, just return success
-    return jsonify({'status': 'success', 'message': 'Notification marked as read'})
+    return jsonify({'success': True, 'message': 'Notification marked as read'})
+
+@notifications_bp.route('/clear', methods=['POST'])
+def clear_all_notifications():
+    """Clear all notifications"""
+    try:
+        # In real implementation, you'd clear notifications from database
+        # For now, just return success
+        return jsonify({'success': True, 'message': 'All notifications cleared'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@notifications_bp.route('/<notification_id>', methods=['DELETE'])
+def dismiss_notification(notification_id):
+    """Dismiss a specific notification"""
+    try:
+        # In real implementation, you'd delete the notification from database
+        # For now, just return success
+        return jsonify({'success': True, 'message': 'Notification dismissed'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 @notifications_bp.route('/settings')
 def get_notification_settings():
