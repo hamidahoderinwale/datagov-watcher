@@ -6,6 +6,13 @@ A comprehensive dataset monitoring and analysis system for tracking government d
 
 DataGov Watcher is a robust monitoring system that tracks dataset states, availability, and metadata changes across government data portals. It provides real-time insights, historical analysis, and comprehensive reporting on government data transparency and accessibility.
 
+**Current System Status:**
+- **634,221** dataset states tracked
+- **109** government agencies monitored
+- **60** database tables with comprehensive metadata
+- **Real-time** monitoring with automated discovery
+- **Intelligent** license classification system
+
 ## Features
 
 ### Core Monitoring
@@ -21,10 +28,12 @@ DataGov Watcher is a robust monitoring system that tracks dataset states, availa
 - **Comparative Analysis**: Compare agencies, time periods, and data types
 
 ### Advanced Features
-- **License Classification**: Intelligent license detection and categorization
-- **Content Analysis**: Analyze dataset descriptions and metadata patterns
-- **Automated Alerts**: Notify users of significant changes or issues
+- **License Classification**: Intelligent license detection and categorization using regex patterns and URL recognition
+- **Content Analysis**: Analyze dataset descriptions and metadata patterns for quality insights
+- **Automated Alerts**: Notify users of significant changes or issues with configurable thresholds
 - **Export Capabilities**: Generate reports in multiple formats (CSV, HTML, JSON)
+- **Historical Tracking**: Complete audit trail of dataset changes with Wayback Machine integration
+- **Performance Analytics**: Agency comparison and data quality scoring
 
 ## Technology Stack
 
@@ -62,7 +71,7 @@ DataGov Watcher is a robust monitoring system that tracks dataset states, availa
 
 4. **Initialize the database**
    ```bash
-   python -c "from src.database.database_manager import DatabaseManager; DatabaseManager().initialize_database()"
+   python -c "from src.database.connection import DatabaseManager; DatabaseManager().initialize_database()"
    ```
 
 5. **Start the application**
@@ -175,7 +184,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 For support, questions, or feature requests:
 
 - Create an issue on GitHub
-- Contact: [Your Contact Information]
+- Check the [API Documentation](http://localhost:8081/api/docs) when running locally
 
 ## Acknowledgments
 
@@ -186,12 +195,13 @@ For support, questions, or feature requests:
 ## Roadmap
 
 - [ ] Enhanced machine learning for content analysis
-- [ ] Multi-language support
-- [ ] Advanced reporting features
-- [ ] Integration with additional data portals
-- [ ] Mobile application
-- [ ] API rate limiting and authentication
-- [ ] Real-time notifications and alerts
+- [ ] Multi-language support for international datasets
+- [ ] Advanced reporting features with custom dashboards
+- [ ] Integration with additional data portals (EU, UK, Canada)
+- [ ] Mobile application for on-the-go monitoring
+- [ ] API authentication and rate limiting
+- [ ] Real-time notifications and alerts via email/Slack
+- [ ] Data quality scoring and recommendations
 
 ---
 
