@@ -57,15 +57,18 @@
     border: 1px solid var(--gray-200);
     border-radius: var(--border-radius-lg);
     box-shadow: var(--shadow-lg);
-    z-index: var(--z-dropdown);
+    z-index: 1001;
     transform: translateY(-10px);
     opacity: 0;
     visibility: hidden;
     transition: all var(--transition-fast);
     margin-top: var(--space-2);
+    overflow: hidden;
+    display: none;
 }
 
 .notification-panel.open {
+    display: block;
     transform: translateY(0);
     opacity: 1;
     visibility: visible;
