@@ -313,12 +313,31 @@ class NotificationManager {
     }
 }
 
+// Set up notification permission request (user-initiated only)
+function setupNotificationPermission() {
+    if (!('Notification' in window)) {
+        return; // Browser doesn't support notifications
+    }
+    
+    // Only show permission request when user interacts with notifications
+    const notificationToggle = document.getElementById('notification-toggle');
+    if (notificationToggle) {
+        notificationToggle.addEventListener('click', function() {
+            if (Notification.permission === 'default') {
+                Notification.requestPermission().then(function(permission) {
+                    if (permission === 'granted') {
+                        console.log('Notification permission granted');
+                    }
+                });
+            }
+        });
+    }
+}
+
 // Initialize notification manager when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
     window.notificationManager = new NotificationManager();
     
-    // Request notification permission
-    if ('Notification' in window && Notification.permission === 'default') {
-        Notification.requestPermission();
-    }
+    // Set up notification permission request (user-initiated only)
+    setupNotificationPermission();
 });

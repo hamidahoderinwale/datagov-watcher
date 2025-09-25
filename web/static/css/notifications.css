@@ -27,18 +27,20 @@
     position: absolute;
     top: -2px;
     right: -2px;
-    background-color: var(--red-500);
+    background-color: #dc2626; /* Bright red for high contrast */
     color: white;
     border-radius: 50%;
-    width: 18px;
-    height: 18px;
+    width: 20px; /* Slightly larger for better visibility */
+    height: 20px;
     font-size: var(--text-xs);
     font-weight: var(--font-bold);
     display: flex;
     align-items: center;
     justify-content: center;
     border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Add shadow for better contrast */
     animation: pulse 2s infinite;
+    min-width: 20px; /* Ensure it doesn't get too small with larger numbers */
 }
 
 @keyframes pulse {

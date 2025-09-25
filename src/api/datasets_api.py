@@ -6,6 +6,7 @@ Provides dataset listing and basic information
 from flask import Blueprint, jsonify, request
 import sqlite3
 from typing import Dict, List, Optional, Any
+from datetime import datetime, timedelta
 
 datasets_bp = Blueprint('datasets', __name__)
 
@@ -14,6 +15,67 @@ def get_db_connection():
     conn = sqlite3.connect('datasets.db')
     conn.row_factory = sqlite3.Row
     return conn
+
+def calculate_capture_metrics(dataset_id: str) -> Dict:
+    """Calculate capture frequency and change metrics for a dataset"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    # Get all snapshots for this dataset
+    cursor.execute("""
+        SELECT snapshot_date, row_count, column_count, file_size, availability
+        FROM dataset_states 
+        WHERE dataset_id = ?
+        ORDER BY snapshot_date ASC
+    """, (dataset_id,))
+    
+    snapshots = cursor.fetchall()
+    conn.close()
+    
+    if len(snapshots) < 2:
+        return {
+            'capture_frequency_days': 0,
+            'significant_changes': 0,
+            'availability_changes': 0,
+            'data_quality_trend': 'stable'
+        }
+    
+    # Calculate capture frequency
+    first_date = datetime.strptime(snapshots[0]['snapshot_date'], '%Y-%m-%d')
+    last_date = datetime.strptime(snapshots[-1]['snapshot_date'], '%Y-%m-%d')
+    total_days = (last_date - first_date).days
+    capture_frequency = total_days / (len(snapshots) - 1) if len(snapshots) > 1 else 0
+    
+    # Count significant changes
+    significant_changes = 0
+    availability_changes = 0
+    prev_snapshot = None
+    
+    for snapshot in snapshots:
+        if prev_snapshot:
+            # Check for significant data changes
+            if (snapshot['row_count'] != prev_snapshot['row_count'] or 
+                snapshot['column_count'] != prev_snapshot['column_count'] or
+                abs((snapshot['file_size'] or 0) - (prev_snapshot['file_size'] or 0)) > 1000):
+                significant_changes += 1
+            
+            # Check for availability changes
+            if snapshot['availability'] != prev_snapshot['availability']:
+                availability_changes += 1
+        
+        prev_snapshot = snapshot
+    
+    # Determine data quality trend
+    recent_snapshots = snapshots[-5:]  # Last 5 snapshots
+    available_count = sum(1 for s in recent_snapshots if s['availability'] == 'available')
+    data_quality_trend = 'improving' if available_count >= 4 else 'declining' if available_count <= 1 else 'stable'
+    
+    return {
+        'capture_frequency_days': round(capture_frequency, 1),
+        'significant_changes': significant_changes,
+        'availability_changes': availability_changes,
+        'data_quality_trend': data_quality_trend
+    }
 
 @datasets_bp.route('/api/datasets')
 def get_datasets():
@@ -27,11 +89,14 @@ def get_datasets():
         conn = get_db_connection()
         cursor = conn.cursor()
         
-        # Build query
+        # Build query with basic dataset info
         query = """
             SELECT DISTINCT ds.dataset_id, ds.title, ds.agency, ds.snapshot_date,
                    ds.row_count, ds.column_count, ds.availability, ds.status_code,
-                   ds.file_size, ds.resource_format, ds.last_modified
+                   ds.file_size, ds.resource_format, ds.last_modified,
+                   (SELECT COUNT(*) FROM dataset_states ds3 WHERE ds3.dataset_id = ds.dataset_id) as total_snapshots,
+                   (SELECT MIN(snapshot_date) FROM dataset_states ds4 WHERE ds4.dataset_id = ds.dataset_id) as first_capture,
+                   (SELECT MAX(snapshot_date) FROM dataset_states ds5 WHERE ds5.dataset_id = ds.dataset_id) as last_capture
             FROM dataset_states ds
             WHERE ds.snapshot_date = (
                 SELECT MAX(snapshot_date) 
@@ -81,22 +146,66 @@ def get_datasets():
         
         conn.close()
         
+        # Add capture metrics to each dataset (for first 20 datasets to avoid performance issues)
+        enhanced_datasets = []
+        for row in datasets[:20]:  # Limit to first 20 for performance
+            dataset_data = {
+                'dataset_id': row['dataset_id'],
+                'title': row['title'],
+                'agency': row['agency'],
+                'snapshot_date': row['snapshot_date'],
+                'row_count': row['row_count'],
+                'column_count': row['column_count'],
+                'availability': row['availability'],
+                'status_code': row['status_code'],
+                'file_size': row['file_size'],
+                'resource_format': row['resource_format'],
+                'last_modified': row['last_modified'],
+                'total_snapshots': row['total_snapshots'],
+                'first_capture': row['first_capture'],
+                'last_capture': row['last_capture']
+            }
+            
+            # Add capture metrics
+            try:
+                metrics = calculate_capture_metrics(row['dataset_id'])
+                dataset_data.update(metrics)
+            except Exception as e:
+                # If metrics calculation fails, add defaults
+                dataset_data.update({
+                    'capture_frequency_days': 0,
+                    'significant_changes': 0,
+                    'availability_changes': 0,
+                    'data_quality_trend': 'unknown'
+                })
+            
+            enhanced_datasets.append(dataset_data)
+        
+        # For remaining datasets, add basic info without expensive metrics
+        for row in datasets[20:]:
+            enhanced_datasets.append({
+                'dataset_id': row['dataset_id'],
+                'title': row['title'],
+                'agency': row['agency'],
+                'snapshot_date': row['snapshot_date'],
+                'row_count': row['row_count'],
+                'column_count': row['column_count'],
+                'availability': row['availability'],
+                'status_code': row['status_code'],
+                'file_size': row['file_size'],
+                'resource_format': row['resource_format'],
+                'last_modified': row['last_modified'],
+                'total_snapshots': row['total_snapshots'],
+                'first_capture': row['first_capture'],
+                'last_capture': row['last_capture'],
+                'capture_frequency_days': 0,
+                'significant_changes': 0,
+                'availability_changes': 0,
+                'data_quality_trend': 'unknown'
+            })
+        
         return jsonify({
-            'datasets': [
-                {
-                    'dataset_id': row['dataset_id'],
-                    'title': row['title'],
-                    'agency': row['agency'],
-                    'snapshot_date': row['snapshot_date'],
-                    'row_count': row['row_count'],
-                    'column_count': row['column_count'],
-                    'availability': row['availability'],
-                    'status_code': row['status_code'],
-                    'file_size': row['file_size'],
-                    'resource_format': row['resource_format'],
-                    'last_modified': row['last_modified']
-                } for row in datasets
-            ],
+            'datasets': enhanced_datasets,
             'total': total,
             'limit': limit,
             'offset': offset

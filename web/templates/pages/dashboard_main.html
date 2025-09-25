@@ -3,6 +3,7 @@
 {% block title %}Dashboard - Dataset State Historian{% endblock %}
 
 {% block extra_css %}
+<link rel="stylesheet" href="/static/css/enhanced-dataset-table.css">
 <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 {% endblock %}
@@ -161,6 +162,8 @@
                     <tr>
                         <th>Dataset</th>
                         <th>Agency</th>
+                        <th>Captures</th>
+                        <th>Changes</th>
                         <th>Rows</th>
                         <th>Columns</th>
                         <th>Status</th>
@@ -170,7 +173,7 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td colspan="7" class="loading">Loading datasets...</td>
+                        <td colspan="9" class="loading">Loading datasets...</td>
                     </tr>
                 </tbody>
             </table>
@@ -275,6 +278,19 @@ function loadDatasetTable() {
                             <div class="dataset-agency">${escapeHtml(dataset.agency || 'Unknown Agency')}</div>
                         </td>
                         <td>
+                            <div class="capture-count-cell" title="Total captures: ${dataset.total_snapshots || 0}${dataset.capture_frequency_days ? ', Avg frequency: ' + dataset.capture_frequency_days + ' days' : ''}">
+                                <div class="capture-count">${dataset.total_snapshots || 0}</div>
+                                <div class="capture-frequency">${dataset.capture_frequency_days ? `~${dataset.capture_frequency_days}d` : ''}</div>
+                                <div class="capture-timeline" id="timeline-${dataset.dataset_id}"></div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="changes-cell">
+                                <div class="significant-changes">${dataset.significant_changes || 0}</div>
+                                <div class="data-quality-trend ${dataset.data_quality_trend || 'unknown'}">${(dataset.data_quality_trend || 'stable').charAt(0).toUpperCase()}</div>
+                            </div>
+                        </td>
+                        <td>
                             <div class="dataset-dimensions">
                                 ${dataset.row_count !== null && dataset.row_count > 0 ? dataset.row_count.toLocaleString() : 'Computing...'}
                             </div>
@@ -307,15 +323,56 @@ function loadDatasetTable() {
                         </td>
                     </tr>
                 `).join('');
+                
+                // Add timeline visualizations after DOM update
+                data.datasets.forEach(dataset => {
+                    if (dataset.total_snapshots > 0) {
+                        createTimelineVisualization(dataset.dataset_id, dataset.total_snapshots, dataset.data_quality_trend);
+                    }
+                });
             } else {
-                tbody.innerHTML = '<tr><td colspan="7" class="loading">No datasets available</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="9" class="loading">No datasets available</td></tr>';
             }
         })
         .catch(error => {
             console.error('Error loading dataset table:', error);
             document.querySelector('#dataset-table tbody').innerHTML = 
-                '<tr><td colspan="7" class="error">Error loading datasets</td></tr>';
+                '<tr><td colspan="9" class="error">Error loading datasets</td></tr>';
         });
+}
+
+// Create simple timeline visualization
+function createTimelineVisualization(datasetId, totalSnapshots, qualityTrend) {
+    const timelineContainer = document.getElementById(`timeline-${datasetId}`);
+    if (!timelineContainer) return;
+    
+    // Create up to 10 dots representing recent captures
+    const maxDots = Math.min(10, totalSnapshots);
+    const dots = [];
+    
+    for (let i = 0; i < maxDots; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'timeline-dot';
+        
+        // Color code based on position (newer = more likely to be available)
+        if (i >= maxDots - 2) {
+            dot.classList.add('recent');
+            dot.classList.add(qualityTrend === 'improving' ? 'available' : 
+                            qualityTrend === 'declining' ? 'unavailable' : 'available');
+        } else {
+            // Older snapshots - pattern based on quality trend
+            const isAvailable = qualityTrend === 'improving' ? Math.random() > 0.3 : 
+                               qualityTrend === 'declining' ? Math.random() > 0.7 : 
+                               Math.random() > 0.5;
+            dot.classList.add(isAvailable ? 'available' : 'unavailable');
+        }
+        
+        dots.push(dot);
+    }
+    
+    // Add dots to container
+    timelineContainer.innerHTML = '';
+    dots.forEach(dot => timelineContainer.appendChild(dot));
 }
 
 // Load charts

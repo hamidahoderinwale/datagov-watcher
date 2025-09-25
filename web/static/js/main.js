@@ -129,8 +129,6 @@ async function loadDashboardData() {
         const datasetsResponse = await fetch('/api/datasets');
         const datasetsData = await datasetsResponse.json();
         
-        console.log('Datasets API response:', datasetsData);
-        
         // Handle new paginated response format
         if (datasetsData.datasets) {
             allDatasets = datasetsData.datasets;
@@ -705,15 +703,12 @@ async function loadVanishedData() {
 
 // Load monitoring statistics
 async function loadMonitoringStats() {
-    console.log('loadMonitoringStats called');
     try {
         const response = await fetch('/api/monitoring/stats');
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        
-        console.log('Monitoring stats response:', data);
         
         // Update monitoring stats with better fallback handling
         const updateElement = (id, value, fallback = '0') => {
@@ -776,12 +771,8 @@ function updateLastUpdated() {
     const timeString = now.toLocaleTimeString();
     const dateString = now.toLocaleDateString();
     const lastUpdatedElement = document.querySelector('.last-updated');
-    console.log('Updating last updated timestamp:', dateString, timeString);
     if (lastUpdatedElement) {
         lastUpdatedElement.textContent = `Last updated: ${dateString} ${timeString}`;
-        console.log('Last updated element found and updated');
-    } else {
-        console.warn('Last updated element not found');
     }
 }
 
@@ -864,7 +855,6 @@ async function loadLicenseDistribution() {
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOMContentLoaded event fired');
     // Set up event listeners
     const searchInput = document.getElementById('searchInput');
     if (searchInput) {
