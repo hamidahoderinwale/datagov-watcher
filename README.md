@@ -186,22 +186,6 @@ For support, questions, or feature requests:
 - Create an issue on GitHub
 - Check the [API Documentation](http://localhost:8081/api/docs) when running locally
 
-## Acknowledgments
-
-- Built for government transparency and data accessibility
-- Inspired by the need for better dataset monitoring and analysis
-- Thanks to the open-source community for the tools and libraries used
-
-## Roadmap
-
-- [ ] Enhanced machine learning for content analysis
-- [ ] Multi-language support for international datasets
-- [ ] Advanced reporting features with custom dashboards
-- [ ] Integration with additional data portals (EU, UK, Canada)
-- [ ] Mobile application for on-the-go monitoring
-- [ ] API authentication and rate limiting
-- [ ] Real-time notifications and alerts via email/Slack
-- [ ] Data quality scoring and recommendations
 
 ---
 
