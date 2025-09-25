@@ -269,7 +269,7 @@ function loadDatasetTable() {
             if (data.datasets && data.datasets.length > 0) {
                 tbody.innerHTML = data.datasets.map(dataset => `
                     <tr>
-                        <td onclick="window.location.href='/dataset/${dataset.dataset_id}'" style="cursor: pointer;">
+                        <td onclick="window.location.href='/datasets/${dataset.dataset_id}'" style="cursor: pointer;">
                             <div class="dataset-name" title="${escapeHtml(dataset.title || 'Unknown Title')}">
                                 ${escapeHtml(dataset.title || 'Unknown Title')}
                             </div>

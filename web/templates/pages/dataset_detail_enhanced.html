@@ -833,7 +833,7 @@ function updateSimilarDatasets(similar) {
             </thead>
             <tbody>
                 ${similar.map(dataset => `
-                    <tr onclick="window.location.href='/dataset/${dataset.dataset_id}'">
+                    <tr onclick="window.location.href='/datasets/${dataset.dataset_id}'">
                         <td>
                             <div style="font-weight: var(--font-medium); max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeHtml(dataset.title || 'Unknown')}">
                                 ${escapeHtml(dataset.title || 'Unknown')}

@@ -164,10 +164,10 @@ class NotificationManager {
         if (notification.type === 'change' && notification.dataset_id) {
             return `
                 <div class="notification-actions">
-                    <button class="notification-action primary" onclick="window.location.href='/dataset/${notification.dataset_id}'">
+                    <button class="notification-action primary" onclick="handleNotificationViewDataset('${notification.dataset_id}')">
                         View Dataset
                     </button>
-                    <button class="notification-action" onclick="window.location.href='/dataset/${notification.dataset_id}/changes'">
+                    <button class="notification-action" onclick="handleNotificationViewChanges('${notification.dataset_id}')">
                         View Changes
                     </button>
                 </div>
@@ -332,6 +332,15 @@ function setupNotificationPermission() {
             }
         });
     }
+}
+
+// Global notification action handlers
+function handleNotificationViewDataset(datasetId) {
+    window.location.href = `/datasets/${datasetId}`;
+}
+
+function handleNotificationViewChanges(datasetId) {
+    window.location.href = `/datasets/${datasetId}#changes`;
 }
 
 // Initialize notification manager when DOM is ready
