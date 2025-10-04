@@ -1,0 +1,34 @@
+{
+  "name": "Dataset State Historian",
+  "description": "A comprehensive dataset monitoring and analysis system for tracking government data availability, changes, and trends across multiple agencies and platforms.",
+  "repository": "https://github.com/hamidahoderinwale/datagov-watcher",
+  "logo": "https://via.placeholder.com/150x150/006D77/FFFFFF?text=DSH",
+  "keywords": ["flask", "data-monitoring", "government-data", "analytics", "python"],
+  "success_url": "/",
+  "buildpacks": [
+    {
+      "url": "heroku/python"
+    }
+  ],
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "basic"
+    }
+  },
+  "addons": [
+    {
+      "plan": "heroku-postgresql:mini"
+    }
+  ],
+  "env": {
+    "FLASK_ENV": {
+      "description": "Flask environment",
+      "value": "production"
+    },
+    "WEB_PORT": {
+      "description": "Port for the web server",
+      "value": "8081"
+    }
+  }
+}

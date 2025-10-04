@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: dataset-state-historian
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python run.py
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: WEB_PORT
+        value: 8081
