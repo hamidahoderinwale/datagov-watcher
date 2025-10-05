@@ -284,7 +284,22 @@ function formatDate(date) {
 
 function formatResponseTime(time) {
     if (!time || time === 0) return '<span class="na-value">N/A</span>';
-    return `${time}ms`;
+    
+    // Add color coding for performance indication
+    let colorClass = '';
+    if (time < 500) {
+        colorClass = 'response-fast'; // Green for fast
+    } else if (time < 2000) {
+        colorClass = 'response-medium'; // Yellow for medium
+    } else {
+        colorClass = 'response-slow'; // Red for slow
+    }
+    
+    if (time < 1000) {
+        return `<span class="${colorClass}">${time}ms</span>`;
+    } else {
+        return `<span class="${colorClass}">${(time / 1000).toFixed(1)}s</span>`;
+    }
 }
 
 function updateTableCount(totalCount = null) {
@@ -916,11 +931,42 @@ document.addEventListener('DOMContentLoaded', function() {
         toggleRefreshBtn.addEventListener('click', toggleAutoRefresh);
     }
     
+    // Wait for Chart.js to be available before loading charts
+    function waitForChartJS() {
+        if (typeof Chart !== 'undefined') {
+            console.log('Chart.js loaded, initializing charts...');
+            loadFormatDistribution();
+        } else {
+            console.log('Waiting for Chart.js...');
+            // Try to load Chart.js dynamically if it's not available
+            if (!document.querySelector('script[src*="chart.js"]')) {
+                console.log('Chart.js not found, loading dynamically...');
+                const script = document.createElement('script');
+                script.src = 'https://cdn.jsdelivr.net/npm/chart.js';
+                script.onload = () => {
+                    console.log('Chart.js loaded dynamically');
+                    loadFormatDistribution();
+                };
+                script.onerror = () => {
+                    console.error('Failed to load Chart.js');
+                    // Show error message instead of chart
+                    const ctx = document.getElementById('format-distribution-chart');
+                    if (ctx) {
+                        ctx.innerHTML = '<div style="text-align: center; color: #ef4444; padding: 20px;">Chart.js failed to load</div>';
+                    }
+                };
+                document.head.appendChild(script);
+            } else {
+                setTimeout(waitForChartJS, 100);
+            }
+        }
+    }
+    
     // Load initial data
     loadDashboardData();
     loadMonitoringStats();
     loadLicenseDistribution();
-    loadFormatDistribution();
+    waitForChartJS(); // Load format distribution after Chart.js is ready
     loadAgencyComparison();
     updateLastUpdated(); // Set initial timestamp
     
@@ -940,6 +986,13 @@ async function loadFormatDistribution() {
         }
         
         const data = await response.json();
+        
+        // Check if Chart.js is loaded
+        if (typeof Chart === 'undefined') {
+            console.warn('Chart.js not loaded yet, retrying in 500ms...');
+            setTimeout(() => loadFormatDistribution(), 500);
+            return;
+        }
         
         // Create pie chart
         const ctx = document.getElementById('format-distribution-chart');
@@ -992,16 +1045,12 @@ async function loadFormatDistribution() {
         // Update format statistics
         const totalFormatsEl = document.getElementById('totalFormats');
         const mostCommonFormatEl = document.getElementById('mostCommonFormat');
-        const unknownFormatsEl = document.getElementById('unknownFormats');
         
         if (totalFormatsEl && data.summary) {
             totalFormatsEl.textContent = data.summary.format_diversity;
         }
         if (mostCommonFormatEl && data.summary) {
             mostCommonFormatEl.textContent = data.summary.most_common_format;
-        }
-        if (unknownFormatsEl && data.summary) {
-            unknownFormatsEl.textContent = data.summary.unknown_format_percentage + '%';
         }
         
         // Update format summary
@@ -1011,17 +1060,18 @@ async function loadFormatDistribution() {
                 <div class="format-summary-item">
                     <strong>Most Common:</strong> ${data.summary.most_common_format}
                 </div>
-                <div class="format-summary-item">
-                    <strong>Format Diversity:</strong> ${data.summary.format_diversity} types
-                </div>
-                <div class="format-summary-item">
-                    <strong>Unknown Formats:</strong> ${data.summary.unknown_format_percentage}%
-                </div>
             `;
         }
         
     } catch (error) {
         console.error('Error loading format distribution:', error);
+        const ctx = document.getElementById('format-distribution-chart');
+        if (ctx) {
+            ctx.innerHTML = `<div style="text-align: center; color: #ef4444; padding: 20px;">
+                Error loading format distribution: ${error.message}
+                <br><small>Chart.js available: ${typeof Chart !== 'undefined' ? 'Yes' : 'No'}</small>
+            </div>`;
+        }
     }
 }
 

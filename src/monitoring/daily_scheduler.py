@@ -10,8 +10,8 @@ import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
-from analysis.time_series_manager import TimeSeriesManager
-from monitoring.enhanced_monitor import EnhancedConcordanceMonitor
+from src.analysis.time_series_manager import TimeSeriesManager
+from src.monitoring.enhanced_monitor import EnhancedConcordanceMonitor
 
 # Configure logging
 logging.basicConfig(

@@ -16,12 +16,12 @@ import argparse
 import schedule
 import threading
 
-from core.historian_core import DatasetStateHistorian, DatasetSnapshot
-from integrations.lil_integration import LILIntegration
-from integrations.wayback_enhanced import WaybackEnhanced
-from integrations.wayback_fetcher import WaybackFetcher
-from visualization.timeline_ui import TimelineUI
-from monitoring.enhanced_monitor import EnhancedConcordanceMonitor
+from src.core.historian_core import DatasetStateHistorian, DatasetSnapshot
+from src.integrations.lil_integration import LILIntegration
+from src.integrations.wayback_enhanced import WaybackEnhanced
+from src.integrations.wayback_fetcher import WaybackFetcher
+from src.visualization.timeline_ui import TimelineUI
+from src.monitoring.enhanced_monitor import EnhancedConcordanceMonitor
 
 # Post-mortem system will be imported conditionally to avoid WeasyPrint issues
 POSTMORTEM_AVAILABLE = False
@@ -56,7 +56,7 @@ class DatasetHistorianMain:
         
         # Try to import post-mortem system conditionally
         try:
-            from analysis.postmortem_system import PostMortemSystem
+            from src.analysis.postmortem_system import PostMortemSystem
             self.postmortem = PostMortemSystem(db_path)
             POSTMORTEM_AVAILABLE = True
         except (ImportError, OSError) as e:

@@ -14,10 +14,10 @@ import os
 # Add the current directory to Python path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from core.data_fetcher import DataFetcher
-from analysis.diff_engine import DiffEngine
-from integrations.wayback_client import WaybackClient
-from core.report_generator import ReportGenerator
+from src.core.data_fetcher import DataFetcher
+from src.analysis.diff_engine import DiffEngine
+from src.integrations.wayback_client import WaybackClient
+from src.core.report_generator import ReportGenerator
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

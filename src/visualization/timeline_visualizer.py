@@ -6,7 +6,7 @@ Part of Phase 1: Time-Series Foundation
 import json
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any
-from analysis.time_series_manager import TimeSeriesManager
+from src.analysis.time_series_manager import TimeSeriesManager
 
 class TimelineVisualizer:
     def __init__(self, db_path: str = "datasets.db"):

@@ -12,25 +12,25 @@ import threading
 from datetime import datetime, timedelta
 from pathlib import Path
 import os
-from monitoring.enhanced_monitor import EnhancedConcordanceMonitor
-from analysis.time_series_manager import TimeSeriesManager
-from visualization.timeline_visualizer import TimelineVisualizer
-from analysis.agency_analytics import AgencyAnalytics
-from integrations.lil_integration import LILIntegration
-from analysis.enhanced_diff_engine import EnhancedDiffEngine
-from visualization.chromogram_timeline import ChromogramTimeline
-from processing.full_database_processor import FullDatabaseProcessor
-from monitoring.scaled_monitor import ScaledMonitor
-from processing.enhanced_row_column_computer import EnhancedRowColumnComputer
-from processing.backfill_dimensions import DimensionBackfillProcessor
+from src.monitoring.enhanced_monitor import EnhancedConcordanceMonitor
+from src.analysis.time_series_manager import TimeSeriesManager
+from src.visualization.timeline_visualizer import TimelineVisualizer
+from src.analysis.agency_analytics import AgencyAnalytics
+from src.integrations.lil_integration import LILIntegration
+from src.analysis.enhanced_diff_engine import EnhancedDiffEngine
+from src.visualization.chromogram_timeline import ChromogramTimeline
+from src.processing.full_database_processor import FullDatabaseProcessor
+from src.monitoring.scaled_monitor import ScaledMonitor
+from src.processing.enhanced_row_column_computer import EnhancedRowColumnComputer
+from src.processing.backfill_dimensions import DimensionBackfillProcessor
 
 # New enhanced systems
-from core.availability_detector import AvailabilityDetector, DatasetStatus
-from analysis.enhanced_diff_engine_v2 import EnhancedDiffEngineV2
-from analysis.event_extractor import EventExtractor, EventType, EventSeverity
-from visualization.chromogram_timeline_v2 import ChromogramTimelineV2
-from api.enhanced_endpoints import enhanced_bp
-from api.notifications_api import notifications_bp
+from src.core.availability_detector import AvailabilityDetector, DatasetStatus
+from src.analysis.enhanced_diff_engine_v2 import EnhancedDiffEngineV2
+from src.analysis.event_extractor import EventExtractor, EventType, EventSeverity
+from src.visualization.chromogram_timeline_v2 import ChromogramTimelineV2
+from src.api.enhanced_endpoints import enhanced_bp
+from src.api.notifications_api import notifications_bp
 
 app = Flask(__name__, 
            template_folder='../web/templates',
@@ -42,9 +42,9 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 app.register_blueprint(enhanced_bp)
 
 # Import and register additional API blueprints
-from api.datasets_api import datasets_bp
-from api.wayback_api import wayback_bp
-from api.analytics_api import analytics_bp
+from src.api.datasets_api import datasets_bp
+from src.api.wayback_api import wayback_bp
+from src.api.analytics_api import analytics_bp
 app.register_blueprint(datasets_bp)
 app.register_blueprint(wayback_bp)
 app.register_blueprint(analytics_bp)
@@ -393,7 +393,7 @@ def api_licenses():
         total_datasets = sum(row[1] for row in license_data)
         
         # Process license data with intelligent classification
-        from core.license_classifier import license_classifier
+        from src.core.license_classifier import license_classifier
         
         licenses = []
         license_categories = {}
@@ -2020,7 +2020,7 @@ def api_monitoring_stats():
         
         # Get rate limiting statistics
         try:
-            from monitoring.rate_limiter import rate_limiter
+            from src.monitoring.rate_limiter import rate_limiter
             rate_limiting_stats = rate_limiter.get_rate_limit_stats()
         except Exception as e:
             rate_limiting_stats = {'error': str(e)}
@@ -2043,7 +2043,7 @@ def api_monitoring_stats():
 def start_discovery():
     """Start comprehensive dataset discovery"""
     try:
-        from core.comprehensive_discovery import ComprehensiveDiscovery
+        from src.core.comprehensive_discovery import ComprehensiveDiscovery
         
         discovery = ComprehensiveDiscovery()
         
@@ -2075,7 +2075,7 @@ def start_discovery():
 def discovery_status():
     """Get discovery status and statistics"""
     try:
-        from core.comprehensive_discovery import ComprehensiveDiscovery
+        from src.core.comprehensive_discovery import ComprehensiveDiscovery
         
         discovery = ComprehensiveDiscovery()
         stats = discovery.get_discovery_stats()
@@ -2089,7 +2089,7 @@ def discovery_status():
 def start_monitoring():
     """Start comprehensive monitoring"""
     try:
-        from monitoring.comprehensive_scheduler import ComprehensiveScheduler
+        from src.monitoring.comprehensive_scheduler import ComprehensiveScheduler
         
         scheduler = ComprehensiveScheduler()
         
@@ -2119,7 +2119,7 @@ def start_monitoring():
 def monitoring_status():
     """Get monitoring status and statistics"""
     try:
-        from monitoring.comprehensive_scheduler import ComprehensiveScheduler
+        from src.monitoring.comprehensive_scheduler import ComprehensiveScheduler
         
         scheduler = ComprehensiveScheduler()
         status = scheduler.get_monitoring_status()
@@ -2133,7 +2133,7 @@ def monitoring_status():
 def init_monitoring():
     """Initialize monitoring schedule for all datasets"""
     try:
-        from monitoring.comprehensive_scheduler import ComprehensiveScheduler
+        from src.monitoring.comprehensive_scheduler import ComprehensiveScheduler
         
         scheduler = ComprehensiveScheduler()
         
@@ -4063,6 +4063,147 @@ def api_political_analysis():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@app.route('/api/dataset/<dataset_id>/recovery-search')
+def api_dataset_recovery_search(dataset_id):
+    """Search for dataset across all recovery sources"""
+    try:
+        from src.recovery.unified_recovery_system import UnifiedRecoverySystem, DatasetMetadata
+        
+        conn = get_database_connection()
+        cursor = conn.cursor()
+        
+        # Get vanished dataset info
+        cursor.execute('''
+            SELECT dataset_id, last_known_title, last_known_agency, last_known_landing_page,
+                   last_seen_date, archival_sources, status, created_at
+            FROM vanished_datasets
+            WHERE dataset_id = ?
+        ''', (dataset_id,))
+        
+        vanished_data = cursor.fetchone()
+        if not vanished_data:
+            return jsonify({'error': 'Dataset not found in vanished datasets'}), 404
+        
+        # Create dataset metadata
+        dataset_metadata = DatasetMetadata(
+            title=vanished_data[1] or 'Unknown Dataset',
+            agency=vanished_data[2] or 'Unknown Agency',
+            data_gov_id=dataset_id,
+            landing_url=vanished_data[3] or '',
+            last_seen=vanished_data[4] or '',
+            keywords=[]  # Could be extracted from title/description
+        )
+        
+        # Initialize recovery system and search
+        recovery_system = UnifiedRecoverySystem()
+        results = recovery_system.search_dataset(dataset_metadata)
+        
+        # Generate provenance pack
+        provenance_pack = recovery_system.generate_provenance_pack(dataset_metadata, results)
+        
+        # Get status badge
+        badge_icon, badge_text = recovery_system.get_recovery_status_badge(results)
+        
+        conn.close()
+        
+        return jsonify({
+            'dataset_id': dataset_id,
+            'recovery_results': results,
+            'provenance_pack': provenance_pack,
+            'status_badge': {
+                'icon': badge_icon,
+                'text': badge_text
+            },
+            'search_timestamp': datetime.now().isoformat()
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/recovery-sources')
+def api_recovery_sources():
+    """Get information about all available recovery sources"""
+    try:
+        from src.recovery.unified_recovery_system import UnifiedRecoverySystem
+        
+        recovery_system = UnifiedRecoverySystem()
+        
+        return jsonify({
+            'recovery_sources': recovery_system.recovery_sources,
+            'total_sources': len(recovery_system.recovery_sources),
+            'description': 'Unified Recovery System based on University of Michigan approach'
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/load-harvard-data')
+def api_load_harvard_data():
+    """Load Harvard LIL data to populate vanished datasets"""
+    try:
+        from src.integrations.harvard_lil_integration import HarvardLILIntegration
+        
+        harvard_lil = HarvardLILIntegration()
+        
+        # Load Harvard datasets (limit to 100 for demo)
+        datasets = harvard_lil.load_harvard_datasets(100)
+        
+        # Get updated political analysis
+        analysis = harvard_lil.get_political_analysis()
+        
+        return jsonify({
+            'success': True,
+            'datasets_loaded': len(datasets),
+            'political_analysis': analysis,
+            'message': f'Successfully loaded {len(datasets)} vanished datasets from Harvard LIL mirror'
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/harvard-data-status')
+def api_harvard_data_status():
+    """Get status of Harvard LIL data in the system"""
+    try:
+        conn = get_database_connection()
+        cursor = conn.cursor()
+        
+        # Count vanished datasets
+        cursor.execute('SELECT COUNT(*) FROM vanished_datasets')
+        vanished_count = cursor.fetchone()[0]
+        
+        # Count by category
+        cursor.execute('''
+            SELECT json_extract(lm.metadata, '$.category') as category, COUNT(*) as count
+            FROM vanished_datasets vd
+            LEFT JOIN lil_manifests lm ON vd.dataset_id = lm.dataset_id
+            GROUP BY category
+        ''')
+        category_counts = dict(cursor.fetchall())
+        
+        # Count by agency
+        cursor.execute('''
+            SELECT last_known_agency, COUNT(*) as count
+            FROM vanished_datasets
+            WHERE last_known_agency IS NOT NULL
+            GROUP BY last_known_agency
+            ORDER BY count DESC
+            LIMIT 10
+        ''')
+        agency_counts = dict(cursor.fetchall())
+        
+        conn.close()
+        
+        return jsonify({
+            'total_vanished': vanished_count,
+            'category_breakdown': category_counts,
+            'top_agencies': agency_counts,
+            'harvard_data_loaded': vanished_count > 0
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 # ============================================================================
 # FULL DATABASE PROCESSING ENDPOINTS
 # ============================================================================
@@ -4355,8 +4496,8 @@ def api_compare_datasets():
         def run_comparison():
             try:
                 # Import the comparison logic
-                from core.data_fetcher import DataFetcher
-                from analysis.diff_engine import DiffEngine
+                from src.core.data_fetcher import DataFetcher
+                from src.analysis.diff_engine import DiffEngine
                 
                 # Initialize components
                 data_fetcher = DataFetcher()
@@ -4944,7 +5085,7 @@ if __name__ == '__main__':
 def api_system_health():
     """Get system health check"""
     try:
-        from monitoring.system_monitor import SystemMonitor
+        from src.monitoring.system_monitor import SystemMonitor
         
         monitor = SystemMonitor()
         health = asyncio.run(monitor._check_system_health())

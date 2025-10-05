@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/enhanced-dashboard.css') }}">
 {% endblock %}
 
+
 {% block content %}
     <!-- Update Indicator -->
     <div id="updateIndicator" class="update-indicator">Data Updated</div>
@@ -116,10 +117,6 @@
                     <div class="format-stat-card">
                         <div class="format-stat-value" id="mostCommonFormat">-</div>
                         <div class="format-stat-label">Most Common</div>
-                    </div>
-                    <div class="format-stat-card">
-                        <div class="format-stat-value" id="unknownFormats">-</div>
-                        <div class="format-stat-label">Unknown Formats</div>
                     </div>
                 </div>
                 <div class="format-chart-container">
@@ -310,9 +307,18 @@
                                 <th class="col-id">Dataset ID</th>
                                 <th class="col-title">Title</th>
                                 <th class="col-agency">Agency</th>
-                                <th class="col-status">Status</th>
-                                <th class="col-last-checked">Last Checked</th>
-                                <th class="col-response">Response Time</th>
+                                <th class="col-status">
+                                    Status
+                                    <span class="tooltip-icon" data-tooltip="Dataset availability status: Available (green), Unavailable (red), or Error (orange)">ℹ️</span>
+                                </th>
+                                <th class="col-last-checked">
+                                    Last Checked
+                                    <span class="tooltip-icon" data-tooltip="When this dataset was last successfully monitored">ℹ️</span>
+                                </th>
+                                <th class="col-response">
+                                    Response Time
+                                    <span class="tooltip-icon" data-tooltip="How quickly the dataset responded during last check (ms/seconds)">ℹ️</span>
+                                </th>
                             </tr>
                         </thead>
                         <tbody id="datasetsTableBody">

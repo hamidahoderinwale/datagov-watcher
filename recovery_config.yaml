@@ -1,0 +1,120 @@
+# Dataset Recovery System Configuration
+# Based on University of Michigan "Missing Government Websites and Data" guide
+
+# Output settings
+output_dir: "./rescued_datasets"
+log_level: "INFO"
+max_concurrent_searches: 5
+timeout_seconds: 30
+
+# Recovery sources configuration
+sources:
+  # Layer A: Harvard Law LIL + Source Cooperative
+  lil:
+    enabled: true
+    priority: 1
+    description: "16 TB Data.gov mirror (311k datasets, 2024–2025)"
+    api_url: "https://source.coop/api/lil-data-gov/search"
+    
+  # Layer B: Internet Archive Ecosystem
+  findlostdata:
+    enabled: true
+    priority: 2
+    description: "Federated search across Harvard LIL, Data Lumos, IA, Dataverse"
+    api_url: "https://findlostdata.org/api/search"
+    
+  datalumos:
+    enabled: true
+    priority: 3
+    description: "DOI-assigned open datasets"
+    api_url: "https://www.datalumos.org/api/search"
+    
+  wayback:
+    enabled: true
+    priority: 4
+    description: "File-level captures for CSVs, PDFs, APIs"
+    api_url: "https://web.archive.org/cdx/search/cdx"
+    
+  # Layer C: Academic Mirrors
+  edgi:
+    enabled: true
+    priority: 5
+    description: "Environmental/CEJST datasets"
+    api_url: "https://envirodatagov.org/api/search"
+    
+  # Layer D: Civic Rescues
+  eot:
+    enabled: true
+    priority: 6
+    description: "End-of-term site captures"
+    api_url: "https://eotarchive.cdlib.org/api/search"
+    
+  webrecorder:
+    enabled: true
+    priority: 7
+    description: "High-fidelity website archives"
+    api_url: "https://webrecorder.net/collections/us-gov/api/search"
+    
+  # Layer E: Targeted State Archives
+  ucsb:
+    enabled: true
+    priority: 8
+    description: "NASA/NOAA/DOE mirrors"
+    api_url: "https://api.github.com/search/repositories"
+
+# Recovery workflow settings
+workflow:
+  # Stop searching after finding high-confidence result
+  early_stop_confidence: 0.8
+  
+  # Minimum confidence threshold for considering a result
+  min_confidence_threshold: 0.5
+  
+  # Maximum number of results to return per source
+  max_results_per_source: 10
+  
+  # Cache search results to avoid duplicate API calls
+  enable_caching: true
+  cache_duration_hours: 24
+
+# FOIA request settings
+foia:
+  # Default contact information for FOIA requests
+  requester_name: "[Your Name]"
+  requester_email: "[your.email@example.com]"
+  requester_phone: "[Your Phone Number]"
+  
+  # FOIA request template customization
+  include_urgency_justification: true
+  include_research_purpose: true
+  request_fee_waiver: false
+
+# Export settings
+export:
+  # Formats to export results in
+  formats: ["json", "csv", "yaml"]
+  
+  # Include full provenance chain in exports
+  include_provenance: true
+  
+  # Include raw API responses in exports
+  include_raw_responses: false
+  
+  # Compress large exports
+  compress_large_exports: true
+  compression_threshold_mb: 10
+
+# Monitoring and alerting
+monitoring:
+  # Log all search attempts
+  log_searches: true
+  
+  # Track success rates by source
+  track_success_rates: true
+  
+  # Alert on new recovery sources
+  alert_new_sources: false
+  
+  # Performance monitoring
+  track_response_times: true
+  slow_query_threshold_seconds: 10

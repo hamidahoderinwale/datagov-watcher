@@ -146,6 +146,471 @@
     border-bottom: none;
 }
 
+/* Recovery Sources Section */
+.recovery-sources-section {
+    background: white;
+    border: 1px solid var(--gray-200);
+    border-radius: 8px;
+    padding: var(--space-6);
+    margin-bottom: var(--space-6);
+}
+
+.recovery-sources-section h3 {
+    font-size: var(--text-xl);
+    font-weight: var(--font-bold);
+    color: var(--gray-900);
+    margin-bottom: var(--space-2);
+}
+
+.recovery-subtitle {
+    font-size: var(--text-sm);
+    color: var(--gray-600);
+    margin-bottom: var(--space-4);
+    font-style: italic;
+}
+
+.recovery-sources-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--space-4);
+    margin-bottom: var(--space-6);
+}
+
+.recovery-source-card {
+    background: #f8fafc;
+    border: 1px solid var(--gray-200);
+    border-radius: 6px;
+    padding: var(--space-4);
+    transition: all 0.2s ease;
+}
+
+.recovery-source-card:hover {
+    border-color: #3b82f6;
+    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.1);
+}
+
+.recovery-source-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-bottom: var(--space-2);
+}
+
+.recovery-source-icon {
+    font-size: 1.5rem;
+}
+
+.recovery-source-name {
+    font-weight: var(--font-semibold);
+    color: var(--gray-800);
+}
+
+.recovery-source-description {
+    font-size: var(--text-sm);
+    color: var(--gray-600);
+    margin-bottom: var(--space-2);
+}
+
+.recovery-source-stats {
+    display: flex;
+    justify-content: space-between;
+    font-size: var(--text-xs);
+    color: var(--gray-500);
+}
+
+.recovery-actions {
+    display: flex;
+    gap: var(--space-3);
+    justify-content: center;
+}
+
+.recovery-button {
+    background: #3b82f6;
+    color: white;
+    border: none;
+    padding: var(--space-2) var(--space-4);
+    border-radius: 6px;
+    font-weight: var(--font-medium);
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.recovery-button:hover {
+    background: #2563eb;
+}
+
+.recovery-button:disabled {
+    background: var(--gray-400);
+    cursor: not-allowed;
+}
+
+.recovery-button.primary {
+    background: #16a34a;
+    font-weight: 600;
+}
+
+.recovery-button.primary:hover {
+    background: #15803d;
+}
+
+/* Notifications */
+.success-notification,
+.error-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10000;
+    max-width: 400px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    animation: slideIn 0.3s ease-out;
+}
+
+.success-notification {
+    background: #dcfce7;
+    border: 1px solid #16a34a;
+    color: #166534;
+}
+
+.error-notification {
+    background: #fef2f2;
+    border: 1px solid #dc2626;
+    color: #991b1b;
+}
+
+.notification-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+}
+
+.notification-icon {
+    font-size: 1.2rem;
+}
+
+.notification-message {
+    font-weight: 500;
+    flex: 1;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Methodology Popup */
+.methodology-popup {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 400px;
+    max-height: 80vh;
+    background: white;
+    border: 1px solid var(--gray-300);
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    font-size: 12px;
+    line-height: 1.4;
+    overflow: hidden;
+    animation: slideInRight 0.3s ease-out;
+}
+
+.methodology-content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.methodology-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: #f8fafc;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.methodology-header h4 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--gray-800);
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 18px;
+    color: var(--gray-500);
+    cursor: pointer;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.close-btn:hover {
+    background: var(--gray-200);
+    color: var(--gray-700);
+}
+
+.methodology-body {
+    padding: 16px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.methodology-body p {
+    margin: 0 0 12px 0;
+    color: var(--gray-700);
+}
+
+.methodology-body h5 {
+    margin: 16px 0 8px 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gray-800);
+    border-bottom: 1px solid var(--gray-200);
+    padding-bottom: 4px;
+}
+
+.methodology-body h5:first-child {
+    margin-top: 0;
+}
+
+.methodology-body ul,
+.methodology-body ol {
+    margin: 8px 0 12px 0;
+    padding-left: 16px;
+}
+
+.methodology-body li {
+    margin: 4px 0;
+    color: var(--gray-700);
+}
+
+.methodology-body strong {
+    color: var(--gray-800);
+    font-weight: 600;
+}
+
+.methodology-footer {
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid var(--gray-200);
+    text-align: center;
+}
+
+.methodology-footer a {
+    color: #3b82f6;
+    text-decoration: none;
+}
+
+.methodology-footer a:hover {
+    text-decoration: underline;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOutRight {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .methodology-popup {
+        width: calc(100vw - 40px);
+        max-width: 400px;
+        left: 20px;
+        right: 20px;
+    }
+}
+
+/* Recovery Results */
+.recovery-results {
+    margin-top: var(--space-4);
+    padding: var(--space-4);
+    background: #f0f9ff;
+    border: 1px solid #0ea5e9;
+    border-radius: 6px;
+}
+
+.recovery-result-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2);
+    background: white;
+    border-radius: 4px;
+    margin-bottom: var(--space-2);
+}
+
+.recovery-result-icon {
+    font-size: 1.2rem;
+}
+
+.recovery-result-text {
+    flex: 1;
+    font-size: var(--text-sm);
+}
+
+.recovery-result-confidence {
+    font-size: var(--text-xs);
+    color: var(--gray-500);
+    background: var(--gray-100);
+    padding: 2px 6px;
+    border-radius: 3px;
+}
+
+/* Dataset Header with Actions */
+.dataset-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-2);
+}
+
+.dataset-actions {
+    display: flex;
+    gap: var(--space-2);
+}
+
+.search-recovery-btn {
+    background: #3b82f6;
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: background-color 0.2s ease;
+}
+
+.search-recovery-btn:hover {
+    background: #2563eb;
+}
+
+/* Recovery Results Styling */
+.recovery-loading {
+    text-align: center;
+    padding: var(--space-4);
+    color: var(--gray-600);
+    font-style: italic;
+}
+
+.recovery-error {
+    text-align: center;
+    padding: var(--space-4);
+    color: #dc2626;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 4px;
+}
+
+.recovery-no-results {
+    text-align: center;
+    padding: var(--space-4);
+    color: var(--gray-600);
+}
+
+.recovery-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    background: #f0f9ff;
+    border: 1px solid #0ea5e9;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+}
+
+.badge-icon {
+    font-size: 1rem;
+}
+
+.badge-text {
+    color: #0c4a6e;
+}
+
+.recovery-results-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-3);
+    padding-bottom: var(--space-2);
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.recovery-count {
+    font-size: var(--text-sm);
+    color: var(--gray-600);
+}
+
+.recovery-results-list {
+    margin-bottom: var(--space-3);
+}
+
+.recovery-source {
+    font-weight: var(--font-semibold);
+    color: var(--gray-800);
+    margin-bottom: 2px;
+}
+
+.recovery-url a {
+    color: #3b82f6;
+    text-decoration: none;
+    font-size: var(--text-xs);
+    word-break: break-all;
+}
+
+.recovery-url a:hover {
+    text-decoration: underline;
+}
+
+.recovery-date {
+    font-size: var(--text-xs);
+    color: var(--gray-500);
+    margin-top: 2px;
+}
+
+.recovery-provenance {
+    font-size: var(--text-xs);
+    color: var(--gray-600);
+    background: #f8fafc;
+    padding: var(--space-2);
+    border-radius: 4px;
+    border-left: 3px solid #3b82f6;
+}
+
 .vanished-datasets-list {
     background: white;
     border: 1px solid var(--gray-200);
@@ -437,6 +902,47 @@
 {% endblock %}
 
 {% block content %}
+<!-- Methodology Information Popup -->
+<div id="methodology-popup" class="methodology-popup">
+    <div class="methodology-content">
+        <div class="methodology-header">
+            <h4>Dataset Retrieval Methodology</h4>
+            <button id="close-methodology" class="close-btn">&times;</button>
+        </div>
+        <div class="methodology-body">
+            <p><strong>Based on University of Michigan "Missing Government Websites and Data" guide</strong></p>
+            
+            <h5>Layered Recovery Stack:</h5>
+            <ul>
+                <li><strong>Harvard LIL + Source Cooperative</strong> - 16 TB Data.gov mirror (311k datasets, 2024–2025)</li>
+                <li><strong>Find Lost Data (UMich)</strong> - Federated search across archives</li>
+                <li><strong>DataLumos (ICPSR)</strong> - DOI-assigned persistent datasets</li>
+                <li><strong>Internet Archive Wayback</strong> - Historical file captures</li>
+                <li><strong>EDGI Climate & Justice</strong> - Environmental/justice datasets</li>
+                <li><strong>End of Term Archive</strong> - Presidential transition captures</li>
+                <li><strong>Webrecorder US Gov</strong> - High-fidelity website archives</li>
+                <li><strong>UCSB Public Data Git</strong> - NASA/NOAA/DOE mirrors</li>
+            </ul>
+            
+            <h5>Recovery Workflow:</h5>
+            <ol>
+                <li>Identify dataset metadata (title, agency, Data.gov ID, landing URL)</li>
+                <li>Search sources in priority order (1-8)</li>
+                <li>Stop early if high-confidence result found (>80%)</li>
+                <li>Generate provenance chain and status badges</li>
+                <li>Export results in multiple formats</li>
+            </ol>
+            
+            <h5>Political Analysis:</h5>
+            <p>Analyzes patterns around political events (Trump 2017/2025, Biden inaugurations) and identifies disproportionately affected agencies (DOE, NOAA, DOI, NASA, EPA) based on 404 Media research.</p>
+            
+            <div class="methodology-footer">
+                <small>Source: <a href="https://findlostdata.org" target="_blank">findlostdata.org</a> | <a href="https://404media.co" target="_blank">404 Media Research</a></small>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="postmortem-container">
     <div class="postmortem-header">
         <h1 class="postmortem-title">Post-mortem Reports</h1>
@@ -513,6 +1019,22 @@
         </div>
     </div>
 
+    <!-- Recovery Sources Section -->
+    <div class="recovery-sources-section" id="recovery-sources-section">
+        <h3>Dataset Recovery Sources</h3>
+        <p class="recovery-subtitle">Comprehensive search across all major archival repositories based on University of Michigan approach</p>
+        
+        <div class="recovery-sources-grid" id="recovery-sources-grid">
+            <!-- Recovery sources will be loaded here -->
+        </div>
+        
+        <div class="recovery-actions">
+            <button id="load-harvard-data" class="recovery-button primary">Load Harvard LIL Data</button>
+            <button id="search-all-datasets" class="recovery-button">Search All Vanished Datasets</button>
+            <button id="export-recovery-report" class="recovery-button">Export Recovery Report</button>
+        </div>
+    </div>
+
     <div class="postmortem-report" id="postmortem-report">
         <div class="report-header">
             <h2 class="report-title" id="report-title">Post-mortem Report</h2>
@@ -542,6 +1064,7 @@ class PostmortemReports {
     init() {
         this.loadVanishedDatasets();
         this.loadPoliticalAnalysis();
+        this.loadRecoverySources();
         this.bindEvents();
     }
 
@@ -575,6 +1098,47 @@ class PostmortemReports {
         } catch (error) {
             console.error('Error loading political analysis:', error);
         }
+    }
+
+    async loadRecoverySources() {
+        try {
+            const response = await fetch('/api/recovery-sources');
+            const data = await response.json();
+            
+            this.renderRecoverySources(data.recovery_sources);
+        } catch (error) {
+            console.error('Error loading recovery sources:', error);
+        }
+    }
+
+    renderRecoverySources(sources) {
+        const grid = document.getElementById('recovery-sources-grid');
+        if (!grid) return;
+
+        const sourceIcons = {
+            'lil': '🏛️',
+            'findlostdata': '🔍',
+            'datalumos': '📊',
+            'wayback': '🕰️',
+            'edgi': '🌱',
+            'eot': '📚',
+            'webrecorder': '💾',
+            'ucsb': '🔬'
+        };
+
+        grid.innerHTML = Object.entries(sources).map(([id, source]) => `
+            <div class="recovery-source-card">
+                <div class="recovery-source-header">
+                    <span class="recovery-source-icon">${sourceIcons[id] || '📁'}</span>
+                    <span class="recovery-source-name">${source.name}</span>
+                </div>
+                <div class="recovery-source-description">${source.description}</div>
+                <div class="recovery-source-stats">
+                    <span>Priority: ${source.priority}</span>
+                    <span>Status: Active</span>
+                </div>
+            </div>
+        `).join('');
     }
 
     updatePoliticalAnalysis(analysis) {
@@ -614,9 +1178,29 @@ class PostmortemReports {
             this.loadVanishedDatasets();
             this.loadPoliticalAnalysis();
         });
+        
+        document.getElementById('load-harvard-data').addEventListener('click', () => {
+            this.loadHarvardData();
+        });
 
         document.getElementById('export-all-pdf').addEventListener('click', () => {
             this.exportAllReports();
+        });
+        
+        // Methodology popup close functionality
+        document.getElementById('close-methodology').addEventListener('click', () => {
+            this.closeMethodologyPopup();
+        });
+        
+        // Close popup when clicking outside
+        document.addEventListener('click', (e) => {
+            const popup = document.getElementById('methodology-popup');
+            const closeBtn = document.getElementById('close-methodology');
+            
+            if (popup && !popup.contains(e.target) && e.target !== closeBtn) {
+                // Don't close on clicks inside the popup
+                return;
+            }
         });
     }
 
@@ -632,7 +1216,14 @@ class PostmortemReports {
             const daysMissing = this.calculateDaysMissing(dataset.last_seen_date);
             return `
                 <div class="vanished-dataset-item" onclick="postmortemReports.loadReport('${dataset.dataset_id}')">
-                    <div class="dataset-title">${this.escapeHtml(dataset.title || 'Unknown Dataset')}</div>
+                    <div class="dataset-header">
+                        <div class="dataset-title">${this.escapeHtml(dataset.title || 'Unknown Dataset')}</div>
+                        <div class="dataset-actions">
+                            <button class="search-recovery-btn" onclick="event.stopPropagation(); postmortemReports.searchDatasetRecovery('${dataset.dataset_id}')" title="Search Recovery Sources">
+                                🔍
+                            </button>
+                        </div>
+                    </div>
                     <div class="dataset-meta">
                         <span><strong>Agency:</strong> ${this.escapeHtml(dataset.agency || 'Unknown')}</span>
                         <span><strong>Last Seen:</strong> ${this.formatDate(dataset.last_seen_date)}</span>
@@ -640,6 +1231,9 @@ class PostmortemReports {
                         <span><strong>Status:</strong> ${this.escapeHtml(dataset.status || 'Unknown')}</span>
                     </div>
                     <div class="vanished-status">${this.escapeHtml(dataset.status || 'Vanished')}</div>
+                    <div class="recovery-results" id="recovery-${dataset.dataset_id}" style="display: none;">
+                        <!-- Recovery results will be loaded here -->
+                    </div>
                 </div>
             `;
         }).join('');
@@ -831,6 +1425,190 @@ Generated: ${new Date().toISOString()}
         const diffTime = Math.abs(now - lastSeen);
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
         return diffDays;
+    }
+
+    async searchDatasetRecovery(datasetId) {
+        try {
+            const recoveryContainer = document.getElementById(`recovery-${datasetId}`);
+            if (!recoveryContainer) return;
+
+            // Show loading state
+            recoveryContainer.innerHTML = '<div class="recovery-loading">🔍 Searching recovery sources...</div>';
+            recoveryContainer.style.display = 'block';
+
+            const response = await fetch(`/api/dataset/${datasetId}/recovery-search`);
+            const data = await response.json();
+
+            if (data.error) {
+                recoveryContainer.innerHTML = `<div class="recovery-error">❌ Error: ${data.error}</div>`;
+                return;
+            }
+
+            this.renderRecoveryResults(datasetId, data);
+        } catch (error) {
+            console.error('Error searching dataset recovery:', error);
+            const recoveryContainer = document.getElementById(`recovery-${datasetId}`);
+            if (recoveryContainer) {
+                recoveryContainer.innerHTML = `<div class="recovery-error">❌ Search failed: ${error.message}</div>`;
+            }
+        }
+    }
+
+    renderRecoveryResults(datasetId, data) {
+        const recoveryContainer = document.getElementById(`recovery-${datasetId}`);
+        if (!recoveryContainer) return;
+
+        const { recovery_results, status_badge, provenance_pack } = data;
+
+        if (!recovery_results || recovery_results.length === 0) {
+            recoveryContainer.innerHTML = `
+                <div class="recovery-no-results">
+                    <div class="recovery-status-badge">
+                        <span class="badge-icon">${status_badge.icon}</span>
+                        <span class="badge-text">${status_badge.text}</span>
+                    </div>
+                    <p>No recovery sources found. Consider filing a FOIA request.</p>
+                </div>
+            `;
+            return;
+        }
+
+        // Sort results by confidence
+        const sortedResults = recovery_results.sort((a, b) => b.confidence - a.confidence);
+
+        recoveryContainer.innerHTML = `
+            <div class="recovery-results-header">
+                <div class="recovery-status-badge">
+                    <span class="badge-icon">${status_badge.icon}</span>
+                    <span class="badge-text">${status_badge.text}</span>
+                </div>
+                <div class="recovery-count">${recovery_results.length} source(s) found</div>
+            </div>
+            <div class="recovery-results-list">
+                ${sortedResults.map(result => `
+                    <div class="recovery-result-item">
+                        <span class="recovery-result-icon">${this.getRecoveryIcon(result.status)}</span>
+                        <div class="recovery-result-text">
+                            <div class="recovery-source">${result.source}</div>
+                            <div class="recovery-url">
+                                <a href="${result.url}" target="_blank" rel="noopener">${result.url}</a>
+                            </div>
+                            ${result.capture_date ? `<div class="recovery-date">Captured: ${result.capture_date}</div>` : ''}
+                        </div>
+                        <div class="recovery-result-confidence">${Math.round(result.confidence * 100)}%</div>
+                    </div>
+                `).join('')}
+            </div>
+            <div class="recovery-provenance">
+                <strong>Provenance Chain:</strong> ${provenance_pack.provenance_chain.join(' → ')}
+            </div>
+        `;
+    }
+
+    getRecoveryIcon(status) {
+        const icons = {
+            'found_lil': '🏛️',
+            'found_wayback': '🕰️',
+            'found_datalumos': '📊',
+            'found_edgi': '🌱',
+            'found_eot': '📚',
+            'found_state': '🏛️',
+            'reissued': '♻️',
+            'missing': '🚨',
+            'foia_filed': '📋'
+        };
+        return icons[status] || '❓';
+    }
+
+    async loadHarvardData() {
+        try {
+            const button = document.getElementById('load-harvard-data');
+            const originalText = button.textContent;
+            
+            // Show loading state
+            button.textContent = 'Loading Harvard Data...';
+            button.disabled = true;
+            
+            const response = await fetch('/api/load-harvard-data');
+            const data = await response.json();
+            
+            if (data.success) {
+                // Show success message
+                this.showSuccess(`Successfully loaded ${data.datasets_loaded} vanished datasets from Harvard LIL mirror`);
+                
+                // Reload the page data
+                await this.loadVanishedDatasets();
+                await this.loadPoliticalAnalysis();
+                
+                // Update the vanished summary
+                this.updateVanishedSummary(data.political_analysis.total_vanished);
+            } else {
+                this.showError(data.error || 'Failed to load Harvard data');
+            }
+            
+        } catch (error) {
+            console.error('Error loading Harvard data:', error);
+            this.showError('Failed to load Harvard data: ' + error.message);
+        } finally {
+            // Reset button state
+            const button = document.getElementById('load-harvard-data');
+            button.textContent = 'Load Harvard LIL Data';
+            button.disabled = false;
+        }
+    }
+
+    showSuccess(message) {
+        // Create success notification
+        const notification = document.createElement('div');
+        notification.className = 'success-notification';
+        notification.innerHTML = `
+            <div class="notification-content">
+                <span class="notification-icon">✅</span>
+                <span class="notification-message">${message}</span>
+            </div>
+        `;
+        
+        // Add to page
+        document.body.appendChild(notification);
+        
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 5000);
+    }
+
+    showError(message) {
+        // Create error notification
+        const notification = document.createElement('div');
+        notification.className = 'error-notification';
+        notification.innerHTML = `
+            <div class="notification-content">
+                <span class="notification-icon">❌</span>
+                <span class="notification-message">${message}</span>
+            </div>
+        `;
+        
+        // Add to page
+        document.body.appendChild(notification);
+        
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 5000);
+    }
+
+    closeMethodologyPopup() {
+        const popup = document.getElementById('methodology-popup');
+        if (popup) {
+            popup.style.animation = 'slideOutRight 0.3s ease-out';
+            setTimeout(() => {
+                popup.style.display = 'none';
+            }, 300);
+        }
     }
 
     escapeHtml(text) {
