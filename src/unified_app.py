@@ -488,10 +488,23 @@ def api_format_distribution():
         conn = get_database_connection()
         cursor = conn.cursor()
         
-        # Get format distribution
+        # Get format distribution with cleaning
         cursor.execute('''
             SELECT 
-                COALESCE(resource_format, 'Unknown') as format,
+                CASE 
+                    WHEN resource_format IS NULL OR resource_format = '' THEN 'Unknown'
+                    WHEN LENGTH(resource_format) > 20 THEN 'Other'
+                    WHEN resource_format LIKE '%Undefined%' THEN 'Unknown'
+                    WHEN resource_format LIKE '%The first column%' THEN 'Other'
+                    WHEN resource_format LIKE '%This is%' THEN 'Other'
+                    WHEN resource_format LIKE '%Three column%' THEN 'Other'
+                    WHEN resource_format LIKE '%Rmd file%' THEN 'R Markdown'
+                    WHEN resource_format LIKE '%Python%' THEN 'Python'
+                    WHEN resource_format LIKE '%README%' THEN 'Documentation'
+                    WHEN resource_format LIKE '%Search portal%' THEN 'Web Service'
+                    WHEN resource_format LIKE '%SharePoint%' THEN 'Web Service'
+                    ELSE UPPER(TRIM(resource_format))
+                END as format,
                 COUNT(*) as count,
                 COUNT(CASE WHEN availability = 'available' THEN 1 END) as available_count
             FROM dataset_states ds
@@ -501,7 +514,20 @@ def api_format_distribution():
                 GROUP BY dataset_id
             ) latest ON ds.dataset_id = latest.dataset_id 
             AND ds.created_at = latest.max_created
-            GROUP BY COALESCE(resource_format, 'Unknown')
+            GROUP BY CASE 
+                WHEN resource_format IS NULL OR resource_format = '' THEN 'Unknown'
+                WHEN LENGTH(resource_format) > 20 THEN 'Other'
+                WHEN resource_format LIKE '%Undefined%' THEN 'Unknown'
+                WHEN resource_format LIKE '%The first column%' THEN 'Other'
+                WHEN resource_format LIKE '%This is%' THEN 'Other'
+                WHEN resource_format LIKE '%Three column%' THEN 'Other'
+                WHEN resource_format LIKE '%Rmd file%' THEN 'R Markdown'
+                WHEN resource_format LIKE '%Python%' THEN 'Python'
+                WHEN resource_format LIKE '%README%' THEN 'Documentation'
+                WHEN resource_format LIKE '%Search portal%' THEN 'Web Service'
+                WHEN resource_format LIKE '%SharePoint%' THEN 'Web Service'
+                ELSE UPPER(TRIM(resource_format))
+            END
             ORDER BY count DESC
             LIMIT 15
         ''')

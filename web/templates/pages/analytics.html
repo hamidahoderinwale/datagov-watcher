@@ -448,65 +448,7 @@
     padding: var(--space-4);
 }
 
-.trend-chart-title {
-    font-size: var(--text-lg);
-    font-weight: var(--font-semibold);
-    color: var(--gray-900);
-    margin-bottom: var(--space-4);
-    text-align: center;
-}
-
-.trend-chart-bars {
-    display: flex;
-    align-items: end;
-    justify-content: space-around;
-    height: 200px;
-    margin-bottom: var(--space-4);
-    border-bottom: 2px solid var(--gray-300);
-}
-
-.trend-bar-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    flex: 1;
-    margin: 0 var(--space-1);
-}
-
-.trend-bar {
-    width: 30px;
-    background: var(--primary);
-    border-radius: 2px 2px 0 0;
-    margin-bottom: var(--space-2);
-    transition: all var(--transition-fast);
-}
-
-.trend-bar:hover {
-    background: var(--primary-dark);
-}
-
-.trend-label {
-    font-size: var(--text-xs);
-    color: var(--gray-600);
-    text-align: center;
-    margin-bottom: var(--space-1);
-}
-
-.trend-value {
-    font-size: var(--text-xs);
-    font-weight: var(--font-medium);
-    color: var(--gray-900);
-    text-align: center;
-}
-
-.trend-chart-summary {
-    text-align: center;
-    font-size: var(--text-sm);
-    color: var(--gray-600);
-    padding: var(--space-2);
-    background: var(--gray-50);
-    border-radius: 0;
-}
+/* Chart.js will handle all styling for the trends chart */
 
 /* Status Chart */
 .status-chart-container {
@@ -1051,12 +993,12 @@ function displayAgencyData(agencies) {
     }, 0);
 }
 
-// Render trend chart
+// Render trend chart using Chart.js
 function renderTrendChart(data, metric, timePeriod) {
-    const chart = document.getElementById('trend-chart');
+    const chartElement = document.getElementById('trend-chart');
     
     if (!data || !data.labels || data.labels.length === 0) {
-        chart.innerHTML = `
+        chartElement.innerHTML = `
             <div class="chart-placeholder">
                 No trend data available for ${metric} over last ${timePeriod} days
             </div>
@@ -1064,48 +1006,97 @@ function renderTrendChart(data, metric, timePeriod) {
         return;
     }
     
-    // Create a simple text-based chart representation
-    const maxValue = Math.max(...data.datasets[0].data);
-    const chartHeight = 200;
+    // Destroy existing chart if it exists
+    if (window.trendChart) {
+        window.trendChart.destroy();
+    }
     
-    let chartHTML = `
-        <div class="trend-chart-container">
-            <div class="trend-chart-title">${metric.charAt(0).toUpperCase() + metric.slice(1)} Trends</div>
-            <div class="trend-chart-bars">
-    `;
+    // Create canvas element
+    chartElement.innerHTML = '<canvas id="trend-canvas"></canvas>';
+    const canvas = document.getElementById('trend-canvas');
+    const ctx = canvas.getContext('2d');
     
-    data.labels.forEach((label, index) => {
-        const value = data.datasets[0].data[index];
-        const height = (value / maxValue) * chartHeight;
-        const percentage = ((value / maxValue) * 100).toFixed(1);
-        
-        chartHTML += `
-            <div class="trend-bar-container">
-                <div class="trend-bar" data-height="${height}" title="${value}"></div>
-                <div class="trend-label">${label}</div>
-                <div class="trend-value">${value.toLocaleString()}</div>
-            </div>
-        `;
+    // Set canvas size
+    canvas.width = chartElement.offsetWidth;
+    canvas.height = chartElement.offsetHeight;
+    
+    // Create Chart.js chart
+    window.trendChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: data.labels,
+            datasets: data.datasets.map((dataset, index) => ({
+                label: dataset.label,
+                data: dataset.data,
+                borderColor: ['#3b82f6', '#10b981', '#ef4444', '#f59e0b'][index] || '#6b7280',
+                backgroundColor: ['rgba(59, 130, 246, 0.1)', 'rgba(16, 185, 129, 0.1)', 'rgba(239, 68, 68, 0.1)', 'rgba(245, 158, 11, 0.1)'][index] || 'rgba(107, 114, 128, 0.1)',
+                tension: 0.4,
+                fill: true,
+                pointRadius: 4,
+                pointHoverRadius: 6
+            }))
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: {
+                    display: true,
+                    text: `${metric.charAt(0).toUpperCase() + metric.slice(1)} Trends (Last ${timePeriod} Days)`,
+                    font: {
+                        size: 16,
+                        weight: 'bold'
+                    }
+                },
+                legend: {
+                    display: true,
+                    position: 'top'
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.dataset.label}: ${context.parsed.y.toLocaleString()}`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    display: true,
+                    title: {
+                        display: true,
+                        text: 'Date'
+                    },
+                    grid: {
+                        color: '#e5e7eb'
+                    }
+                },
+                y: {
+                    display: true,
+                    title: {
+                        display: true,
+                        text: metric.charAt(0).toUpperCase() + metric.slice(1)
+                    },
+                    beginAtZero: true,
+                    grid: {
+                        color: '#e5e7eb'
+                    },
+                    ticks: {
+                        callback: function(value) {
+                            return value.toLocaleString();
+                        }
+                    }
+                }
+            },
+            interaction: {
+                mode: 'nearest',
+                axis: 'x',
+                intersect: false
+            }
+        }
     });
-    
-    chartHTML += `
-            </div>
-            <div class="trend-chart-summary">
-                Total: ${data.datasets[0].data.reduce((a, b) => a + b, 0).toLocaleString()} | 
-                Average: ${Math.round(data.datasets[0].data.reduce((a, b) => a + b, 0) / data.datasets[0].data.length).toLocaleString()}
-            </div>
-        </div>
-    `;
-    
-    chart.innerHTML = chartHTML;
-    
-    // Apply dynamic styles
-    setTimeout(() => {
-        chart.querySelectorAll('.trend-bar[data-height]').forEach(bar => {
-            const height = bar.getAttribute('data-height');
-            bar.style.height = `${height}px`;
-        });
-    }, 0);
 }
 
 // Load chart data
