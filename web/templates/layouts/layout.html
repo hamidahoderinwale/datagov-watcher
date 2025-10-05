@@ -26,13 +26,9 @@
             </button>
 
 
-            <!-- Top Navigation Links -->
-            <div class="top-nav-links">
-                <a href="/" class="top-nav-link {% if request.endpoint == 'index' %}active{% endif %}">Dashboard</a>
-                <a href="/catalog" class="top-nav-link {% if request.endpoint == 'catalog' %}active{% endif %}">Catalog</a>
-                <a href="/agencies" class="top-nav-link {% if request.endpoint == 'agencies' %}active{% endif %}">Agencies</a>
-                <a href="/tags" class="top-nav-link {% if request.endpoint == 'tags' %}active{% endif %}">Tags</a>
-                <a href="/metrics" class="top-nav-link {% if request.endpoint == 'metrics' %}active{% endif %}">Analytics</a>
+            <!-- App Title (replaces duplicate navigation) -->
+            <div class="app-title">
+                <h1>Dataset State Historian</h1>
             </div>
 
             <!-- Notification System -->

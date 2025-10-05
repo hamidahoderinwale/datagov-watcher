@@ -44,40 +44,28 @@
 }
 
 
-/* Top Navigation Links */
-.top-nav-links {
+/* App Title */
+.app-title {
+    flex: 1;
     display: flex;
     align-items: center;
-    gap: var(--space-2);
+    justify-content: center;
 }
 
-.top-nav-link {
-    padding: var(--space-2) var(--space-3);
-    color: var(--gray-600);
-    text-decoration: none;
-    font-size: var(--text-sm);
-    font-weight: var(--font-medium);
-    border-radius: 0;
-    transition: all var(--transition-fast);
-    white-space: nowrap;
-}
-
-.top-nav-link:hover {
+.app-title h1 {
+    font-size: 1.25rem;
+    font-weight: 600;
     color: var(--gray-900);
-    background: var(--gray-50);
-}
-
-.top-nav-link.active {
-    color: var(--primary);
-    background: var(--primary-light);
+    margin: 0;
+    text-align: center;
 }
 
 /* Main content positioning handled by sidebar.css */
 
 /* Responsive Design */
 @media (max-width: 1024px) {
-    .top-nav-links {
-        display: none;
+    .app-title h1 {
+        font-size: 1.125rem;
     }
 }
 
@@ -94,5 +82,9 @@
     .top-nav .sidebar-toggle {
         width: 36px;
         height: 36px;
+    }
+    
+    .app-title h1 {
+        font-size: 1rem;
     }
 }
