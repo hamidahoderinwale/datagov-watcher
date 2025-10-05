@@ -488,21 +488,83 @@ def api_format_distribution():
         conn = get_database_connection()
         cursor = conn.cursor()
         
-        # Get format distribution with cleaning
+        # Get format distribution with comprehensive cleaning
         cursor.execute('''
             SELECT 
                 CASE 
                     WHEN resource_format IS NULL OR resource_format = '' THEN 'Unknown'
-                    WHEN LENGTH(resource_format) > 20 THEN 'Other'
+                    -- Clean up malformed entries
                     WHEN resource_format LIKE '%Undefined%' THEN 'Unknown'
                     WHEN resource_format LIKE '%The first column%' THEN 'Other'
                     WHEN resource_format LIKE '%This is%' THEN 'Other'
                     WHEN resource_format LIKE '%Three column%' THEN 'Other'
-                    WHEN resource_format LIKE '%Rmd file%' THEN 'R Markdown'
-                    WHEN resource_format LIKE '%Python%' THEN 'Python'
-                    WHEN resource_format LIKE '%README%' THEN 'Documentation'
-                    WHEN resource_format LIKE '%Search portal%' THEN 'Web Service'
-                    WHEN resource_format LIKE '%SharePoint%' THEN 'Web Service'
+                    WHEN resource_format LIKE '%comma separated%' THEN 'CSV'
+                    WHEN resource_format LIKE '%zip file%' THEN 'ZIP'
+                    WHEN resource_format LIKE '%zipped%' THEN 'ZIP'
+                    WHEN resource_format LIKE '%Zipped%' THEN 'ZIP'
+                    WHEN resource_format LIKE '%ZIP%' THEN 'ZIP'
+                    WHEN resource_format LIKE '%zip%' THEN 'ZIP'
+                    -- Standardize common formats
+                    WHEN resource_format LIKE '%CSV%' OR resource_format LIKE '%csv%' THEN 'CSV'
+                    WHEN resource_format LIKE '%JSON%' OR resource_format LIKE '%json%' THEN 'JSON'
+                    WHEN resource_format LIKE '%XML%' OR resource_format LIKE '%xml%' THEN 'XML'
+                    WHEN resource_format LIKE '%PDF%' OR resource_format LIKE '%pdf%' THEN 'PDF'
+                    WHEN resource_format LIKE '%XLS%' OR resource_format LIKE '%xls%' THEN 'Excel'
+                    WHEN resource_format LIKE '%Excel%' OR resource_format LIKE '%excel%' THEN 'Excel'
+                    WHEN resource_format LIKE '%Word%' OR resource_format LIKE '%word%' THEN 'Word'
+                    WHEN resource_format LIKE '%PowerPoint%' OR resource_format LIKE '%powerpoint%' THEN 'PowerPoint'
+                    WHEN resource_format LIKE '%PNG%' OR resource_format LIKE '%png%' THEN 'PNG'
+                    WHEN resource_format LIKE '%JPG%' OR resource_format LIKE '%jpg%' THEN 'JPG'
+                    WHEN resource_format LIKE '%GIF%' OR resource_format LIKE '%gif%' THEN 'GIF'
+                    WHEN resource_format LIKE '%TIFF%' OR resource_format LIKE '%tiff%' THEN 'TIFF'
+                    WHEN resource_format LIKE '%TXT%' OR resource_format LIKE '%txt%' OR resource_format LIKE '%text%' THEN 'Text'
+                    WHEN resource_format LIKE '%HTML%' OR resource_format LIKE '%html%' THEN 'HTML'
+                    WHEN resource_format LIKE '%API%' OR resource_format LIKE '%api%' THEN 'API'
+                    WHEN resource_format LIKE '%WMS%' OR resource_format LIKE '%wms%' THEN 'WMS'
+                    WHEN resource_format LIKE '%SHP%' OR resource_format LIKE '%shp%' THEN 'Shapefile'
+                    WHEN resource_format LIKE '%KML%' OR resource_format LIKE '%kml%' THEN 'KML'
+                    WHEN resource_format LIKE '%KMZ%' OR resource_format LIKE '%kmz%' THEN 'KMZ'
+                    WHEN resource_format LIKE '%NetCDF%' OR resource_format LIKE '%netcdf%' OR resource_format LIKE '%nc%' THEN 'NetCDF'
+                    WHEN resource_format LIKE '%HDF%' OR resource_format LIKE '%hdf%' THEN 'HDF'
+                    WHEN resource_format LIKE '%R%' OR resource_format LIKE '%RData%' OR resource_format LIKE '%rdata%' THEN 'R'
+                    WHEN resource_format LIKE '%Python%' OR resource_format LIKE '%python%' OR resource_format LIKE '%py%' THEN 'Python'
+                    WHEN resource_format LIKE '%Rmd%' OR resource_format LIKE '%rmd%' THEN 'R Markdown'
+                    WHEN resource_format LIKE '%README%' OR resource_format LIKE '%readme%' THEN 'Documentation'
+                    WHEN resource_format LIKE '%Search portal%' OR resource_format LIKE '%SharePoint%' THEN 'Web Service'
+                    WHEN resource_format LIKE '%website%' OR resource_format LIKE '%web page%' THEN 'Web Service'
+                    WHEN resource_format LIKE '%GitHub%' OR resource_format LIKE '%github%' THEN 'Code Repository'
+                    -- Group very long descriptive text as "Other"
+                    WHEN LENGTH(resource_format) > 30 THEN 'Other'
+                    -- Clean up application/ MIME types
+                    WHEN resource_format LIKE 'application/%' THEN 
+                        CASE 
+                            WHEN resource_format LIKE '%json%' THEN 'JSON'
+                            WHEN resource_format LIKE '%xml%' THEN 'XML'
+                            WHEN resource_format LIKE '%pdf%' THEN 'PDF'
+                            WHEN resource_format LIKE '%excel%' OR resource_format LIKE '%spreadsheet%' THEN 'Excel'
+                            WHEN resource_format LIKE '%zip%' THEN 'ZIP'
+                            WHEN resource_format LIKE '%csv%' THEN 'CSV'
+                            ELSE 'Other'
+                        END
+                    -- Clean up text/ MIME types
+                    WHEN resource_format LIKE 'text/%' THEN 
+                        CASE 
+                            WHEN resource_format LIKE '%html%' THEN 'HTML'
+                            WHEN resource_format LIKE '%csv%' THEN 'CSV'
+                            WHEN resource_format LIKE '%xml%' THEN 'XML'
+                            WHEN resource_format LIKE '%plain%' OR resource_format LIKE '%txt%' THEN 'Text'
+                            ELSE 'Text'
+                        END
+                    -- Clean up image/ MIME types
+                    WHEN resource_format LIKE 'image/%' THEN 
+                        CASE 
+                            WHEN resource_format LIKE '%png%' THEN 'PNG'
+                            WHEN resource_format LIKE '%jpeg%' OR resource_format LIKE '%jpg%' THEN 'JPG'
+                            WHEN resource_format LIKE '%gif%' THEN 'GIF'
+                            WHEN resource_format LIKE '%tiff%' THEN 'TIFF'
+                            ELSE 'Image'
+                        END
+                    -- Default: clean and standardize
                     ELSE UPPER(TRIM(resource_format))
                 END as format,
                 COUNT(*) as count,
@@ -516,16 +578,71 @@ def api_format_distribution():
             AND ds.created_at = latest.max_created
             GROUP BY CASE 
                 WHEN resource_format IS NULL OR resource_format = '' THEN 'Unknown'
-                WHEN LENGTH(resource_format) > 20 THEN 'Other'
                 WHEN resource_format LIKE '%Undefined%' THEN 'Unknown'
                 WHEN resource_format LIKE '%The first column%' THEN 'Other'
                 WHEN resource_format LIKE '%This is%' THEN 'Other'
                 WHEN resource_format LIKE '%Three column%' THEN 'Other'
-                WHEN resource_format LIKE '%Rmd file%' THEN 'R Markdown'
-                WHEN resource_format LIKE '%Python%' THEN 'Python'
-                WHEN resource_format LIKE '%README%' THEN 'Documentation'
-                WHEN resource_format LIKE '%Search portal%' THEN 'Web Service'
-                WHEN resource_format LIKE '%SharePoint%' THEN 'Web Service'
+                WHEN resource_format LIKE '%comma separated%' THEN 'CSV'
+                WHEN resource_format LIKE '%zip file%' THEN 'ZIP'
+                WHEN resource_format LIKE '%zipped%' THEN 'ZIP'
+                WHEN resource_format LIKE '%Zipped%' THEN 'ZIP'
+                WHEN resource_format LIKE '%ZIP%' THEN 'ZIP'
+                WHEN resource_format LIKE '%zip%' THEN 'ZIP'
+                WHEN resource_format LIKE '%CSV%' OR resource_format LIKE '%csv%' THEN 'CSV'
+                WHEN resource_format LIKE '%JSON%' OR resource_format LIKE '%json%' THEN 'JSON'
+                WHEN resource_format LIKE '%XML%' OR resource_format LIKE '%xml%' THEN 'XML'
+                WHEN resource_format LIKE '%PDF%' OR resource_format LIKE '%pdf%' THEN 'PDF'
+                WHEN resource_format LIKE '%XLS%' OR resource_format LIKE '%xls%' THEN 'Excel'
+                WHEN resource_format LIKE '%Excel%' OR resource_format LIKE '%excel%' THEN 'Excel'
+                WHEN resource_format LIKE '%Word%' OR resource_format LIKE '%word%' THEN 'Word'
+                WHEN resource_format LIKE '%PowerPoint%' OR resource_format LIKE '%powerpoint%' THEN 'PowerPoint'
+                WHEN resource_format LIKE '%PNG%' OR resource_format LIKE '%png%' THEN 'PNG'
+                WHEN resource_format LIKE '%JPG%' OR resource_format LIKE '%jpg%' THEN 'JPG'
+                WHEN resource_format LIKE '%GIF%' OR resource_format LIKE '%gif%' THEN 'GIF'
+                WHEN resource_format LIKE '%TIFF%' OR resource_format LIKE '%tiff%' THEN 'TIFF'
+                WHEN resource_format LIKE '%TXT%' OR resource_format LIKE '%txt%' OR resource_format LIKE '%text%' THEN 'Text'
+                WHEN resource_format LIKE '%HTML%' OR resource_format LIKE '%html%' THEN 'HTML'
+                WHEN resource_format LIKE '%API%' OR resource_format LIKE '%api%' THEN 'API'
+                WHEN resource_format LIKE '%WMS%' OR resource_format LIKE '%wms%' THEN 'WMS'
+                WHEN resource_format LIKE '%SHP%' OR resource_format LIKE '%shp%' THEN 'Shapefile'
+                WHEN resource_format LIKE '%KML%' OR resource_format LIKE '%kml%' THEN 'KML'
+                WHEN resource_format LIKE '%KMZ%' OR resource_format LIKE '%kmz%' THEN 'KMZ'
+                WHEN resource_format LIKE '%NetCDF%' OR resource_format LIKE '%netcdf%' OR resource_format LIKE '%nc%' THEN 'NetCDF'
+                WHEN resource_format LIKE '%HDF%' OR resource_format LIKE '%hdf%' THEN 'HDF'
+                WHEN resource_format LIKE '%R%' OR resource_format LIKE '%RData%' OR resource_format LIKE '%rdata%' THEN 'R'
+                WHEN resource_format LIKE '%Python%' OR resource_format LIKE '%python%' OR resource_format LIKE '%py%' THEN 'Python'
+                WHEN resource_format LIKE '%Rmd%' OR resource_format LIKE '%rmd%' THEN 'R Markdown'
+                WHEN resource_format LIKE '%README%' OR resource_format LIKE '%readme%' THEN 'Documentation'
+                WHEN resource_format LIKE '%Search portal%' OR resource_format LIKE '%SharePoint%' THEN 'Web Service'
+                WHEN resource_format LIKE '%website%' OR resource_format LIKE '%web page%' THEN 'Web Service'
+                WHEN resource_format LIKE '%GitHub%' OR resource_format LIKE '%github%' THEN 'Code Repository'
+                WHEN LENGTH(resource_format) > 30 THEN 'Other'
+                WHEN resource_format LIKE 'application/%' THEN 
+                    CASE 
+                        WHEN resource_format LIKE '%json%' THEN 'JSON'
+                        WHEN resource_format LIKE '%xml%' THEN 'XML'
+                        WHEN resource_format LIKE '%pdf%' THEN 'PDF'
+                        WHEN resource_format LIKE '%excel%' OR resource_format LIKE '%spreadsheet%' THEN 'Excel'
+                        WHEN resource_format LIKE '%zip%' THEN 'ZIP'
+                        WHEN resource_format LIKE '%csv%' THEN 'CSV'
+                        ELSE 'Other'
+                    END
+                WHEN resource_format LIKE 'text/%' THEN 
+                    CASE 
+                        WHEN resource_format LIKE '%html%' THEN 'HTML'
+                        WHEN resource_format LIKE '%csv%' THEN 'CSV'
+                        WHEN resource_format LIKE '%xml%' THEN 'XML'
+                        WHEN resource_format LIKE '%plain%' OR resource_format LIKE '%txt%' THEN 'Text'
+                        ELSE 'Text'
+                    END
+                WHEN resource_format LIKE 'image/%' THEN 
+                    CASE 
+                        WHEN resource_format LIKE '%png%' THEN 'PNG'
+                        WHEN resource_format LIKE '%jpeg%' OR resource_format LIKE '%jpg%' THEN 'JPG'
+                        WHEN resource_format LIKE '%gif%' THEN 'GIF'
+                        WHEN resource_format LIKE '%tiff%' THEN 'TIFF'
+                        ELSE 'Image'
+                    END
                 ELSE UPPER(TRIM(resource_format))
             END
             ORDER BY count DESC
