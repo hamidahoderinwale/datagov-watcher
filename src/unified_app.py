@@ -148,6 +148,24 @@ def index():
     """Main dashboard page"""
     return render_template('pages/unified_app.html', page='dashboard')
 
+@app.route('/health')
+def health_check():
+    """Health check endpoint for Railway deployment"""
+    try:
+        # Simple health check - just return OK if the app is running
+        return jsonify({
+            'status': 'healthy',
+            'timestamp': datetime.now().isoformat(),
+            'service': 'Dataset State Historian',
+            'version': '1.0.0'
+        }), 200
+    except Exception as e:
+        return jsonify({
+            'status': 'unhealthy',
+            'timestamp': datetime.now().isoformat(),
+            'error': str(e)
+        }), 500
+
 @app.route('/favicon.ico')
 def favicon():
     """Serve favicon to prevent 404 errors"""
