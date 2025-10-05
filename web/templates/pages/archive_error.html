@@ -9,15 +9,15 @@
 {% block content %}
 <div class="archive-container">
     <div class="page-header">
-        <h1 class="page-title">Archive Error</h1>
-        <p class="page-subtitle">An error occurred while loading the archive</p>
+        <h1 class="page-title">Archive {{ error_type|title if error_type else 'Error' }}</h1>
+        <p class="page-subtitle">{{ error_subtitle if error_subtitle else 'An error occurred while loading the archive' }}</p>
     </div>
 
     <div class="error-content">
         <div class="error-card">
-            <div class="error-icon">⚠️</div>
-            <h2>Archive Loading Error</h2>
-            <p>We encountered an error while trying to load the dataset archive.</p>
+            <div class="error-icon">{{ error_icon if error_icon else '⚠️' }}</div>
+            <h2>{{ error_title if error_title else 'Archive Loading Error' }}</h2>
+            <p>{{ error_message if error_message else 'We encountered an error while trying to load the dataset archive.' }}</p>
             
             <div class="error-details">
                 <h3>Error Details:</h3>
@@ -111,5 +111,6 @@
 }
 </style>
 {% endblock %}
+
 
 

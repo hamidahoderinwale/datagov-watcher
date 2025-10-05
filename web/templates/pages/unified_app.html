@@ -4,6 +4,7 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/monitoring-status.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/enhanced-dashboard.css') }}">
 {% endblock %}
 
 {% block content %}
@@ -104,6 +105,59 @@
                 </div>
             </div>
             
+            <!-- Format Distribution Section -->
+            <div class="format-distribution-section">
+                <h3>Data Format Distribution</h3>
+                <div class="format-stats">
+                    <div class="format-stat-card">
+                        <div class="format-stat-value" id="totalFormats">-</div>
+                        <div class="format-stat-label">Format Types</div>
+                    </div>
+                    <div class="format-stat-card">
+                        <div class="format-stat-value" id="mostCommonFormat">-</div>
+                        <div class="format-stat-label">Most Common</div>
+                    </div>
+                    <div class="format-stat-card">
+                        <div class="format-stat-value" id="unknownFormats">-</div>
+                        <div class="format-stat-label">Unknown Formats</div>
+                    </div>
+                </div>
+                <div class="format-chart-container">
+                    <div class="format-chart" id="format-distribution-chart">
+                        <!-- Chart will be rendered here -->
+                    </div>
+                    <div class="format-summary" id="format-summary">
+                        <!-- Summary will be populated here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Agency Comparison Section -->
+            <div class="agency-comparison-section">
+                <h3>Agency Performance Comparison</h3>
+                <div class="agency-comparison-summary" id="agency-comparison-summary">
+                    <!-- Summary will be populated here -->
+                </div>
+                <div class="agency-comparison-table-container">
+                    <table class="agency-comparison-table">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Agency</th>
+                                <th>Datasets</th>
+                                <th>Quality Score</th>
+                                <th>Availability</th>
+                                <th>Standardization</th>
+                                <th>Total Size</th>
+                            </tr>
+                        </thead>
+                        <tbody id="agency-comparison-table">
+                            <!-- Populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
             <!-- License Distribution Section -->
             <div class="license-distribution-section">
                 <h3>License Distribution</h3>

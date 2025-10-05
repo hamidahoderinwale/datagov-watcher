@@ -155,8 +155,8 @@ def favicon():
 
 @app.route('/full-database')
 def full_database_dashboard():
-    """Full database processing dashboard"""
-    return render_template('pages/full_database_dashboard.html')
+    """Full database processing dashboard - consolidated into main dashboard"""
+    return render_template('pages/unified_app.html', page='dashboard')
 
 @app.route('/minimal')
 def minimal_dashboard():
@@ -481,6 +481,450 @@ def api_licenses():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@app.route('/api/format-distribution')
+def api_format_distribution():
+    """Get format distribution data for pie chart"""
+    try:
+        conn = get_database_connection()
+        cursor = conn.cursor()
+        
+        # Get format distribution
+        cursor.execute('''
+            SELECT 
+                COALESCE(resource_format, 'Unknown') as format,
+                COUNT(*) as count,
+                COUNT(CASE WHEN availability = 'available' THEN 1 END) as available_count
+            FROM dataset_states ds
+            INNER JOIN (
+                SELECT dataset_id, MAX(created_at) as max_created
+                FROM dataset_states 
+                GROUP BY dataset_id
+            ) latest ON ds.dataset_id = latest.dataset_id 
+            AND ds.created_at = latest.max_created
+            GROUP BY COALESCE(resource_format, 'Unknown')
+            ORDER BY count DESC
+            LIMIT 15
+        ''')
+        
+        formats = []
+        colors = [
+            '#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6',
+            '#06b6d4', '#84cc16', '#f97316', '#ec4899', '#6366f1',
+            '#14b8a6', '#f43f5e', '#8b5cf6', '#06b6d4', '#84cc16'
+        ]
+        
+        for i, row in enumerate(cursor.fetchall()):
+            format_name, count, available_count = row
+            availability_rate = (available_count / count * 100) if count > 0 else 0
+            
+            formats.append({
+                'format': format_name,
+                'count': count,
+                'available_count': available_count,
+                'availability_rate': round(availability_rate, 1),
+                'percentage': 0,  # Will be calculated below
+                'color': colors[i % len(colors)]
+            })
+        
+        # Calculate percentages
+        total_count = sum(f['count'] for f in formats)
+        for format_data in formats:
+            format_data['percentage'] = round((format_data['count'] / total_count * 100), 1)
+        
+        conn.close()
+        
+        return jsonify({
+            'formats': formats,
+            'total_datasets': total_count,
+            'summary': {
+                'most_common_format': formats[0]['format'] if formats else 'Unknown',
+                'format_diversity': len(formats),
+                'unknown_format_percentage': next((f['percentage'] for f in formats if f['format'] == 'Unknown'), 0)
+            }
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/data-quality-score')
+def api_data_quality_score():
+    """Get overall data quality score and metrics"""
+    try:
+        conn = get_database_connection()
+        cursor = conn.cursor()
+        
+        # Get total datasets
+        cursor.execute('SELECT COUNT(DISTINCT dataset_id) FROM dataset_states')
+        total_datasets = cursor.fetchone()[0]
+        
+        # Calculate quality metrics
+        # 1. Format Standardization (25 points)
+        cursor.execute('''
+            SELECT 
+                COUNT(CASE WHEN resource_format IN ('CSV', 'JSON', 'XML', 'XLS', 'XLSX') THEN 1 END) as standardized,
+                COUNT(*) as total
+            FROM dataset_states ds
+            INNER JOIN (
+                SELECT dataset_id, MAX(created_at) as max_created
+                FROM dataset_states 
+                GROUP BY dataset_id
+            ) latest ON ds.dataset_id = latest.dataset_id 
+            AND ds.created_at = latest.max_created
+        ''')
+        format_row = cursor.fetchone()
+        format_score = (format_row[0] / format_row[1] * 25) if format_row[1] > 0 else 0
+        
+        # 2. Metadata Completeness (25 points)
+        cursor.execute('''
+            SELECT 
+                COUNT(CASE WHEN title IS NOT NULL AND title != '' THEN 1 END) as with_title,
+                COUNT(CASE WHEN agency IS NOT NULL AND agency != '' THEN 1 END) as with_agency,
+                COUNT(*) as total
+            FROM dataset_states ds
+            INNER JOIN (
+                SELECT dataset_id, MAX(created_at) as max_created
+                FROM dataset_states 
+                GROUP BY dataset_id
+            ) latest ON ds.dataset_id = latest.dataset_id 
+            AND ds.created_at = latest.max_created
+        ''')
+        metadata_row = cursor.fetchone()
+        metadata_score = ((metadata_row[0] + metadata_row[1]) / (metadata_row[2] * 2) * 25) if metadata_row[2] > 0 else 0
+        
+        # 3. Availability (25 points)
+        cursor.execute('''
+            SELECT 
+                COUNT(CASE WHEN availability = 'available' THEN 1 END) as available,
+                COUNT(*) as total
+            FROM dataset_states ds
+            INNER JOIN (
+                SELECT dataset_id, MAX(created_at) as max_created
+                FROM dataset_states 
+                GROUP BY dataset_id
+            ) latest ON ds.dataset_id = latest.dataset_id 
+            AND ds.created_at = latest.max_created
+        ''')
+        availability_row = cursor.fetchone()
+        availability_score = (availability_row[0] / availability_row[1] * 25) if availability_row[1] > 0 else 0
+        
+        # 4. License Transparency (25 points) - Currently 0
+        license_score = 0  # All licenses are unknown
+        
+        # Calculate overall score
+        overall_score = format_score + metadata_score + availability_score + license_score
+        grade = get_quality_grade(overall_score)
+        
+        conn.close()
+        
+        return jsonify({
+            'overall_score': round(overall_score, 1),
+            'grade': grade,
+            'metrics': {
+                'format_standardization': {
+                    'score': round(format_score, 1),
+                    'max_score': 25,
+                    'percentage': round((format_score / 25) * 100, 1)
+                },
+                'metadata_completeness': {
+                    'score': round(metadata_score, 1),
+                    'max_score': 25,
+                    'percentage': round((metadata_score / 25) * 100, 1)
+                },
+                'availability': {
+                    'score': round(availability_score, 1),
+                    'max_score': 25,
+                    'percentage': round((availability_score / 25) * 100, 1)
+                },
+                'license_transparency': {
+                    'score': round(license_score, 1),
+                    'max_score': 25,
+                    'percentage': round((license_score / 25) * 100, 1)
+                }
+            },
+            'total_datasets': total_datasets,
+            'recommendations': get_quality_recommendations(overall_score, format_score, metadata_score, availability_score, license_score)
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/agency-comparison')
+def api_agency_comparison():
+    """Get comparative metrics between agencies"""
+    try:
+        conn = get_database_connection()
+        cursor = conn.cursor()
+        
+        # Get agency comparison data
+        cursor.execute('''
+            SELECT 
+                ds.agency,
+                COUNT(*) as total_datasets,
+                COUNT(CASE WHEN ds.availability = 'available' THEN 1 END) as available_datasets,
+                COUNT(CASE WHEN ds.resource_format IN ('CSV', 'JSON', 'XML', 'XLS', 'XLSX') THEN 1 END) as standardized_formats,
+                COUNT(CASE WHEN ds.title IS NOT NULL AND ds.title != '' THEN 1 END) as with_titles,
+                AVG(ds.row_count) as avg_rows,
+                AVG(ds.column_count) as avg_columns,
+                SUM(ds.file_size) as total_size,
+                COUNT(DISTINCT ds.resource_format) as format_diversity
+            FROM dataset_states ds
+            INNER JOIN (
+                SELECT dataset_id, MAX(created_at) as max_created
+                FROM dataset_states 
+                GROUP BY dataset_id
+            ) latest ON ds.dataset_id = latest.dataset_id 
+            AND ds.created_at = latest.max_created
+            WHERE ds.agency IS NOT NULL AND ds.agency != ''
+            GROUP BY ds.agency
+            HAVING COUNT(*) >= 100  -- Only agencies with 100+ datasets
+            ORDER BY total_datasets DESC
+            LIMIT 20
+        ''')
+        
+        agencies = []
+        for row in cursor.fetchall():
+            agency, total, available, standardized, with_titles, avg_rows, avg_cols, total_size, format_diversity = row
+            
+            availability_rate = (available / total * 100) if total > 0 else 0
+            standardization_rate = (standardized / total * 100) if total > 0 else 0
+            title_completeness = (with_titles / total * 100) if total > 0 else 0
+            
+            # Calculate quality score (0-100)
+            quality_score = (availability_rate * 0.4 + standardization_rate * 0.3 + title_completeness * 0.3)
+            
+            agencies.append({
+                'agency': agency,
+                'total_datasets': total,
+                'available_datasets': available,
+                'availability_rate': round(availability_rate, 1),
+                'standardization_rate': round(standardization_rate, 1),
+                'title_completeness': round(title_completeness, 1),
+                'quality_score': round(quality_score, 1),
+                'avg_rows': round(avg_rows or 0, 0),
+                'avg_columns': round(avg_cols or 0, 0),
+                'total_size_mb': round((total_size or 0) / 1024 / 1024, 1),
+                'format_diversity': format_diversity or 0
+            })
+        
+        conn.close()
+        
+        return jsonify({
+            'agencies': agencies,
+            'summary': {
+                'total_agencies': len(agencies),
+                'avg_quality_score': round(sum(a['quality_score'] for a in agencies) / len(agencies), 1) if agencies else 0,
+                'best_performing': agencies[0] if agencies else None,
+                'most_datasets': max(agencies, key=lambda x: x['total_datasets']) if agencies else None
+            }
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+def get_quality_grade(score):
+    """Convert numeric score to letter grade"""
+    if score >= 90: return 'A'
+    elif score >= 80: return 'B'
+    elif score >= 70: return 'C'
+    elif score >= 60: return 'D'
+    else: return 'F'
+
+def get_quality_recommendations(overall, format_score, metadata_score, availability_score, license_score):
+    """Generate quality improvement recommendations"""
+    recommendations = []
+    
+    if license_score == 0:
+        recommendations.append({
+            'priority': 'critical',
+            'category': 'License Transparency',
+            'message': '100% of datasets have unknown licenses. This is a critical transparency issue.',
+            'action': 'Work with agencies to implement proper license metadata'
+        })
+    
+    if format_score < 15:
+        recommendations.append({
+            'priority': 'high',
+            'category': 'Format Standardization',
+            'message': 'Many datasets lack standardized formats. Focus on CSV, JSON, XML adoption.',
+            'action': 'Encourage agencies to use machine-readable formats'
+        })
+    
+    if metadata_score < 20:
+        recommendations.append({
+            'priority': 'medium',
+            'category': 'Metadata Completeness',
+            'message': 'Some datasets lack proper titles and agency information.',
+            'action': 'Improve metadata collection and validation'
+        })
+    
+    if availability_score < 20:
+        recommendations.append({
+            'priority': 'high',
+            'category': 'Data Availability',
+            'message': 'Some datasets are unavailable. Monitor and fix broken links.',
+            'action': 'Implement automated availability monitoring'
+        })
+    
+    return recommendations
+
+@app.route('/api/dataset/<dataset_id>/enhanced-metadata')
+def api_enhanced_dataset_metadata(dataset_id):
+    """Get enhanced metadata for a specific dataset including all URL types"""
+    try:
+        conn = get_database_connection()
+        cursor = conn.cursor()
+        
+        # Get basic dataset info
+        cursor.execute('''
+            SELECT dataset_id, title, agency, url, resource_format, 
+                   availability, row_count, column_count, file_size, last_modified
+            FROM dataset_states ds
+            WHERE ds.dataset_id = ? 
+            AND ds.snapshot_date = (
+                SELECT MAX(snapshot_date) 
+                FROM dataset_states ds2 
+                WHERE ds2.dataset_id = ds.dataset_id
+            )
+        ''', (dataset_id,))
+        
+        dataset = cursor.fetchone()
+        if not dataset:
+            return jsonify({'error': 'Dataset not found'}), 404
+        
+        # Try to fetch additional metadata from Data.gov API
+        enhanced_metadata = fetch_datagov_metadata(dataset_id)
+        
+        # Build comprehensive URL list
+        urls = {
+            'primary_url': dataset[3],  # url field
+            'catalog_url': f'https://catalog.data.gov/dataset/{dataset_id}',
+            'service_urls': [],
+            'api_urls': [],
+            'fallback_urls': []
+        }
+        
+        # Add URLs from Data.gov metadata if available
+        if enhanced_metadata:
+            if enhanced_metadata.get('resources'):
+                for resource in enhanced_metadata['resources']:
+                    resource_url = resource.get('url', '')
+                    resource_format = resource.get('format', '').upper()
+                    resource_name = resource.get('name', '')
+                    
+                    if resource_url:
+                        if any(api_type in resource_format for api_type in ['API', 'REST', 'SOAP', 'WFS', 'WMS']):
+                            urls['api_urls'].append({
+                                'url': resource_url,
+                                'format': resource_format,
+                                'name': resource_name,
+                                'type': 'api'
+                            })
+                        elif any(service_type in resource_format for service_type in ['DODS', 'THREDDS', 'OPENDAP']):
+                            urls['service_urls'].append({
+                                'url': resource_url,
+                                'format': resource_format,
+                                'name': resource_name,
+                                'type': 'service'
+                            })
+                        else:
+                            urls['fallback_urls'].append({
+                                'url': resource_url,
+                                'format': resource_format,
+                                'name': resource_name,
+                                'type': 'resource'
+                            })
+        
+        # Add specific URLs for OceanSITES dataset
+        if dataset_id == '0ffebe57-b885-454d-8326-34ce69301927':
+            urls['service_urls'].append({
+                'url': 'https://dods.ndbc.noaa.gov/oceansites/',
+                'format': 'DODS',
+                'name': 'OceanSITES DODS Access',
+                'type': 'service'
+            })
+            urls['fallback_urls'].append({
+                'url': 'https://www.ncei.noaa.gov/archive/accession/OceanSITES',
+                'format': 'ARCHIVE',
+                'name': 'NCEI Archive Accession',
+                'type': 'archive'
+            })
+        
+        conn.close()
+        
+        return jsonify({
+            'dataset_id': dataset_id,
+            'title': dataset[1],
+            'agency': dataset[2],
+            'urls': urls,
+            'metadata': {
+                'resource_format': dataset[4],
+                'availability': dataset[5],
+                'row_count': dataset[6],
+                'column_count': dataset[7],
+                'file_size': dataset[8],
+                'last_modified': dataset[9]
+            },
+            'datagov_metadata': enhanced_metadata,
+            'recommendations': generate_url_recommendations(urls, dataset[5])
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+def fetch_datagov_metadata(dataset_id):
+    """Fetch additional metadata from Data.gov API"""
+    try:
+        import requests
+        
+        # Try to fetch from Data.gov CKAN API
+        api_url = f'https://catalog.data.gov/api/3/action/package_show?id={dataset_id}'
+        response = requests.get(api_url, timeout=10)
+        
+        if response.status_code == 200:
+            data = response.json()
+            if data.get('success') and data.get('result'):
+                return data['result']
+        
+        return None
+        
+    except Exception as e:
+        print(f"Error fetching Data.gov metadata: {e}")
+        return None
+
+def generate_url_recommendations(urls, availability):
+    """Generate recommendations for URL usage"""
+    recommendations = []
+    
+    if not urls['primary_url']:
+        recommendations.append({
+            'priority': 'high',
+            'message': 'Primary URL is missing. Consider using catalog URL or service URLs.',
+            'action': 'Use catalog URL as fallback'
+        })
+    
+    if urls['service_urls']:
+        recommendations.append({
+            'priority': 'medium',
+            'message': 'Service URLs (DODS, THREDDS) are available for programmatic access.',
+            'action': 'Consider using service URLs for automated data access'
+        })
+    
+    if urls['api_urls']:
+        recommendations.append({
+            'priority': 'low',
+            'message': 'API endpoints are available for real-time data access.',
+            'action': 'Use API URLs for live data queries'
+        })
+    
+    if availability != 'available':
+        recommendations.append({
+            'priority': 'critical',
+            'message': 'Dataset is currently unavailable. Check all URL types.',
+            'action': 'Verify URL accessibility and try alternative endpoints'
+        })
+    
+    return recommendations
+
 @app.route('/api/tags/<tag_name>')
 def api_tag_details(tag_name):
     """API endpoint for specific tag details"""
@@ -590,8 +1034,8 @@ def agencies_list():
 
 @app.route('/datasets/<dataset_id>')
 def dataset_profile(dataset_id):
-    """Dataset profile page"""
-    return render_template('pages/dataset_profile.html')
+    """Dataset profile page - using enhanced version"""
+    return render_template('pages/dataset_detail_enhanced.html')
 
 @app.route('/agencies/<agency_name>')
 def agency_page(agency_name):
@@ -601,8 +1045,8 @@ def agency_page(agency_name):
 # Additional missing routes
 @app.route('/visualization')
 def data_visualization():
-    """Data visualization page"""
-    return render_template('pages/data_visualization.html')
+    """Data visualization page - using clean version"""
+    return render_template('pages/data_visualization_clean.html')
 
 @app.route('/data-quality')
 def data_quality():
@@ -617,7 +1061,7 @@ def field_diff_panel():
 @app.route('/content-drift-charts')
 def content_drift_charts():
     """Content drift charts page"""
-    return render_template('components/content_drift_charts.html')
+    return render_template('components/charts/content_drift_charts.html')
 
 @app.route('/api/dataset/<dataset_id>/content-drift')
 def api_dataset_content_drift(dataset_id):
@@ -1381,7 +1825,13 @@ def archive_view(dataset_id):
         
         dataset_info = cursor.fetchone()
         if not dataset_info:
-            return render_template('pages/archive_not_found.html', dataset_id=dataset_id)
+            return render_template('pages/archive_error.html', 
+                              error_type='not found',
+                              error_subtitle='The requested dataset archive could not be found',
+                              error_icon='📁',
+                              error_title='Dataset Not Found',
+                              error_message=f'The dataset with ID {dataset_id} could not be found in our archive.',
+                              dataset_id=dataset_id)
         
         # Get historical snapshots
         cursor.execute('''
@@ -1420,7 +1870,13 @@ def archive_view(dataset_id):
                              archive_url=archive_url)
         
     except Exception as e:
-        return render_template('pages/archive_error.html', error=str(e))
+        return render_template('pages/archive_error.html', 
+                              error_type='error',
+                              error_subtitle='An error occurred while loading the archive',
+                              error_icon='⚠️',
+                              error_title='Archive Loading Error',
+                              error_message='We encountered an error while trying to load the dataset archive.',
+                              error=str(e))
 
 @app.route('/api/dataset/<dataset_id>')
 def api_dataset_details(dataset_id):
@@ -3289,19 +3745,321 @@ def api_chromogram_html(dataset_id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+def analyze_political_context(vanished_data, last_seen_date):
+    """Analyze political context for dataset disappearance"""
+    political_causes = []
+    
+    if not last_seen_date:
+        return political_causes
+    
+    # Key political dates from the 404 Media article
+    trump_inauguration = datetime(2017, 1, 20)
+    biden_inauguration = datetime(2021, 1, 20)
+    trump_2025_inauguration = datetime(2025, 1, 20)
+    
+    # Agencies disproportionately affected (from 404 Media article)
+    affected_agencies = [
+        'Department of Energy',
+        'National Oceanic and Atmospheric Administration', 
+        'Department of the Interior',
+        'NASA',
+        'Environmental Protection Agency'
+    ]
+    
+    agency = vanished_data[2] if len(vanished_data) > 2 else ''
+    title = vanished_data[1] if len(vanished_data) > 1 else ''
+    
+    # Check if dataset disappeared around political events
+    days_since_trump_2017 = (last_seen_date - trump_inauguration).days
+    days_since_biden = (last_seen_date - biden_inauguration).days
+    days_since_trump_2025 = (last_seen_date - trump_2025_inauguration).days
+    
+    # Check for climate-related content
+    climate_keywords = ['climate', 'temperature', 'emission', 'carbon', 'greenhouse', 'global warming', 'coral reef', 'thermal']
+    is_climate_related = any(keyword.lower() in title.lower() for keyword in climate_keywords)
+    
+    # Check for DEI-related content
+    dei_keywords = ['diversity', 'equity', 'inclusion', 'minority', 'marginalized', 'disadvantaged']
+    is_dei_related = any(keyword.lower() in title.lower() for keyword in dei_keywords)
+    
+    # Political context analysis
+    if abs(days_since_trump_2025) <= 30:  # Within 30 days of Trump 2025 inauguration
+        political_causes.append({
+            'cause': 'Post-Inauguration Removal',
+            'confidence': 'high',
+            'description': f'Dataset disappeared within 30 days of Trump 2025 inauguration (day {days_since_trump_2025})'
+        })
+    
+    if abs(days_since_trump_2017) <= 30:  # Within 30 days of Trump 2017 inauguration
+        political_causes.append({
+            'cause': 'Post-Inauguration Removal (2017)',
+            'confidence': 'medium',
+            'description': f'Dataset disappeared within 30 days of Trump 2017 inauguration (day {days_since_trump_2017})'
+        })
+    
+    if any(affected_agency in agency for affected_agency in affected_agencies):
+        political_causes.append({
+            'cause': 'Targeted Agency Removal',
+            'confidence': 'high',
+            'description': f'Dataset from {agency}, which is disproportionately affected by political removals'
+        })
+    
+    if is_climate_related:
+        political_causes.append({
+            'cause': 'Climate Data Removal',
+            'confidence': 'high',
+            'description': 'Dataset appears to contain climate-related data, which has been targeted for removal'
+        })
+    
+    if is_dei_related:
+        political_causes.append({
+            'cause': 'DEI Data Removal',
+            'confidence': 'high',
+            'description': 'Dataset appears to contain diversity, equity, or inclusion data, which has been targeted for removal'
+        })
+    
+    return political_causes
+
 @app.route('/api/postmortem/<dataset_id>')
 def api_postmortem(dataset_id):
     """Generate post-mortem analysis for vanished dataset"""
     try:
-        from analysis.postmortem_system import PostMortemSystem
+        conn = get_database_connection()
+        cursor = conn.cursor()
         
-        # Initialize post-mortem system
-        postmortem_system = PostMortemSystem()
+        # Get vanished dataset info
+        cursor.execute('''
+            SELECT dataset_id, last_known_title, last_known_agency, last_known_landing_page,
+                   last_seen_date, archival_sources, status, created_at
+            FROM vanished_datasets
+            WHERE dataset_id = ?
+        ''', (dataset_id,))
         
-        # Generate comprehensive post-mortem analysis
-        analysis = postmortem_system.generate_postmortem(dataset_id)
+        vanished_data = cursor.fetchone()
+        if not vanished_data:
+            return jsonify({'error': 'Dataset not found in vanished datasets'}), 404
+        
+        # Get historical data from dataset_states
+        cursor.execute('''
+            SELECT snapshot_date, availability, status_code, row_count, column_count, file_size, resource_format
+            FROM dataset_states
+            WHERE dataset_id = ?
+            ORDER BY snapshot_date DESC
+            LIMIT 10
+        ''', (dataset_id,))
+        
+        historical_data = cursor.fetchall()
+        
+        # Calculate days missing
+        from datetime import datetime
+        last_seen = datetime.strptime(vanished_data[4], '%Y-%m-%d') if vanished_data[4] else None
+        days_missing = (datetime.now() - last_seen).days if last_seen else 0
+        
+        # Generate timeline events
+        timeline_events = []
+        for i, (date, availability, status_code, row_count, col_count, file_size, format_type) in enumerate(historical_data):
+            if i == 0:  # Most recent
+                timeline_events.append({
+                    'date': date,
+                    'description': f'Dataset became unavailable (Status: {status_code})',
+                    'severity': 'critical'
+                })
+            else:
+                timeline_events.append({
+                    'date': date,
+                    'description': f'Dataset was available (Rows: {row_count}, Format: {format_type})',
+                    'severity': 'info'
+                })
+        
+        # Generate suspected causes with political context
+        suspected_causes = []
+        if vanished_data[6] == 'removed':
+            suspected_causes.append({
+                'cause': 'Intentional Removal',
+                'confidence': 'high',
+                'description': 'Dataset was likely intentionally removed from the source'
+            })
+        
+        if days_missing > 30:
+            suspected_causes.append({
+                'cause': 'Long-term Unavailability',
+                'confidence': 'medium',
+                'description': f'Dataset has been unavailable for {days_missing} days'
+            })
+        
+        # Add political context analysis
+        political_context = analyze_political_context(vanished_data, last_seen)
+        if political_context:
+            suspected_causes.extend(political_context)
+        
+        # Generate recovery recommendations
+        recovery_recommendations = []
+        if vanished_data[5]:  # archival_sources
+            recovery_recommendations.append({
+                'action': 'Check Archive Sources',
+                'description': 'Verify availability in archival sources',
+                'priority': 'high'
+            })
+        
+        recovery_recommendations.extend([
+            {
+                'action': 'Contact Agency',
+                'description': f'Reach out to {vanished_data[2]} for dataset status',
+                'priority': 'medium'
+            },
+            {
+                'action': 'Monitor for Return',
+                'description': 'Set up monitoring for potential dataset return',
+                'priority': 'low'
+            }
+        ])
+        
+        conn.close()
+        
+        return jsonify({
+            'dataset_id': dataset_id,
+            'title': vanished_data[1],
+            'agency': vanished_data[2],
+            'original_url': vanished_data[3],
+            'last_seen_date': vanished_data[4],
+            'days_missing': days_missing,
+            'status': vanished_data[6],
+            'archive_url': vanished_data[5],
+            'timeline_events': timeline_events,
+            'suspected_causes': suspected_causes,
+            'recovery_recommendations': recovery_recommendations,
+            'analysis_summary': {
+                'total_historical_snapshots': len(historical_data),
+                'last_available_date': historical_data[-1][0] if len(historical_data) > 1 else None,
+                'data_characteristics': {
+                    'avg_rows': sum(row[3] or 0 for row in historical_data) / len(historical_data) if historical_data else 0,
+                    'avg_columns': sum(row[4] or 0 for row in historical_data) / len(historical_data) if historical_data else 0,
+                    'formats_used': list(set(row[6] for row in historical_data if row[6]))
+                }
+            }
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/vanished-datasets/political-analysis')
+def api_political_analysis():
+    """Analyze political patterns in vanished datasets"""
+    try:
+        conn = get_database_connection()
+        cursor = conn.cursor()
+        
+        # Get all vanished datasets
+        cursor.execute('''
+            SELECT dataset_id, last_known_title, last_known_agency, last_seen_date, status
+            FROM vanished_datasets
+            ORDER BY last_seen_date DESC
+        ''')
+        
+        vanished_datasets = cursor.fetchall()
+        
+        # Political analysis
+        analysis = {
+            'total_vanished': len(vanished_datasets),
+            'political_patterns': {},
+            'agency_breakdown': {},
+            'content_analysis': {},
+            'timeline_analysis': {}
+        }
+        
+        # Key political dates
+        trump_inauguration_2017 = datetime(2017, 1, 20)
+        biden_inauguration = datetime(2021, 1, 20)
+        trump_inauguration_2025 = datetime(2025, 1, 20)
+        
+        # Agencies disproportionately affected
+        affected_agencies = [
+            'Department of Energy',
+            'National Oceanic and Atmospheric Administration', 
+            'Department of the Interior',
+            'NASA',
+            'Environmental Protection Agency'
+        ]
+        
+        # Analysis counters
+        post_trump_2017_count = 0
+        post_biden_count = 0
+        post_trump_2025_count = 0
+        climate_related_count = 0
+        dei_related_count = 0
+        affected_agency_count = 0
+        
+        climate_keywords = ['climate', 'temperature', 'emission', 'carbon', 'greenhouse', 'global warming', 'coral reef', 'thermal']
+        dei_keywords = ['diversity', 'equity', 'inclusion', 'minority', 'marginalized', 'disadvantaged']
+        
+        agency_counts = {}
+        
+        for dataset in vanished_datasets:
+            dataset_id, title, agency, last_seen_date, status = dataset
+            
+            # Parse date
+            try:
+                last_seen = datetime.strptime(last_seen_date, '%Y-%m-%d') if last_seen_date else None
+            except:
+                last_seen = None
+            
+            # Agency analysis
+            if agency:
+                agency_counts[agency] = agency_counts.get(agency, 0) + 1
+                
+                # Check if from affected agency
+                if any(affected_agency in agency for affected_agency in affected_agencies):
+                    affected_agency_count += 1
+            
+            # Political timeline analysis
+            if last_seen:
+                days_since_trump_2017 = (last_seen - trump_inauguration_2017).days
+                days_since_biden = (last_seen - biden_inauguration).days
+                days_since_trump_2025 = (last_seen - trump_inauguration_2025).days
+                
+                if abs(days_since_trump_2017) <= 30:
+                    post_trump_2017_count += 1
+                if abs(days_since_biden) <= 30:
+                    post_biden_count += 1
+                if abs(days_since_trump_2025) <= 30:
+                    post_trump_2025_count += 1
+            
+            # Content analysis
+            if title:
+                if any(keyword.lower() in title.lower() for keyword in climate_keywords):
+                    climate_related_count += 1
+                if any(keyword.lower() in title.lower() for keyword in dei_keywords):
+                    dei_related_count += 1
+        
+        # Compile analysis
+        analysis['political_patterns'] = {
+            'post_trump_2017_inauguration': post_trump_2017_count,
+            'post_biden_inauguration': post_biden_count,
+            'post_trump_2025_inauguration': post_trump_2025_count,
+            'affected_agencies_count': affected_agency_count
+        }
+        
+        analysis['content_analysis'] = {
+            'climate_related': climate_related_count,
+            'dei_related': dei_related_count,
+            'climate_percentage': round((climate_related_count / len(vanished_datasets)) * 100, 2) if vanished_datasets else 0,
+            'dei_percentage': round((dei_related_count / len(vanished_datasets)) * 100, 2) if vanished_datasets else 0
+        }
+        
+        # Top affected agencies
+        analysis['agency_breakdown'] = dict(sorted(agency_counts.items(), key=lambda x: x[1], reverse=True)[:10])
+        
+        # Timeline analysis
+        analysis['timeline_analysis'] = {
+            'most_recent_disappearance': vanished_datasets[0][3] if vanished_datasets else None,
+            'oldest_disappearance': vanished_datasets[-1][3] if vanished_datasets else None,
+            'disappearances_by_month': {}  # Could be expanded with more detailed timeline
+        }
+        
+        conn.close()
         
         return jsonify(analysis)
+        
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 

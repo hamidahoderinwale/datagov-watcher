@@ -37,7 +37,7 @@
 }
 
 .realtime-dashboard .header {
-    background: linear-gradient(90deg, #1a1a1a, #2a2a2a);
+    background: #1a1a1a;
     color: #00ff00;
     border-bottom: 2px solid #00ff00;
     box-shadow: 0 2px 10px rgba(0, 255, 0, 0.3);

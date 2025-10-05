@@ -138,7 +138,7 @@ def get_dataset_metadata(dataset_id):
 @app.route('/')
 def index():
     """Main data viewer page"""
-    return render_template('components/data_viewer.html')
+    return render_template('components/panels/data_viewer.html')
 
 @app.route('/api/dataset/<dataset_id>/data')
 def api_dataset_data(dataset_id):

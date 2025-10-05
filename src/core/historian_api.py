@@ -551,7 +551,7 @@ class HistorianAPI:
         @self.app.route('/')
         def dashboard():
             """Main dashboard page"""
-            return render_template('components/historian_dashboard.html')
+            return render_template('components/dashboards/historian_dashboard.html')
         
         # Timeline explorer route
         @self.app.route('/timeline')

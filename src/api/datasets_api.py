@@ -89,9 +89,9 @@ def get_datasets():
         conn = get_db_connection()
         cursor = conn.cursor()
         
-        # Build query with basic dataset info
+        # Build query with basic dataset info including URL
         query = """
-            SELECT DISTINCT ds.dataset_id, ds.title, ds.agency, ds.snapshot_date,
+            SELECT DISTINCT ds.dataset_id, ds.title, ds.agency, ds.url, ds.snapshot_date,
                    ds.row_count, ds.column_count, ds.availability, ds.status_code,
                    ds.file_size, ds.resource_format, ds.last_modified,
                    (SELECT COUNT(*) FROM dataset_states ds3 WHERE ds3.dataset_id = ds.dataset_id) as total_snapshots,
@@ -153,6 +153,7 @@ def get_datasets():
                 'dataset_id': row['dataset_id'],
                 'title': row['title'],
                 'agency': row['agency'],
+                'url': row['url'],
                 'snapshot_date': row['snapshot_date'],
                 'row_count': row['row_count'],
                 'column_count': row['column_count'],
@@ -187,6 +188,7 @@ def get_datasets():
                 'dataset_id': row['dataset_id'],
                 'title': row['title'],
                 'agency': row['agency'],
+                'url': row['url'],
                 'snapshot_date': row['snapshot_date'],
                 'row_count': row['row_count'],
                 'column_count': row['column_count'],

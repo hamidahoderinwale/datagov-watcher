@@ -117,10 +117,37 @@ async function loadDashboardData() {
         const statsResponse = await fetch('/api/stats');
         const stats = await statsResponse.json();
         
+        // Load analytics stats for additional data
+        const analyticsResponse = await fetch('/api/analytics/stats');
+        const analytics = await analyticsResponse.json();
+        
         document.getElementById('totalDatasets').textContent = stats.unique_datasets || 0;
         document.getElementById('totalSnapshots').textContent = stats.total_snapshots || 0;
         document.getElementById('unavailableDatasets').textContent = stats.availability_stats?.unavailable || 0;
         document.getElementById('availableDatasets').textContent = stats.availability_stats?.available || 0;
+        
+        // Update sidebar navigation counts
+        const catalogCountEl = document.getElementById('catalog-count');
+        const agenciesCountEl = document.getElementById('agencies-count');
+        const vanishedCountEl = document.getElementById('vanished-count');
+        const changesCountEl = document.getElementById('changes-count');
+        
+        if (catalogCountEl) {
+            catalogCountEl.textContent = stats.unique_datasets || 0;
+            console.log('Updated catalog-count:', stats.unique_datasets || 0);
+        }
+        if (agenciesCountEl) {
+            agenciesCountEl.textContent = analytics.total_agencies || 0;
+            console.log('Updated agencies-count:', analytics.total_agencies || 0);
+        }
+        if (vanishedCountEl) {
+            vanishedCountEl.textContent = stats.availability_stats?.unavailable || 0;
+            console.log('Updated vanished-count:', stats.availability_stats?.unavailable || 0);
+        }
+        if (changesCountEl) {
+            changesCountEl.textContent = stats.total_diffs || 0;
+            console.log('Updated changes-count:', stats.total_diffs || 0);
+        }
         
         // Load timeline data
         await loadTimelineData();
@@ -824,10 +851,20 @@ async function loadLicenseDistribution() {
         
         const data = await response.json();
         
-        // Update license statistics
-        document.getElementById('totalWithLicenses').textContent = data.summary.known_license_count.toLocaleString();
-        document.getElementById('totalUnknownLicenses').textContent = data.summary.unknown_license_count.toLocaleString();
-        document.getElementById('licenseCoverage').textContent = data.summary.known_license_percentage + '%';
+        // Update license statistics with error handling
+        const totalWithLicensesEl = document.getElementById('totalWithLicenses');
+        const totalUnknownLicensesEl = document.getElementById('totalUnknownLicenses');
+        const licenseCoverageEl = document.getElementById('licenseCoverage');
+        
+        if (totalWithLicensesEl) {
+            totalWithLicensesEl.textContent = (data.summary?.known_license_count || 0).toLocaleString();
+        }
+        if (totalUnknownLicensesEl) {
+            totalUnknownLicensesEl.textContent = (data.summary?.unknown_license_count || 0).toLocaleString();
+        }
+        if (licenseCoverageEl) {
+            licenseCoverageEl.textContent = (data.summary?.known_license_percentage || 0) + '%';
+        }
         
         // Update license breakdown
         const breakdownContainer = document.getElementById('licenseBreakdown');
@@ -883,6 +920,8 @@ document.addEventListener('DOMContentLoaded', function() {
     loadDashboardData();
     loadMonitoringStats();
     loadLicenseDistribution();
+    loadFormatDistribution();
+    loadAgencyComparison();
     updateLastUpdated(); // Set initial timestamp
     
     // Start auto-refresh
@@ -891,6 +930,246 @@ document.addEventListener('DOMContentLoaded', function() {
     // Show dashboard by default
     showPage('dashboard');
 });
+
+// Load format distribution data and create pie chart
+async function loadFormatDistribution() {
+    try {
+        const response = await fetch('/api/format-distribution');
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        // Create pie chart
+        const ctx = document.getElementById('format-distribution-chart');
+        if (ctx) {
+            // Destroy existing chart
+            if (window.formatDistributionChart) {
+                window.formatDistributionChart.destroy();
+            }
+            
+            const canvas = document.createElement('canvas');
+            ctx.innerHTML = '';
+            ctx.appendChild(canvas);
+            
+            window.formatDistributionChart = new Chart(canvas, {
+                type: 'pie',
+                data: {
+                    labels: data.formats.map(f => `${f.format} (${f.percentage}%)`),
+                    datasets: [{
+                        data: data.formats.map(f => f.count),
+                        backgroundColor: data.formats.map(f => f.color),
+                        borderColor: '#ffffff',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'right',
+                            labels: {
+                                usePointStyle: true,
+                                padding: 15
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const format = data.formats[context.dataIndex];
+                                    return `${format.format}: ${format.count.toLocaleString()} datasets (${format.percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Update format statistics
+        const totalFormatsEl = document.getElementById('totalFormats');
+        const mostCommonFormatEl = document.getElementById('mostCommonFormat');
+        const unknownFormatsEl = document.getElementById('unknownFormats');
+        
+        if (totalFormatsEl && data.summary) {
+            totalFormatsEl.textContent = data.summary.format_diversity;
+        }
+        if (mostCommonFormatEl && data.summary) {
+            mostCommonFormatEl.textContent = data.summary.most_common_format;
+        }
+        if (unknownFormatsEl && data.summary) {
+            unknownFormatsEl.textContent = data.summary.unknown_format_percentage + '%';
+        }
+        
+        // Update format summary
+        const summaryEl = document.getElementById('format-summary');
+        if (summaryEl && data.summary) {
+            summaryEl.innerHTML = `
+                <div class="format-summary-item">
+                    <strong>Most Common:</strong> ${data.summary.most_common_format}
+                </div>
+                <div class="format-summary-item">
+                    <strong>Format Diversity:</strong> ${data.summary.format_diversity} types
+                </div>
+                <div class="format-summary-item">
+                    <strong>Unknown Formats:</strong> ${data.summary.unknown_format_percentage}%
+                </div>
+            `;
+        }
+        
+    } catch (error) {
+        console.error('Error loading format distribution:', error);
+    }
+}
+
+
+// Load agency comparison data
+async function loadAgencyComparison() {
+    try {
+        const response = await fetch('/api/agency-comparison');
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        // Update agency comparison table
+        const tableBody = document.getElementById('agency-comparison-table');
+        if (tableBody) {
+            tableBody.innerHTML = data.agencies.map((agency, index) => `
+                <tr>
+                    <td class="rank">${index + 1}</td>
+                    <td class="agency-name">${agency.agency}</td>
+                    <td class="dataset-count">${agency.total_datasets.toLocaleString()}</td>
+                    <td class="quality-score">
+                        <div class="score-bar">
+                            <div class="score-fill" style="width: ${agency.quality_score}%"></div>
+                            <span class="score-text">${agency.quality_score}%</span>
+                        </div>
+                    </td>
+                    <td class="availability">${agency.availability_rate}%</td>
+                    <td class="standardization">${agency.standardization_rate}%</td>
+                    <td class="size">${agency.total_size_mb.toLocaleString()} MB</td>
+                </tr>
+            `).join('');
+        }
+        
+        // Update summary stats
+        const summaryEl = document.getElementById('agency-comparison-summary');
+        if (summaryEl && data.summary) {
+            summaryEl.innerHTML = `
+                <div class="summary-stat">
+                    <span class="stat-label">Total Agencies:</span>
+                    <span class="stat-value">${data.summary.total_agencies}</span>
+                </div>
+                <div class="summary-stat">
+                    <span class="stat-label">Average Quality Score:</span>
+                    <span class="stat-value">${data.summary.avg_quality_score}%</span>
+                </div>
+                <div class="summary-stat">
+                    <span class="stat-label">Best Performing:</span>
+                    <span class="stat-value">${data.summary.best_performing?.agency || 'N/A'}</span>
+                </div>
+            `;
+        }
+        
+    } catch (error) {
+        console.error('Error loading agency comparison:', error);
+    }
+}
+
+// Load enhanced URLs for a dataset
+async function loadEnhancedUrls(datasetId) {
+    try {
+        const response = await fetch(`/api/dataset/${datasetId}/enhanced-metadata`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        const container = document.getElementById(`enhanced-urls-${datasetId}`);
+        
+        if (container && data.urls) {
+            container.innerHTML = `
+                <div class="enhanced-urls-content">
+                    <h6>All Available URLs</h6>
+                    
+                    ${data.urls.catalog_url ? `
+                        <div class="url-section">
+                            <strong>Catalog URL:</strong>
+                            <a href="${data.urls.catalog_url}" target="_blank">${data.urls.catalog_url}</a>
+                        </div>
+                    ` : ''}
+                    
+                    ${data.urls.service_urls && data.urls.service_urls.length > 0 ? `
+                        <div class="url-section">
+                            <strong>Service URLs (DODS, THREDDS, etc.):</strong>
+                            ${data.urls.service_urls.map(url => `
+                                <div class="url-item">
+                                    <a href="${url.url}" target="_blank">${url.name || url.url}</a>
+                                    <span class="url-format">${url.format}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : ''}
+                    
+                    ${data.urls.api_urls && data.urls.api_urls.length > 0 ? `
+                        <div class="url-section">
+                            <strong>API URLs:</strong>
+                            ${data.urls.api_urls.map(url => `
+                                <div class="url-item">
+                                    <a href="${url.url}" target="_blank">${url.name || url.url}</a>
+                                    <span class="url-format">${url.format}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : ''}
+                    
+                    ${data.urls.fallback_urls && data.urls.fallback_urls.length > 0 ? `
+                        <div class="url-section">
+                            <strong>Additional Resources:</strong>
+                            ${data.urls.fallback_urls.slice(0, 5).map(url => `
+                                <div class="url-item">
+                                    <a href="${url.url}" target="_blank">${url.name || url.url}</a>
+                                    <span class="url-format">${url.format}</span>
+                                </div>
+                            `).join('')}
+                            ${data.urls.fallback_urls.length > 5 ? `
+                                <div class="url-item">
+                                    <em>... and ${data.urls.fallback_urls.length - 5} more resources</em>
+                                </div>
+                            ` : ''}
+                        </div>
+                    ` : ''}
+                    
+                    ${data.recommendations && data.recommendations.length > 0 ? `
+                        <div class="url-recommendations">
+                            <strong>Recommendations:</strong>
+                            ${data.recommendations.map(rec => `
+                                <div class="recommendation ${rec.priority}">
+                                    <span class="priority-badge ${rec.priority}">${rec.priority.toUpperCase()}</span>
+                                    ${rec.message}
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+            container.style.display = 'block';
+        }
+        
+    } catch (error) {
+        console.error('Error loading enhanced URLs:', error);
+        const container = document.getElementById(`enhanced-urls-${datasetId}`);
+        if (container) {
+            container.innerHTML = '<p style="color: red;">Error loading enhanced URLs</p>';
+            container.style.display = 'block';
+        }
+    }
+}
 
 // Cleanup on page unload
 window.addEventListener('beforeunload', function() {
@@ -935,7 +1214,11 @@ function openDatasetModal(datasetId) {
                 <p><strong>Content Type:</strong> ${dataset.content_type || 'N/A'}</p>
                 <p><strong>Resource Format:</strong> ${dataset.resource_format || 'N/A'}</p>
                 <p><strong>Last Modified:</strong> ${formatDate(dataset.last_modified) || 'N/A'}</p>
-                <p><strong>URL:</strong> ${dataset.url ? `<a href="${dataset.url}" target="_blank">${dataset.url}</a>` : 'N/A'}</p>
+                <p><strong>Primary URL:</strong> ${dataset.url ? `<a href="${dataset.url}" target="_blank">${dataset.url}</a>` : 'N/A'}</p>
+                <div id="enhanced-urls-${dataset.dataset_id}" class="enhanced-urls" style="display: none;">
+                    <!-- Enhanced URLs will be loaded here -->
+                </div>
+                <button onclick="loadEnhancedUrls('${dataset.dataset_id}')" class="btn btn-sm btn-outline">Load All URLs</button>
                 <p><strong>Description:</strong> ${dataset.description || 'No description available'}</p>
                 <p><strong>Schema:</strong> ${dataset.schema ? `<pre style="font-size: 12px; background: #f5f5f5; padding: 10px; border-radius: 4px; overflow-x: auto;">${JSON.stringify(JSON.parse(dataset.schema), null, 2)}</pre>` : 'N/A'}</p>
                 
