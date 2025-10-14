@@ -319,6 +319,73 @@ def get_analytics_stats():
         """)
         recent_snapshots = cursor.fetchone()[0]
         
+        # Calculate changes from last week
+        week_ago = datetime.now() - timedelta(days=7)
+        
+        # Datasets change
+        cursor.execute("""
+            SELECT COUNT(DISTINCT dataset_id) 
+            FROM dataset_states 
+            WHERE snapshot_date >= date('now', '-14 days') 
+            AND snapshot_date < date('now', '-7 days')
+        """)
+        datasets_last_week = cursor.fetchone()[0]
+        datasets_change = total_datasets - datasets_last_week if datasets_last_week > 0 else 0
+        
+        # Agencies change
+        cursor.execute("""
+            SELECT COUNT(DISTINCT agency) 
+            FROM dataset_states 
+            WHERE snapshot_date >= date('now', '-14 days') 
+            AND snapshot_date < date('now', '-7 days')
+            AND agency IS NOT NULL
+        """)
+        agencies_last_week = cursor.fetchone()[0]
+        agencies_change = total_agencies - agencies_last_week if agencies_last_week > 0 else 0
+        
+        # Snapshots change
+        cursor.execute("""
+            SELECT COUNT(*) 
+            FROM dataset_states 
+            WHERE snapshot_date >= date('now', '-14 days') 
+            AND snapshot_date < date('now', '-7 days')
+        """)
+        snapshots_last_week = cursor.fetchone()[0]
+        snapshots_change = total_snapshots - snapshots_last_week if snapshots_last_week > 0 else 0
+        
+        # Available datasets change
+        cursor.execute("""
+            SELECT COUNT(CASE WHEN availability = 'available' THEN 1 END)
+            FROM dataset_states ds
+            INNER JOIN (
+                SELECT dataset_id, MAX(created_at) as max_created
+                FROM dataset_states 
+                WHERE snapshot_date >= date('now', '-14 days') 
+                AND snapshot_date < date('now', '-7 days')
+                GROUP BY dataset_id
+            ) latest ON ds.dataset_id = latest.dataset_id 
+            AND ds.created_at = latest.max_created
+        """)
+        available_last_week = cursor.fetchone()[0]
+        available_change = availability_stats[0] - available_last_week if available_last_week > 0 else 0
+        
+        # Changes change (content changes)
+        cursor.execute("""
+            SELECT COUNT(*) 
+            FROM dataset_states 
+            WHERE snapshot_date >= date('now', '-14 days') 
+            AND snapshot_date < date('now', '-7 days')
+            AND content_hash IS NOT NULL
+        """)
+        changes_last_week = cursor.fetchone()[0]
+        changes_change = recent_snapshots - changes_last_week if changes_last_week > 0 else 0
+        
+        # Availability rate change
+        total_last_week = datasets_last_week
+        availability_rate_last_week = (available_last_week / total_last_week * 100) if total_last_week > 0 else 0
+        availability_rate_current = (availability_stats[0] / total_datasets * 100) if total_datasets > 0 else 0
+        availability_change = round(availability_rate_current - availability_rate_last_week, 1)
+        
         conn.close()
         
         return jsonify({
@@ -331,7 +398,14 @@ def get_analytics_stats():
                 'unknown': availability_stats[2]
             },
             'recent_snapshots': recent_snapshots,
-            'last_updated': datetime.now().isoformat()
+            'last_updated': datetime.now().isoformat(),
+            # Change indicators
+            'datasets_change': datasets_change,
+            'agencies_change': agencies_change,
+            'snapshots_change': snapshots_change,
+            'available_change': available_change,
+            'changes_change': changes_change,
+            'availability_change': availability_change
         })
         
     except Exception as e:
