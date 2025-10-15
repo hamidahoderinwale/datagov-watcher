@@ -1834,176 +1834,9 @@ def api_stats():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route('/api/datasets')
-def api_datasets():
-    """API endpoint for all datasets with comprehensive state information"""
-    try:
-        # Get pagination parameters
-        page = request.args.get('page', 1, type=int)
-        per_page = request.args.get('per_page', 1000, type=int)
-        offset = (page - 1) * per_page
-        
-        conn = get_database_connection()
-        cursor = conn.cursor()
-        
-        # First, get the total count
-        cursor.execute('''
-            SELECT COUNT(DISTINCT ds.dataset_id)
-            FROM dataset_states ds
-            INNER JOIN (
-                SELECT dataset_id, MAX(created_at) as max_created
-                FROM dataset_states 
-                GROUP BY dataset_id
-            ) latest ON ds.dataset_id = latest.dataset_id 
-            AND ds.created_at = latest.max_created
-        ''')
-        total_count = cursor.fetchone()[0]
-        
-        # Get datasets with enhanced data from dataset_states table and live_monitoring table
-        cursor.execute('''
-            SELECT ds.dataset_id, ds.snapshot_date, ds.title, ds.agency, ds.url,
-                   ds.status_code, ds.content_hash, ds.file_size, ds.content_type,
-                   ds.resource_format, ds.row_count, ds.column_count, ds.schema,
-                   ds.last_modified, ds.availability, ds.created_at, 'enhanced_monitor' as source,
-                   (SELECT COUNT(*) FROM dataset_states ds2 WHERE ds2.dataset_id = ds.dataset_id) as total_snapshots,
-                   0 as total_diffs,
-                   NULL as last_change,
-                   lm.last_checked,
-                   lm.status as monitoring_status,
-                   lm.response_time_ms,
-                   hs.license
-            FROM dataset_states ds
-            LEFT JOIN (
-                SELECT dataset_id, last_checked, status, response_time_ms,
-                       ROW_NUMBER() OVER (PARTITION BY dataset_id ORDER BY last_checked DESC) as rn
-                FROM live_monitoring
-            ) lm ON ds.dataset_id = lm.dataset_id AND lm.rn = 1
-            LEFT JOIN (
-                SELECT dataset_id, license,
-                       ROW_NUMBER() OVER (PARTITION BY dataset_id ORDER BY created_at DESC) as rn
-                FROM historian_snapshots
-            ) hs ON ds.dataset_id = hs.dataset_id AND hs.rn = 1
-            INNER JOIN (
-                SELECT dataset_id, MAX(created_at) as max_created
-                FROM dataset_states 
-                GROUP BY dataset_id
-            ) latest ON ds.dataset_id = latest.dataset_id 
-            AND ds.created_at = latest.max_created
-            ORDER BY lm.last_checked DESC NULLS LAST, ds.created_at DESC
-            LIMIT ? OFFSET ?
-        ''', (per_page, offset))
-        
-        columns = [description[0] for description in cursor.description]
-        datasets = [dict(zip(columns, row)) for row in cursor.fetchall()]
-        
-        # Add volatility metrics for each dataset
-        for dataset in datasets:
-            dataset_id = dataset['dataset_id']
-            
-            # Set default volatility values
-            dataset['avg_volatility'] = 0.0
-            dataset['max_volatility'] = 0.0
-            dataset['volatility_measurements'] = 0
-            dataset['recent_changes'] = []
-            
-            # Format monitoring data
-            if dataset['last_checked']:
-                # Format last_checked as readable date
-                try:
-                    from datetime import datetime
-                    last_checked_dt = datetime.fromisoformat(dataset['last_checked'].replace('Z', '+00:00'))
-                    dataset['last_checked'] = last_checked_dt.strftime('%Y-%m-%d %H:%M:%S')
-                except:
-                    dataset['last_checked'] = str(dataset['last_checked'])
-            else:
-                dataset['last_checked'] = 'N/A'
-            
-            if dataset['response_time_ms']:
-                # Format response time as readable format
-                if dataset['response_time_ms'] < 1000:
-                    dataset['response_time'] = f"{dataset['response_time_ms']}ms"
-                else:
-                    dataset['response_time'] = f"{dataset['response_time_ms']/1000:.1f}s"
-            else:
-                dataset['response_time'] = 'N/A'
-            
-            # Use monitoring status if available, otherwise use availability
-            if dataset['monitoring_status']:
-                dataset['status'] = dataset['monitoring_status']
-            else:
-                # Determine status based on availability and recent activity
-                if dataset['availability'] == 'available':
-                    if dataset['total_diffs'] > 0:
-                        dataset['status'] = 'active'
-                    else:
-                        dataset['status'] = 'stable'
-                elif dataset['availability'] == 'partially_available':
-                    dataset['status'] = 'degraded'
-                else:
-                    dataset['status'] = 'unavailable'
-        
-        conn.close()
-        
-        # Calculate pagination info
-        total_pages = (total_count + per_page - 1) // per_page
-        
-        return jsonify({
-            'datasets': datasets,
-            'pagination': {
-                'page': page,
-                'per_page': per_page,
-                'total_count': total_count,
-                'total_pages': total_pages,
-                'has_next': page < total_pages,
-                'has_prev': page > 1
-            }
-        })
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+# Removed duplicate endpoint - using the blueprint version in datasets_api.py
 
-@app.route('/api/dataset/<dataset_id>')
-def api_dataset_detail(dataset_id):
-    """API endpoint for specific dataset details"""
-    try:
-        conn = get_database_connection()
-        cursor = conn.cursor()
-        
-        # Get timeline
-        cursor.execute('''
-            SELECT snapshot_date, row_count, column_count, file_size, created_at
-            FROM dataset_states 
-            WHERE dataset_id = ?
-            ORDER BY snapshot_date ASC
-        ''', (dataset_id,))
-        
-        columns = [description[0] for description in cursor.description]
-        timeline = [dict(zip(columns, row)) for row in cursor.fetchall()]
-        
-        # Get diffs
-        cursor.execute('''
-            SELECT from_date, to_date, diff_type, diff_data, created_at
-            FROM state_diffs 
-            WHERE dataset_id = ?
-            ORDER BY from_date ASC
-        ''', (dataset_id,))
-        
-        columns = [description[0] for description in cursor.description]
-        diffs = []
-        
-        for row in cursor.fetchall():
-            diff = dict(zip(columns, row))
-            diff['diff_data'] = json.loads(diff['diff_data'])
-            diffs.append(diff)
-        
-        conn.close()
-        
-        return jsonify({
-            'dataset_id': dataset_id,
-            'timeline': timeline,
-            'diffs': diffs
-        })
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+# Removed duplicate endpoint - using the more comprehensive one below
 
 @app.route('/api/vanished')
 def api_vanished():
@@ -3849,19 +3682,75 @@ def api_search():
     """API endpoint for searching datasets"""
     try:
         query = request.args.get('q', '').lower()
-        datasets_response = api_datasets()
-        datasets = datasets_response.get_json()
+        
+        # Get datasets directly from database
+        conn = get_database_connection()
+        cursor = conn.cursor()
         
         if query:
-            filtered = []
-            for dataset in datasets:
-                if (query in dataset.get('title', '').lower() or 
-                    query in dataset.get('agency', '').lower() or
-                    query in dataset.get('dataset_id', '').lower()):
-                    filtered.append(dataset)
-            return jsonify(filtered)
+            cursor.execute("""
+                SELECT 
+                    ds.dataset_id,
+                    ds.title,
+                    ds.agency,
+                    ds.availability,
+                    ds.created_at,
+                    ds.row_count,
+                    ds.resource_format,
+                    ds.dimension_computation_time_ms
+                FROM dataset_states ds
+                INNER JOIN (
+                    SELECT dataset_id, MAX(created_at) as max_created
+                    FROM dataset_states 
+                    GROUP BY dataset_id
+                ) latest ON ds.dataset_id = latest.dataset_id 
+                AND ds.created_at = latest.max_created
+                WHERE (
+                    LOWER(ds.title) LIKE ? OR 
+                    LOWER(ds.agency) LIKE ? OR 
+                    LOWER(ds.dataset_id) LIKE ?
+                )
+                ORDER BY ds.title
+                LIMIT 50
+            """, (f'%{query}%', f'%{query}%', f'%{query}%'))
+        else:
+            cursor.execute("""
+                SELECT 
+                    ds.dataset_id,
+                    ds.title,
+                    ds.agency,
+                    ds.availability,
+                    ds.created_at,
+                    ds.row_count,
+                    ds.resource_format,
+                    ds.dimension_computation_time_ms
+                FROM dataset_states ds
+                INNER JOIN (
+                    SELECT dataset_id, MAX(created_at) as max_created
+                    FROM dataset_states 
+                    GROUP BY dataset_id
+                ) latest ON ds.dataset_id = latest.dataset_id 
+                AND ds.created_at = latest.max_created
+                ORDER BY ds.title
+                LIMIT 50
+            """)
         
+        datasets = []
+        for row in cursor.fetchall():
+            datasets.append({
+                'dataset_id': row[0],
+                'title': row[1],
+                'agency': row[2],
+                'availability': row[3],
+                'last_checked': row[4],
+                'row_count': row[5],
+                'resource_format': row[6],
+                'response_time_ms': row[7]
+            })
+        
+        conn.close()
         return jsonify(datasets)
+        
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 

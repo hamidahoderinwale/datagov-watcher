@@ -603,151 +603,32 @@ function exportChartData(format) {
     alert(`Exporting chart data as ${format.toUpperCase()}...`);
 }
 
-// Fallback data functions
-function getFallbackTrendsData() {
-    const labels = [];
-    const total = [];
-    const available = [];
-    const unavailable = [];
-    
-    // Generate 30 days of sample data
-    for (let i = 29; i >= 0; i--) {
-        const date = new Date();
-        date.setDate(date.getDate() - i);
-        labels.push(date.toISOString().split('T')[0]);
-        
-        const baseTotal = 1000 + Math.random() * 100;
-        const baseAvailable = baseTotal * (0.85 + Math.random() * 0.1);
-        const baseUnavailable = baseTotal - baseAvailable;
-        
-        total.push(Math.round(baseTotal));
-        available.push(Math.round(baseAvailable));
-        unavailable.push(Math.round(baseUnavailable));
-    }
-    
+// Error handling for missing data
+function handleMissingData(dataType) {
+    console.warn(`No ${dataType} data available`);
     return {
-        labels: labels,
-        total: total,
-        available: available,
-        unavailable: unavailable,
-        stats: {
-            total_datasets: Math.max(...total),
-            avg_available: Math.round(available.reduce((a, b) => a + b, 0) / available.length),
-            avg_unavailable: Math.round(unavailable.reduce((a, b) => a + b, 0) / unavailable.length)
-        }
+        labels: [],
+        datasets: [],
+        error: `No ${dataType} data available. Please check data sources.`
     };
 }
 
 function getFallbackStatusData() {
-    return {
-        labels: ['Available', 'Unavailable', 'Unknown'],
-        datasets: [{
-            label: 'Status',
-            data: [850, 120, 30],
-            backgroundColor: ['#10b981', '#ef4444', '#6b7280'],
-            borderColor: '#1f2937',
-            borderWidth: 1
-        }],
-        stats: {
-            total_datasets: 1000,
-            available_percentage: 85,
-            unavailable_percentage: 12,
-            unknown_percentage: 3
-        }
-    };
+    return handleMissingData('status distribution');
 }
 
 function getFallbackAgencyDistributionData() {
-    return {
-        labels: ['Department of Health', 'Department of Education', 'Department of Transportation', 'Department of Energy', 'Department of Commerce'],
-        datasets: [{
-            label: 'Datasets',
-            data: [125, 98, 76, 54, 43],
-            backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'],
-            borderColor: '#1f2937',
-            borderWidth: 1
-        }],
-        summary: {
-            total_agencies: 5,
-            total_datasets: 396,
-            total_available: 350,
-            total_unavailable: 46
-        }
-    };
+    return handleMissingData('agency distribution');
 }
 
 function getFallbackAgenciesData() {
-    return {
-        labels: ['Agency A', 'Agency B', 'Agency C', 'Agency D', 'Agency E'],
-        datasets: [{
-            label: 'Datasets',
-            data: [45, 32, 28, 19, 15],
-            backgroundColor: '#3b82f6',
-            borderColor: '#2563eb',
-            borderWidth: 1
-        }],
-        stats: {
-            total_agencies: 5,
-            total_datasets: 139
-        }
-    };
+    return handleMissingData('agencies');
 }
 
 function getFallbackChangesData() {
-    const labels = [];
-    const data = [];
-    
-    // Generate 30 days of sample data
-    for (let i = 29; i >= 0; i--) {
-        const date = new Date();
-        date.setDate(date.getDate() - i);
-        labels.push(date.toISOString().split('T')[0]);
-        data.push(Math.round(Math.random() * 50 + 10));
-    }
-    
-    return {
-        labels: labels,
-        datasets: [{
-            label: 'Changes',
-            data: data,
-            borderColor: '#f59e0b',
-            backgroundColor: 'rgba(245, 158, 11, 0.1)',
-            tension: 0.4,
-            fill: true
-        }],
-        stats: {
-            total_changes: data.reduce((a, b) => a + b, 0),
-            avg_daily_changes: Math.round(data.reduce((a, b) => a + b, 0) / data.length)
-        }
-    };
+    return handleMissingData('changes');
 }
 
 function getFallbackQualityData() {
-    const labels = [];
-    const data = [];
-    
-    // Generate 30 days of sample data
-    for (let i = 29; i >= 0; i--) {
-        const date = new Date();
-        date.setDate(date.getDate() - i);
-        labels.push(date.toISOString().split('T')[0]);
-        data.push(Math.round(70 + Math.random() * 20));
-    }
-    
-    return {
-        labels: labels,
-        datasets: [{
-            label: 'Quality Score',
-            data: data,
-            borderColor: '#8b5cf6',
-            backgroundColor: 'rgba(139, 92, 246, 0.1)',
-            tension: 0.4,
-            fill: true
-        }],
-        stats: {
-            avg_quality: Math.round(data.reduce((a, b) => a + b, 0) / data.length),
-            min_quality: Math.min(...data),
-            max_quality: Math.max(...data)
-        }
-    };
+    return handleMissingData('quality metrics');
 }

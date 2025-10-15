@@ -464,21 +464,13 @@ class UnifiedRecoverySystem:
         
         return status_map.get(best_result.status, ("❓", "Unknown"))
 
-# Example usage and testing
+# CLI interface for dataset recovery
 if __name__ == "__main__":
-    recovery_system = UnifiedRecoverySystem()
-    
-    # Test with the Electric Vehicle dataset
-    test_dataset = DatasetMetadata(
-        title="Electric Vehicle Population Data",
-        agency="State of Washington",
-        data_gov_id="844dbad1-ee1e-44b8-9799-34cb7ed24640",
-        landing_url="https://data.wa.gov/resource/f6w7-q2d2",
-        last_seen="2025-09-19",
-        keywords=["electric", "vehicle", "population", "washington"]
-    )
-    
-    results = recovery_system.search_dataset(test_dataset)
-    provenance_pack = recovery_system.generate_provenance_pack(test_dataset, results)
-    
-    print(json.dumps(provenance_pack, indent=2))
+    import sys
+    if len(sys.argv) > 1:
+        # Command line usage
+        recovery_system = UnifiedRecoverySystem()
+        print("Dataset Recovery System - Use the CLI tool for interactive recovery")
+        print("Run: python src/recovery/rescue_datasets_cli.py --help")
+    else:
+        print("Dataset Recovery System initialized successfully")
