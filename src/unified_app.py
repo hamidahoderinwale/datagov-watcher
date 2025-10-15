@@ -3,12 +3,13 @@ Unified Concordance App: Single Application with Subpages
 Combines all monitoring, data viewing, and real-time features
 """
 
-from flask import Flask, render_template, jsonify, request, redirect, url_for
+from flask import Flask, render_template, jsonify, request, redirect, url_for, make_response
 from flask_socketio import SocketIO, emit
 import sqlite3
 import json
 import asyncio
 import threading
+import time
 from datetime import datetime, timedelta
 from pathlib import Path
 import os
@@ -215,6 +216,11 @@ def management():
 @app.route('/metrics')
 def metrics_dashboard():
     """System metrics dashboard"""
+    return render_template('pages/analytics.html')
+
+@app.route('/analytics')
+def analytics_dashboard():
+    """Analytics dashboard page"""
     return render_template('pages/analytics.html')
 
 @app.route('/catalog')
@@ -1273,6 +1279,11 @@ def field_diff_panel():
     """Field diff panel page"""
     return render_template('pages/unified_app.html', page='field-diff-panel')
 
+@app.route('/content-drift')
+def content_drift():
+    """Content drift page"""
+    return render_template('components/charts/content_drift_charts.html')
+
 @app.route('/content-drift-charts')
 def content_drift_charts():
     """Content drift charts page"""
@@ -1402,6 +1413,11 @@ def api_dataset_content_drift(dataset_id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@app.route('/change-log')
+def change_log():
+    """Change log page"""
+    return render_template('pages/unified_app.html', page='change-log-view')
+
 @app.route('/change-log-view')
 def change_log_view():
     """Change log view page"""
@@ -1412,10 +1428,20 @@ def live_monitor():
     """Live monitoring dashboard page"""
     return render_template('pages/live_monitor.html')
 
+@app.route('/post-mortem')
+def post_mortem():
+    """Post-mortem page"""
+    return render_template('pages/postmortem_reports.html')
+
 @app.route('/postmortem-reports')
 def postmortem_reports():
     """Post-mortem reports page"""
     return render_template('pages/postmortem_reports.html')
+
+@app.route('/volatility')
+def volatility():
+    """Volatility page"""
+    return render_template('pages/volatility_metrics.html')
 
 @app.route('/volatility-metrics')
 def volatility_metrics():
@@ -4541,7 +4567,7 @@ def api_trigger_monitoring():
 def api_column_changes(dataset_id):
     """API endpoint for column-level changes"""
     try:
-        from enhanced_column_diffing import EnhancedColumnDiffing
+        from src.analysis.enhanced_column_diffing import EnhancedColumnDiffing
         
         diffing = EnhancedColumnDiffing()
         changes = diffing.get_column_changes(dataset_id)
